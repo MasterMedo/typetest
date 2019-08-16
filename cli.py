@@ -1,8 +1,8 @@
 """
 Usage:
     cli.py  [-abcehpsw] [-v | -q] [-d=<duration>] [-l=<layout>]
-            [-r=<directory> | -f=<file>] [-o=<file>]
-            [--output-format=<format>]
+            [-r=<directory> | -f=<file>]
+            [-o=<file>] [--output-format=<format>]
             [--bg=<color> --fg=<color> --cc=<color> --wc=<color>]
     cli.py  (--help | --version)
 
@@ -24,7 +24,7 @@ Options:
     -h --hide                   Hide timer and dynamic wpm counter.
     --help                      Show this screen.
     -l --layout=<layout>        Keyboard layout for calculating
-                                keystrokes. [default: en-us]
+                                keystrokes. [default: qwerty]
     -o --output=<file>          File to store output result in.
     --output-format=<format>    File format to store output as; json,
                                 csv. [default: json]
@@ -44,46 +44,55 @@ Options:
 Shortcuts:
     ^C / Ctrl+c                 End the test and get results now.
     ^R / Ctrl+r                 Restart the same test.
-
 """
 
 from docopt import docopt
 from schema import Schema, And, Or, Use, SchemaError
 from os     import path
 
-layouts = ['en-us']
-formats = ['csv', 'json']
+layouts  = ['colemak',  'dvorak', 'qwerty']
+formats  = ['csv', 'json']
+
 if __name__ == '__main__':
     args = docopt(__doc__, version='typetest 0.1')
     schema = Schema({
-        '--all-correct-chars': bool,
-        '--beep': bool,
+        '--all-correct-chars':      bool,
+        '--beep':                   bool,
+        '--chars-over-keystrokes':  bool,
+        '--endless':                bool,
+        '--hide':                   bool,
+        '--help':                   bool,
+        '--prevent-wrong':          bool,
+        '--quiet':                  bool,
+        '--shuffle-words':          bool,
+        '--verbose':                bool,
+        '--version':                bool,
+        '--word-by-word':           bool,
+
         '--bg': And(Use(int), lambda n: 0 <= n < 256,
-                error='<color> should be an integer between 0 and 256'),
-        '--chars-over-keystrokes': bool,
-        '--cc': And(Use(int), lambda n: 0 <= n < 256,
-                error='<color> should be an integer between 0 and 256'),
-        '--duration': Or(None, Use(int), error='<duration> should be int'),
-        '--endless': bool,
-        '--file': Or(None, Use(open, error='<file> should be readable')),
+                error='<color> should be an integer between 0 and 256.'),
         '--fg': And(Use(int), lambda n: 0 <= n < 256,
-                error='<color> should be an integer between 0 and 256'),
-        '--hide': bool,
-        '--help': bool,
-        '--layout': And(lambda l: l in layouts,
-                    error=f'<layout> must be in {layouts}'),
-        '--output': Or(None, Use(open, error='<file> should be readable')),
-        '--output-format': Or(None, lambda f: f in formats,
-                            error=f'<format> should be in {formats}'),
-        '--prevent-wrong': bool,
-        '--quiet': bool,
-        '--root': And(path.exists, error='<directory> should exist'),
-        '--shuffle-words': bool,
-        '--verbose': bool,
-        '--version': bool,
-        '--word-by-word': bool,
+                error='<color> should be an integer between 0 and 256.'),
+        '--cc': And(Use(int), lambda n: 0 <= n < 256,
+                error='<color> should be an integer between 0 and 256.'),
         '--wc': And(Use(int), lambda n: 0 <= n < 256,
-                error='<color> should be an integer between 0 and 256')})
+                error='<color> should be an integer between 0 and 256.'),
+
+        '--duration':   Or(None, And(Use(int), lambda n: 0 < n,
+                        error='<duration> should be an int larger than 0.')),
+
+        '--file':       Or(None, And(path.isfile,
+                        error='<file> should be an existing file.')),
+        '--output':     Or(None, And(path.exists,
+                        error='<file> should refer to an existing path.')),
+        '--root':       And(path.isdir,
+                        error='<directory> should be an existing directory.'),
+
+        '--output-format':  And(lambda f: f in formats,
+                            error=f'<format> should be in {formats}.'),
+        '--layout':         And(lambda l: l in layouts,
+                            error=f'<layout> must be in {layouts}.'),
+        })
     try:
         args = schema.validate(args)
     except SchemaError as e:
