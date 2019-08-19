@@ -21,19 +21,14 @@ from random     import shuffle
 from typing     import List
 from operator   import eq
 from itertools  import chain, zip_longest
+from keystrokes import keystroke
 
-__all__ = ['accuracy', 'cpm', 'dph', 'EndOfTestError', 'generate_test',
-        'gross_speed', 'keystroke', 'keystrokes', 'net_speed',
-        'true_gross_speed', 'true_wpm', 'TypingTest', 'wpm']
+__all__ = ['accuracy', 'cpm', 'dph', 'TypeTestError', 'gross_speed',
+        'net_speed', 'true_gross_speed', 'true_wpm', 'TypingTest', 'wpm']
 
 _whitespaces = '\t\n\x0b\x0c\r '
 
-# For language specific characters see 'keystrokes_file_path'.
-_keystrokes = [
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890`-={}:"|<>?',  # count as 2 keystrokes
-    '~!@#$%^&*()_+']                                    # count as 3 keystrokes
-
-class EndOfTestError(Exception):
+class TypeTestError(Exception):
     """Error raised when there are no more words or characters left
     in the typing 'test' for the 'text' to be compared to.
 
@@ -45,11 +40,6 @@ class EndOfTestError(Exception):
 
 class TypingTest:
     """Object used to calculate statistics from a typing test.
-
-    You need to initialize 'test' in init or it will be auto-generated.
-
-    You can add the 'text' character by character, in chuncks,
-    or at once. Use the method 'submit', or submit the text through init.
 
     Simple usage:
         from keytype import TypingTest
@@ -82,8 +72,8 @@ class TypingTest:
 
         self.text_raw = ''
         self.text     = ''
-        self.text_words         = []
-        self.correct_words      = []
+        self.text_words    = []
+        self.correct_words = []
 
 ## ---------------------- Private methods -----------------------------
 
@@ -111,7 +101,7 @@ class TypingTest:
             return False
 
         if self.test_char_i >= len(self.test):
-            raise EndOfTestError('Test length exceeded!')
+            raise TypeTestError('Test length exceeded!')
 
         self.test_char_i += 1
         self.text        += char
@@ -126,9 +116,10 @@ class TypingTest:
         """
 
         self.text_raw += word
+        self.text += word
 
         if self.test_word_i >= len(self.test_words):
-            raise EndOfTestError('Test length exceeded!')
+            raise TypeTestError('Test length exceeded!')
 
         if any(d in word for d in self.delimiters):
             raise ValueError('Words have to be submitted without delimiters.')
@@ -137,50 +128,6 @@ class TypingTest:
         self.test_word_i += 1
 
         return self.text_words[-1] == self.test_words[self.test_word_i-1]
-
-    def gross_speed(self) -> float:
-        """Calculate the gross typing speed in wpm (words per minute).
-
-        Gross typing speed takes both correctly and incorrectly
-        typed keystrokes as well as invalid keystrokes into account.
-
-        """
-
-        return wpm(sum(map(keystroke, self.text_raw)), self.duration)
-
-    def net_speed(self) -> float:
-        """Calculate the net typing speed in wpm (words per minute).
-
-        Net typing speed only takes correctly typed keystrokes into account.
-
-        """
-
-        return wpm(sum(self.correct_words_keystrokes), self.duration)
-
-    def result(self) -> str:
-        """
-        """
-
-        return stats(sum(self.correct_words_keystrokes), self.duration)
-
-    def result_extensive(self) -> str:
-        """
-        """
-
-        r = 'Extensive result:\n'
-        r += '\nSpeed by word (correct words only):\n'
-        r += f'{wpm(len(self.correct_words)*5, self.duration)} wpm\n'
-        r += f'Duration: {self.duration:.{2}f} sec\n'
-        r += '\nSpeed by keystroke (correct words only):\n'
-        r += stats(sum(self.correct_words_keystrokes),  self.duration)
-        r += '\nSpeed by character (correct words only):\n'
-        r += stats(len(self.correct_words_chars),       self.duration)
-        r += '\nSpeed by keystroke (correct chars only):\n'
-        r += stats(sum(self.correct_chars_keystrokes),  self.duration)
-        r += '\nSpeed by character (correct chars only):\n'
-        r += stats(len(self.correct_chars),             self.duration)
-
-        return r
 
     def submit(self, duration: float) -> None:
         """Submit 'text' from the user input.
@@ -219,7 +166,48 @@ class TypingTest:
         self.incorrect_chars_keystrokes = list(map(keystroke, self.incorrect_chars))
         self.invalid_chars_keystrokes   = list(map(keystroke, self.invalid_chars))
 
+        self.accuracy = accuracy(sum(len(i) for i in self.test_words[:self.test_word_i]),
+                len(self.correct_words_chars),
+                self.corrections)
+
+        self.true_speed_wpm = wpm(len(self.correct_words)*5,          self.duration)
+        self.true_speed_cpm = cpm(len(self.correct_words_chars),      self.duration)
+        self.true_speed_dph = dph(len(self.correct_words_chars),      self.duration)
+        self.speed_wpm      = wpm(sum(self.correct_words_keystrokes), self.duration)
+        self.speed_cpm      = cpm(sum(self.correct_words_keystrokes), self.duration)
+        self.speed_dph      = dph(sum(self.correct_words_keystrokes), self.duration)
+
+
+        self.results = {
+                "duration":                     self.duration,
+                "correct_words":                self.correct_words,
+                "incorrect_words":              self.incorrect_words,
+                "invalid_words":                self.invalid_words,
+                "correct_chars":                self.correct_chars,
+                "incorrect_chars":              self.incorrect_chars,
+                "invalid_chars":                self.invalid_chars,
+                "correct_words_chars":          self.correct_words_chars,
+                "incorrect_words_chars":        self.incorrect_words_chars,
+                "invalid_words_chars":          self.invalid_words_chars,
+                "correct_words_keystrokes":     self.correct_words_keystrokes,
+                "incorrect_words_keystrokes":   self.incorrect_words_keystrokes,
+                "invalid_words_keystrokes":     self.invalid_words_keystrokes,
+                "correct_chars_keystrokes":     self.correct_chars_keystrokes,
+                "incorrect_chars_keystrokes":   self.incorrect_chars_keystrokes,
+                "invalid_chars_keystrokes":     self.invalid_chars_keystrokes,
+                "accuracy":                     self.accuracy,
+                "true_speed":                   self.true_speed_wpm
+                }
+
 ## --------------------- Convinience interface -------------------------
+
+def accuracy(total_keystrokes_required: int,
+        correct_keystrokes: int,
+        corrections: int) -> float:
+    """
+    """
+
+    return correct_keystrokes/(total_keystrokes_required+corrections)*100
 
 def cpm(keystrokes: int, duration: float) -> float:
     """Calculate typing speed in cpm (characters per minute).
@@ -238,56 +226,6 @@ def dph(keystrokes: int, duration: float) -> float:
     """
 
     return keystrokes/duration*3600
-
-def generate_test(language: str='english',
-        difficulty: str='basic',
-        shuffle_words: bool=False):
-    """Generates a typing test with specified parameters.
-
-    difficulty - word complexity ('basic', 'advanced')
-    """
-
-    with open(f'tests/{language}/{difficulty}', 'r') as f:
-        test = f.read()
-
-    if shuffle_words:
-        test_words = test.split()
-        shuffle(test_words)
-        test = ' '.join(test_words)
-
-    return test
-
-def keystroke(char: str) -> int:
-    """Return how many keystrokes does a 'char' count as.
-
-    For language specific characters see 'keystrokes_file_path'.
-
-    1 keystroke:
-        a b c d e f g h i j k l m n o p q r s t u v w x y z
-        [ ] ; ' \ / . ,
-        ALL OTHER CHARACTERS NOT SPECIFIED IN THE 'keystrokes_file_path'
-    2 keystrokes:
-        A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
-        1 2 3 4 5 6 7 8 9 0
-        ` - = { } : " | < > ?
-    3 keystrokes:
-        ~ ! @ # $ % ^ & * ( ) _ +
-
-    """
-
-    for i, chars in enumerate(_keystrokes):
-        if char in chars:
-            return i+2
-
-    return 1
-
-def stats(keystrokes: int, duration: float) -> str:
-    """Returns speed in wpm, cpm and dph
-    """
-
-    return  f'{wpm(keystrokes, duration):.{2}f} wpm\n' + \
-            f'{cpm(keystrokes, duration):.{2}f} cpm\n' + \
-            f'{dph(keystrokes, duration):.{2}f} dph'
 
 def wpm(keystrokes: int, duration: float) -> float:
     """Calculate typing speed in wpm (words per minute).
