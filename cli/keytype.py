@@ -15,13 +15,9 @@
 # Copyright (C) 2019 Mislav Vuletić
 
 from re         import split
-from time       import time
-from enum       import Enum
-from random     import shuffle
 from typing     import List
-from operator   import eq
 from itertools  import chain, zip_longest
-from keystrokes import keystroke
+from cli.keystrokes import keystroke
 
 __all__ = ['accuracy', 'cpm', 'dph', 'TypeTestError', 'gross_speed',
         'net_speed', 'true_gross_speed', 'true_wpm', 'TypingTest', 'wpm']

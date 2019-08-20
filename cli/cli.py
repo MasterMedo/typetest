@@ -49,9 +49,9 @@ Shortcuts:
 
 from docopt     import docopt
 from schema     import Schema, And, Or, Use, SchemaError
-from os         import path, listdir, walk
+from os         import path, walk
 from re         import split
-from keytype    import TypingTest
+from cli.keytype import TypingTest
 from random     import choice, shuffle
 from textwrap   import wrap
 from time       import time
@@ -61,7 +61,8 @@ import curses
 layouts  = ['colemak',  'dvorak', 'qwerty']
 formats  = ['csv', 'json']
 
-if __name__ == '__main__':
+
+def start():
     args = docopt(__doc__, version='typetest 0.1')
     schema = Schema({
         '--all-correct-chars':      bool,#
@@ -248,9 +249,6 @@ if __name__ == '__main__':
         test.submit(duration)
     except TypeError as e:
         exit()
-
-    #if args['--output']:
-        #with open(args['--output'], 'w'):
 
     if args['--verbose']:
         print(f'accuracy:       {test.accuracy:.{0}f}%')
