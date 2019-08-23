@@ -71,9 +71,14 @@ def init():
         prompt.refresh()
 
     test_text = ' '.join(typetest.test.test_words)
-    add_color = lambda word: [word, color_basic]
-    testscr_rows = [list(map(add_color, row)) for row in map(str.split, wrap(test_text, maxx-1, break_long_words=False, break_on_hyphens=False))]
-    testscr_rows[0][0][1] = color_basic_reverse
+    add_color = lambda char: [char, color_basic]
+    text_rows = wrap(test_text, maxx-1, break_long_words=False, break_on_hyphens=False)
+    testscr_rows = [[list(map(add_color, word)) for word in row] for row in map(str.split, text_rows)]
+    if typetest.args['--word-by-word']:
+        for i in range(len(testscr_rows[0][0])):
+            testscr_rows[0][0][i][1] = color_basic_reverse
+    else:
+        testscr_rows[0][0][0][1] = color_basic_reverse
 
 def play():
     while True:
@@ -98,8 +103,9 @@ def draw_testscr():
 
     start_row_i = min(test_row_i, len(testscr_rows) - testscr_height)
     for row_i, row in enumerate(testscr_rows[start_row_i:start_row_i + testscr_height]):
-        for word_i, (word, color) in enumerate(row):
-            testscr.addstr(word, color)
+        for word_i, word in enumerate(row):
+            for char_i, (char, color) in enumerate(word):
+                testscr.addstr(char, color)
             if word_i + 1 != len(row):
                 testscr.addstr(' ')
         if row_i != testscr_height - 1:
@@ -111,13 +117,13 @@ def draw_wordscr():
     wordscr.erase()
 
     if typetest.test.triggered_new_word:
-        test_word = testscr_rows[test_row_i][test_word_i][0]
-
         if typetest.test.last_text_word == typetest.test.last_test_word:
-            testscr_rows[test_row_i][test_word_i][1] = color_correct
+            for i in range(len(testscr_rows[test_row_i][test_word_i])):
+                testscr_rows[test_row_i][test_word_i][i][1] = color_correct
 
         else:
-            testscr_rows[test_row_i][test_word_i][1] = color_wrong
+            for i in range(len(testscr_rows[test_row_i][test_word_i])):
+                testscr_rows[test_row_i][test_word_i][i][1] = color_wrong
 
         test_word_i += 1
 
@@ -125,17 +131,20 @@ def draw_wordscr():
             test_word_i = 0
             test_row_i += 1
 
-        testscr_rows[test_row_i][test_word_i][1] = color_basic_reverse
+        for i in range(len(testscr_rows[test_row_i][test_word_i])):
+            testscr_rows[test_row_i][test_word_i][i][1] = color_basic_reverse
 
     elif typetest.test.text_word != typetest.test.test_word[:len(typetest.test.text_word)]:
-        #exit(f'\"{typetest.test.text_word}\", \"{typetest.test.test_word[:len(typetest.test.text_word)]}\"')
-        testscr_rows[test_row_i][test_word_i][1] = color_wrong_reverse
+        for i in range(len(testscr_rows[test_row_i][test_word_i])):
+            testscr_rows[test_row_i][test_word_i][i][1] = color_wrong_reverse
 
     elif typetest.test.text_word == typetest.test.test_word:
-        testscr_rows[test_row_i][test_word_i][1] = color_correct_reverse
+        for i in range(len(testscr_rows[test_row_i][test_word_i])):
+            testscr_rows[test_row_i][test_word_i][i][1] = color_correct_reverse
 
     elif typetest.test.text_word == typetest.test.test_word[:len(typetest.test.text_word)]:
-        testscr_rows[test_row_i][test_word_i][1] = color_basic_reverse
+        for i in range(len(testscr_rows[test_row_i][test_word_i])):
+            testscr_rows[test_row_i][test_word_i][i][1] = color_basic_reverse
 
     wordscr.addstr(typetest.test.text_word)
     wordscr.refresh()
