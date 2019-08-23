@@ -1,9 +1,6 @@
 from textwrap       import wrap
 from curses         import *
 
-from typetest.core  import output_results
-from typetest.util  import TypeTestDone
-
 import typetest
 
 COLOR_BASIC           = None
