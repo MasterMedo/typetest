@@ -1,14 +1,18 @@
-from typetest.core  import get_test_raw, print_result, output_results
+from random         import shuffle
+from pathlib        import Path
+from typetest.core  import print_result, output_results
 from typetest.util  import TypeTest, TypeTestDone, split_by_delimiters
 from typetest       import cli, gui
-from random         import shuffle
 
 import typetest
 
 if __name__ == '__main__':
-    cli.parse()
+    cli.parse_args()
 
-    test_raw = get_test_raw()
+    if typetest.args['--file']:
+        with open(typetest.args['--file'], 'r') as f:
+            test_raw = f.read()
+
     test_words = split_by_delimiters(test_raw, typetest.args['--delimiters'])
 
     if typetest.args['--shuffle-words']:

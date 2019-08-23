@@ -4,21 +4,6 @@ from random         import choice
 
 import typetest
 
-def get_test_raw():
-    if typetest.args['--file']:
-        with open(typetest.args['--file'], 'r') as f:
-            test_raw = f.read()
-    else:
-        try:
-            root, _, files = next(walk(typetest.args['--root-dir']))
-            test_path = choice(files)
-            with open(root+test_path, 'r') as f:
-                test_raw = f.read()
-        except IndexError as e:
-            exit(f"No files in {typetest.args['--root-dir']}.")
-
-    return test_raw
-
 def output_results():
     with open(typetest.args['--output'], 'w') as f:
         if typetest.args['--output-format'] == 'json':

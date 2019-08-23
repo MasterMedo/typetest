@@ -75,7 +75,7 @@ def init():
 
     test_text = ' '.join(typetest.test.test_words)
     add_color = lambda word: [word, COLOR_BASIC]
-    testscr_rows = [list(map(add_color, row)) for row in map(str.split, wrap(test_text, maxx-1))]
+    testscr_rows = [list(map(add_color, row)) for row in map(str.split, wrap(test_text, maxx-1, break_long_words=False, break_on_hyphens=False))]
     testscr_rows[0][0][1] = COLOR_BASIC_REVERSE
 
 def play():

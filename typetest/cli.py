@@ -22,6 +22,7 @@ Options:
     -e --endless                Repeat test endlessly, if -r is
                                 specified randomizes every repetition.
     -f --file=<file>            File to read the test from.
+                                Overrides --root-dir option.
     --fg=<color>                Foreground main color. [default: 7]
     -h --hide                   Hide timer and dynamic wpm counter.
     --help                      Show this screen.
@@ -51,8 +52,9 @@ Shortcuts:
 
 from docopt     import docopt
 from schema     import Schema, And, Or, Use, SchemaError
-from os         import path
+from os         import path, walk
 from sys        import argv
+from random     import choice
 from typetest   import VERSION, ROOTDIR
 
 import typetest
@@ -60,20 +62,20 @@ import typetest
 KEYBOARD_VARIANTS = ['dvorak', 'colemak', 'qwerty']
 OUTPUT_FORMATS = ['csv', 'json']
 
-def parse():
+def parse_args():
     args = docopt(__doc__, argv=argv[1:], version=VERSION)
     schema = Schema({
-        '--all-correct-chars':      bool,#
-        '--beep':                   bool,#
-        '--endless':                bool,#
+        '--all-correct-chars':      bool,
+        '--beep':                   bool,
+        '--endless':                bool,
         '--hide':                   bool,
         '--help':                   bool,
-        '--prevent-wrong':          bool,#
+        '--prevent-wrong':          bool,
         '--quiet':                  bool,
         '--shuffle-words':          bool,
         '--verbose':                bool,
         '--version':                bool,
-        '--word-by-word':           bool,#
+        '--word-by-word':           bool,
 
         '--bg': And(Use(int), lambda n: 0 <= n < 256,
                 error='<color> should be an integer between 0 and 256.'),
@@ -84,23 +86,29 @@ def parse():
         '--wc': And(Use(int), lambda n: 0 <= n < 256,
                 error='<color> should be an integer between 0 and 256.'),
 
-        '--duration':   Or(None, And(Use(int), lambda n: 0 < n,#
+        '--duration':   Or(None, And(Use(int), lambda n: 0 < n,
                         error='<duration> should be an int larger than 0.')),
         '--delimiters': Use(lambda s: bytes(s, "utf-8").decode("unicode_escape")),
 
         '--file':       Or(None, And(path.isfile,
                         error='<file> should be an existing file.')),
-        '--output':     Or(None, And(path.exists,#
+        '--output':     Or(None, And(path.exists,
                         error='<path> should refer to an existing path.')),
         '--root-dir':   And(path.isdir,
                         error='<directory> should be an existing directory.'),
 
-        '--output-format':  And(lambda f: f in OUTPUT_FORMATS,#
+        '--output-format':  And(lambda f: f in OUTPUT_FORMATS,
                             error=f'<format> should be in {OUTPUT_FORMATS}.'),
-        '--layout':         And(lambda l: l in KEYBOARD_VARIANTS,#
+        '--layout':         And(lambda l: l in KEYBOARD_VARIANTS,
                             error=f'<layout> must be in {KEYBOARD_VARIANTS}.'),
         })
     try:
-        typetest.args = schema.validate(args)
+        args = schema.validate(args)
+        if not args['--file']:
+            root, _, files = next(walk(args['--root-dir']))
+            args['--file'] = path.join(root, choice(files))
+        typetest.args = args
     except SchemaError as e:
         exit(e)
+    except IndexError as e:
+        exit(f"<directory> '{args['--root-dir']}' doesn't contain a <file>.")
