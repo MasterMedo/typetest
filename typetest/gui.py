@@ -113,7 +113,7 @@ def draw_wordscr():
     if typetest.test.triggered_new_word:
         test_word = testscr_rows[test_row_i][test_word_i][0]
 
-        if typetest.test.is_last_word_correct():
+        if typetest.test.last_text_word == typetest.test.last_test_word:
             testscr_rows[test_row_i][test_word_i][1] = color_correct
 
         else:
@@ -127,16 +127,17 @@ def draw_wordscr():
 
         testscr_rows[test_row_i][test_word_i][1] = color_basic_reverse
 
-    elif not typetest.test.are_current_words_equal():
-            testscr_rows[test_row_i][test_word_i][1] = color_wrong_reverse
+    elif typetest.test.text_word != typetest.test.test_word[:len(typetest.test.text_word)]:
+        #exit(f'\"{typetest.test.text_word}\", \"{typetest.test.test_word[:len(typetest.test.text_word)]}\"')
+        testscr_rows[test_row_i][test_word_i][1] = color_wrong_reverse
 
-    elif typetest.test.is_current_word_correct():
-            testscr_rows[test_row_i][test_word_i][1] = color_correct_reverse
+    elif typetest.test.text_word == typetest.test.test_word:
+        testscr_rows[test_row_i][test_word_i][1] = color_correct_reverse
 
-    elif typetest.test.are_current_words_equal():
-            testscr_rows[test_row_i][test_word_i][1] = color_basic_reverse
+    elif typetest.test.text_word == typetest.test.test_word[:len(typetest.test.text_word)]:
+        testscr_rows[test_row_i][test_word_i][1] = color_basic_reverse
 
-    wordscr.addstr(typetest.test.get_current_text_word())
+    wordscr.addstr(typetest.test.text_word)
     wordscr.refresh()
 
 def draw_timescr():

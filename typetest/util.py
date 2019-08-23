@@ -83,6 +83,10 @@ class TypeTest:
         self.tmp_speed_wpm          = 0
         self.duration               = 0
 
+        self.text_word = ''
+        self.test_word = ''.join(takewhile(lambda x: x not in delimiters, self.test))
+        self.last_text_word = ''
+        self.last_test_word = ''
 
 ## ---------------------- Public interface ----------------------------
     def addch(self, char: str) -> bool:
@@ -97,32 +101,42 @@ class TypeTest:
 
         if char == '\b':
             if self.text and (not self.word_by_word or self.text[-1] not in self.delimiters):
-                if self.are_current_words_equal():
+                if self.text_word == self.test_word[:len(self.text_word)]:
                     self.tmp_correct_keystrokes -= keystroke(self.text[-1])
 
                 self.text_char_i -= 1
                 self.text = self.text[:-1]
+                self.text_word = self.text_word[:-1]
 
         elif self.word_by_word and char in self.delimiters:
             if not self.text or (self.text and self.text[-1] in self.delimiters):
                 pass
 
             elif self.text and self.text[-1] not in self.delimiters:
+                self.last_text_word = self.text_word
+                self.last_test_word = self.test_word
+                self.text_word = ''
+                self.test_word = ''
                 self.text += char
                 self.triggered_new_word = True
                 for i in range(self.test_char_i, len(self.test)):
                     if self.test[self.test_char_i] in self.delimiters:
                         self.test_char_i += 1
+                        for c in self.test[self.test_char_i:]:
+                            if c in self.delimiters:
+                                break
+                            self.test_word += c
                         break
                     self.test_char_i += 1
                 if self.test_char_i >= len(self.test):
                     raise TypeTestDone('done')
 
         else:
-            self.text        += char
+            self.text += char
+            self.text_word += char
             self.text_char_i += 1
             if char not in self.delimiters:
-                if self.are_current_words_equal():
+                if self.text_word == self.test_word[:len(self.text_word)]:
                     self.tmp_correct_keystrokes += keystroke(char)
 
         self.tmp_speed_wpm = wpm(self.tmp_correct_keystrokes, self.duration)
@@ -194,45 +208,7 @@ class TypeTest:
             "true_speed":                   self.true_speed_wpm,
         }
 
-    def not_in_delimiters(self, char: str) -> bool:
-        return char not in self.delimiters
-
-    def in_delimiters(self, char: str) -> bool:
-        return char in self.delimiters
-
-    def get_current_test_word(self) -> str:
-        return ''.join(takewhile(self.not_in_delimiters, self.test[self.test_char_i:]))
-
-    def get_current_text_word(self) -> str:
-        return ''.join(reversed(list(takewhile(self.not_in_delimiters, reversed(self.text)))))
-
-    def are_current_words_equal(self) -> bool:
-        text_word = self.get_current_text_word()
-        test_word = self.get_current_test_word()
-        return text_word == test_word[:len(text_word)]
-
-    def get_last_text_word(self) -> str:
-        return get_last_word(self.text, self.delimiters)
-
-    def get_last_test_word(self) -> str:
-        return get_last_word(self.test[:self.test_char_i], self.delimiters)
-
-    def is_last_word_correct(self) -> bool:
-        return self.get_last_text_word() == self.get_last_test_word()
-
-    def is_current_word_correct(self) -> bool:
-        text_word = self.get_current_text_word()
-        test_word = self.get_current_test_word()
-        return text_word == test_word
-
 ## --------------------- Convinience interface -------------------------
-
-def get_last_word(text: str, delimiters) -> str:
-        not_in_delimiters = lambda c: c not in delimiters
-        in_delimiters     = lambda c: c in delimiters
-        text     = dropwhile(not_in_delimiters, reversed(text))
-        text     = dropwhile(in_delimiters, text)
-        return ''.join(reversed(list(takewhile(not_in_delimiters, text))))
 
 def accuracy(total_keystrokes_required: int,
         correct_keystrokes: int,
