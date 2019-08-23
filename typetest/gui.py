@@ -3,12 +3,12 @@ from curses         import *
 
 import typetest
 
-COLOR_BASIC           = None
-COLOR_BASIC_REVERSE   = None
-COLOR_WRONG           = None
-COLOR_WRONG_REVERSE   = None
-COLOR_CORRECT         = None
-COLOR_CORRECT_REVERSE = None
+color_basic           = None
+color_basic_reverse   = None
+color_wrong           = None
+color_wrong_reverse   = None
+color_correct         = None
+color_correct_reverse = None
 
 stdscr   = None
 testscr  = None
@@ -23,7 +23,7 @@ test_word_i = 0
 def init():
     global stdscr, testscr, wordscr, timescr, speedscr
     global testscr_height, testscr_rows
-    global COLOR_BASIC, COLOR_BASIC_REVERSE, COLOR_WRONG, COLOR_WRONG_REVERSE, COLOR_CORRECT, COLOR_CORRECT_REVERSE
+    global color_basic, color_basic_reverse, color_wrong, color_wrong_reverse, color_correct, color_correct_reverse
 
     stdscr = initscr()
     start_color()
@@ -39,12 +39,12 @@ def init():
     init_pair(5, typetest.args['--cc'], typetest.args['--bg'])  # green on black
     init_pair(6, typetest.args['--bg'], typetest.args['--cc'])  # black on green
 
-    COLOR_BASIC           = color_pair(1)
-    COLOR_BASIC_REVERSE   = color_pair(2)
-    COLOR_WRONG           = color_pair(3)
-    COLOR_WRONG_REVERSE   = color_pair(4)
-    COLOR_CORRECT         = color_pair(5)
-    COLOR_CORRECT_REVERSE = color_pair(6)
+    color_basic           = color_pair(1)
+    color_basic_reverse   = color_pair(2)
+    color_wrong           = color_pair(3)
+    color_wrong_reverse   = color_pair(4)
+    color_correct         = color_pair(5)
+    color_correct_reverse = color_pair(6)
                                                                 # defaults
     maxy, maxx = stdscr.getmaxyx()
 
@@ -71,9 +71,9 @@ def init():
         prompt.refresh()
 
     test_text = ' '.join(typetest.test.test_words)
-    add_color = lambda word: [word, COLOR_BASIC]
+    add_color = lambda word: [word, color_basic]
     testscr_rows = [list(map(add_color, row)) for row in map(str.split, wrap(test_text, maxx-1, break_long_words=False, break_on_hyphens=False))]
-    testscr_rows[0][0][1] = COLOR_BASIC_REVERSE
+    testscr_rows[0][0][1] = color_basic_reverse
 
 def play():
     while True:
@@ -114,10 +114,10 @@ def draw_wordscr():
         test_word = testscr_rows[test_row_i][test_word_i][0]
 
         if typetest.test.is_last_word_correct():
-            testscr_rows[test_row_i][test_word_i][1] = COLOR_CORRECT
+            testscr_rows[test_row_i][test_word_i][1] = color_correct
 
         else:
-            testscr_rows[test_row_i][test_word_i][1] = COLOR_WRONG
+            testscr_rows[test_row_i][test_word_i][1] = color_wrong
 
         test_word_i += 1
 
@@ -125,16 +125,16 @@ def draw_wordscr():
             test_word_i = 0
             test_row_i += 1
 
-        testscr_rows[test_row_i][test_word_i][1] = COLOR_BASIC_REVERSE
+        testscr_rows[test_row_i][test_word_i][1] = color_basic_reverse
 
     elif not typetest.test.are_current_words_equal():
-            testscr_rows[test_row_i][test_word_i][1] = COLOR_WRONG_REVERSE
+            testscr_rows[test_row_i][test_word_i][1] = color_wrong_reverse
 
     elif typetest.test.is_current_word_correct():
-            testscr_rows[test_row_i][test_word_i][1] = COLOR_CORRECT_REVERSE
+            testscr_rows[test_row_i][test_word_i][1] = color_correct_reverse
 
     elif typetest.test.are_current_words_equal():
-            testscr_rows[test_row_i][test_word_i][1] = COLOR_BASIC_REVERSE
+            testscr_rows[test_row_i][test_word_i][1] = color_basic_reverse
 
     wordscr.addstr(typetest.test.get_current_text_word())
     wordscr.refresh()
