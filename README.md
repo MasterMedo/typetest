@@ -1,2 +1,7 @@
+# WIP
+
 # typetest
-typing test - python package
+test your typing speed without leaving the terminal
+
+### Usage
+-	python typetest.py --word-by-word -sv
