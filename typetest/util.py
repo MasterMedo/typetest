@@ -119,6 +119,9 @@ class TypeTest:
                 self.test_word = ''
                 self.text += char
                 self.triggered_new_word = True
+                if self.last_text_word == self.last_test_word[:len(self.last_text_word)] \
+                        and self.last_text_word != self.last_test_word:
+                            self.tmp_correct_keystrokes -= sum(map(keystroke, self.last_text_word))
                 for i in range(self.test_char_i, len(self.test)):
                     if self.test[self.test_char_i] in self.delimiters:
                         self.test_char_i += 1
