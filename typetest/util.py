@@ -95,6 +95,8 @@ class TypeTest:
 
         self.text_times.append(time())
         self.triggered_new_word = False
+        self.triggered_new_char = False
+        self.triggered_deletion = False
 
         self.text_raw += char
         self.duration  = self.text_times[-1] - self.text_times[0]
@@ -103,7 +105,7 @@ class TypeTest:
             if self.text and (not self.word_by_word or self.text[-1] not in self.delimiters):
                 if self.text_word == self.test_word[:len(self.text_word)]:
                     self.tmp_correct_keystrokes -= keystroke(self.text[-1])
-
+                self.triggered_deletion = True
                 self.text_char_i -= 1
                 self.text = self.text[:-1]
                 self.text_word = self.text_word[:-1]
@@ -111,7 +113,6 @@ class TypeTest:
         elif self.word_by_word and char in self.delimiters:
             if not self.text or (self.text and self.text[-1] in self.delimiters):
                 pass
-
             elif self.text and self.text[-1] not in self.delimiters:
                 self.last_text_word = self.text_word
                 self.last_test_word = self.test_word
@@ -138,6 +139,7 @@ class TypeTest:
             self.text += char
             self.text_word += char
             self.text_char_i += 1
+            self.triggered_new_char = True
             if char not in self.delimiters:
                 if self.text_word == self.test_word[:len(self.text_word)]:
                     self.tmp_correct_keystrokes += keystroke(char)
