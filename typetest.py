@@ -22,17 +22,22 @@ if __name__ == '__main__':
 
     try:
         gui.init()
-        gui.play()
+        while True:
+            gui.draw_stdscr()
+            if not typetest.args['--hide']:
+                gui.draw_stats()
+            c = gui.stdscr.getch()
+            c = chr(c) if c != 263 else '\b'
+            typetest.test.addch(c)
+            gui.change_word_colors()
 
     except TypeTestDone as e:
-        pass
+        gui.shutdown()
     except KeyboardInterrupt as e:
-        pass
+        gui.shutdown()
     except Exception as e:
         gui.shutdown()
         raise
-
-    gui.shutdown()
 
     typetest.test.submit()
 
