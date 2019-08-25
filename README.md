@@ -3,6 +3,8 @@
 # typetest
 test your typing speed without leaving the terminal
 
+![example](./img/example.gif)
+
 ### TODO
 - cli
 	- implement options (-abd --cpm...)
