@@ -51,7 +51,7 @@ def init():
 
     maxy, maxx = stdscr.getmaxyx()
 
-    rows_maxy = 3 if typetest.args['--word-by-word'] else maxy - int(not typetest.args['--hide'])
+    rows_maxy = 3 if not typetest.args['--char-by-char'] else maxy - int(not typetest.args['--hide'])
 
     word_size     = maxx - speed_size - time_size - prompt_size - 3
 
@@ -59,7 +59,7 @@ def init():
     add_color = lambda char: [char, color_basic]
     text_rows = wrap(test_text, maxx-1, break_long_words=False, break_on_hyphens=False)
     rows = [[list(map(add_color, word)) for word in row] for row in map(str.split, text_rows)]
-    if typetest.args['--word-by-word']:
+    if not typetest.args['--char-by-char']:
         for i in range(len(rows[0][0])):
             rows[0][0][i][1] = color_basic_reverse
     else:
@@ -137,6 +137,8 @@ def change_word_colors():
         else:
             for i in range(len(rows[test_row_i][test_word_i])):
                 rows[test_row_i][test_word_i][i][1] = color_wrong
+            if typetest.args['--beep']:
+                print('\a', end='')
 
         test_word_i += 1
         if test_word_i == len(rows[test_row_i]):

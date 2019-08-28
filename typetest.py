@@ -7,7 +7,10 @@ from typetest       import cli, gui
 import typetest
 
 if __name__ == '__main__':
-    cli.parse_args()
+    cli.load_cli_args()
+    cli.add_config_args()
+    cli.validate_args()
+    cli.add_default_args()
 
     if typetest.args['--file']:
         with open(typetest.args['--file'], 'r') as f:
