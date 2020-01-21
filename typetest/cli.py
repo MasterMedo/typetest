@@ -18,7 +18,7 @@ Options:
     --cc=<color>                Correct color.
     --cpm                       Show characters per minute. #
     -d --duration=<duration>    Limit duration of the typing test to
-                                <duration>. #
+                                <duration>.
     --delimiters=<string>       Delimiters to divide text file by.
                                 Decoded with utf-8.
     --dph                       Show depressions per hour. #
@@ -53,7 +53,7 @@ from schema     import Schema, And, Or, Use, SchemaError
 from os         import path, walk
 from sys        import argv
 from random     import choice
-from typetest   import VERSION, TESTDIR, CONFIG, OUTPUT, DELIMITERS
+from typetest   import VERSION, TESTDIR, CONFIG, OUTPUT, DELIMITERS, DURATION
 from typetest   import COLOR_BLACK, COLOR_WHITE, COLOR_GREEN, COLOR_RED
 
 import csv, yaml
@@ -125,6 +125,9 @@ def validate_args():
 
 def add_default_args():
     try:
+        if not typetest.args['--duration']:
+            typetest.args['--duration'] = DURATION
+
         if not typetest.args['--file']:
             if not typetest.args['--root-dir']:
                 typetest.args['--root-dir'] = TESTDIR

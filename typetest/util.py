@@ -40,7 +40,7 @@ class TypeTest:
     """Object used to calculate statistics from a typing test.
 
     Simple usage:
-        from keytype import TypingTest
+        from util import TypeTest
         import time
 
         start = time.time()

@@ -27,6 +27,7 @@ COLOR_GREEN = 46
 COLOR_RED   = 196
 DELIMITERS = '\n '
 TESTDIR = path.join(ROOTDIR, 'tests/english')
+DURATION = 60
 
 args = None
 test = None

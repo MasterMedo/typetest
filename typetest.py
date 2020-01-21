@@ -33,6 +33,8 @@ if __name__ == '__main__':
             c = str(c) if c not in [127, 263] else '\b'
             typetest.test.addch(c)
             gui.change_word_colors()
+            if typetest.test.duration >= typetest.args['--duration']:
+                raise TypeTestDone('Time is up!')
 
     except TypeTestDone as e:
         gui.shutdown()
