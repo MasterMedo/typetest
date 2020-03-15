@@ -3,6 +3,8 @@
 # typetest
 test your typing speed without leaving the terminal
 
+This repo is home to two different programs, one is a minimal requirements self contained file `tt.py` and the other is `typetest` with extensible features.
+
 ![example](./img/example.gif)
 
 ### TODO
