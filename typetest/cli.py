@@ -48,20 +48,21 @@ Shortcuts:
     C-w / ^W / Ctrl+w           Delete a word. #
 """
 
-from docopt     import docopt
-from schema     import Schema, And, Or, Use, SchemaError
-from os         import path, walk
-from sys        import argv
-from random     import choice
-from typetest   import VERSION, TESTDIR, CONFIG, OUTPUT, DELIMITERS, DURATION
-from typetest   import COLOR_BLACK, COLOR_WHITE, COLOR_GREEN, COLOR_RED
+from docopt import docopt
+from schema import Schema, And, Or, Use, SchemaError
+from os import path, walk
+from sys import argv
+from random import choice
+from typetest import VERSION, TESTDIR, CONFIG, DELIMITERS, DURATION
+from typetest import COLOR_BLACK, COLOR_WHITE, COLOR_GREEN, COLOR_RED
 
-import csv, yaml
+import yaml
 import typetest
 
 
 def load_cli_args():
     typetest.args = docopt(__doc__, argv=argv[1:], version=VERSION)
+
 
 def add_config_args():
     with open(CONFIG) as f:
@@ -71,57 +72,91 @@ def add_config_args():
 
     typetest.args = merge_args(typetest.args, config_args)
 
+
 def merge_args(x, y):
     for key in set(x) | set(y):
-        if y.get(key) and not x[key] or x[key] == None and key in y:
+        if y.get(key) and not x[key] or x[key] is None and key in y:
             x[key] = y[key]
     return x
 
+
+def error(key):
+    return f"Error in key, value ('{key}', {typetest.args[key]}):\n"
+
+
+def color_error(key):
+    return error(key) + '<color> should be an integer between 0 and 256'
+
+
+def file_error(key):
+    return error(key) + '<file> should be an existing file.'
+
+
+def path_error(key):
+    return error(key) + '<path> should refer to a valid path.'
+
+
+def directory_error(key):
+    return error(key) + '<directory> should be an existing directory.'
+
+
+def delimiter_error(key):
+    return error(key) + '<delimiters> should be a string of delimiters.'
+
+
+def no_file_error(key):
+    return error(key) + '<directory> should contain a file.'
+
+
+def duration_error(key):
+    return error(key) + '<duration> should be an integer larger than 0.'
+
+
+def gtzero(x):
+    return x > 0
+
+
+def iscolor(x):
+    return 0 <= x < 256
+
+
+def to_unicode(x):
+    return bytes(x, 'utf-8').decode('unicode_escape')
+
+
 def validate_args():
-    error           = lambda key: f"Error in key, value ('{key}', {typetest.args[key]}):\n"
-    color_error     = lambda key: error(key) + '<color> should be an integer between 0 and 256'
-    file_error      = lambda key: error(key) + '<file> should be an existing file.'
-    path_error      = lambda key: error(key) + '<path> should refer to a valid path.'
-    directory_error = lambda key: error(key) + '<directory> should be an existing directory.'
-    delimiter_error = lambda key: error(key) + '<delimiters> should be a string of delimiters.'
-    no_file_error   = lambda key: error(key) + '<directory> should contain a file.'
-    duration_error  = lambda key: error(key) + '<duration> should be an integer larger than 0.'
-
-    gtzero     = lambda x: x > 0
-    iscolor    = lambda x: 0 <= x < 256
-    to_unicode  = lambda x: bytes(x, 'utf-8').decode('unicode_escape')
-
     schema = Schema({
-        '--all-correct-chars':  bool,
-        '--beep':               bool,
-        '--char-by-char':       bool,
-        '--cpm':                bool,
-        '--dph':                bool,
-        '--endless':            bool,
-        '--hide':               bool,
-        '--help':               bool,
-        '--normalize':          bool,
-        '--prevent-wrong':      bool,
-        '--quiet':              bool,
-        '--shuffle-words':      bool,
-        '--version':            bool,
-        '--verbose':            int,
-        '--tag':                list,
-        '--bg':         Or(None, And(Use(int), iscolor, error=color_error('--bg'))),
-        '--fg':         Or(None, And(Use(int), iscolor, error=color_error('--fg'))),
-        '--cc':         Or(None, And(Use(int), iscolor, error=color_error('--cc'))),
-        '--wc':         Or(None, And(Use(int), iscolor, error=color_error('--wc'))),
-        '--duration':   Or(None, And(Use(int), gtzero,  error=duration_error('--duration'))),
-        '--delimiters': Or(None, Use(to_unicode),       error=delimiter_error('--delimiters')),
-        '--file':       Or(None, path.isfile,           error=file_error('--file')),
-        '--output':     Or(None, path.exists,           error=path_error('--output')),
-        '--root-dir':   Or(None, path.isdir,            error=directory_error('--root-dir')),
+        '--all-correct-chars': bool,
+        '--beep': bool,
+        '--char-by-char': bool,
+        '--cpm': bool,
+        '--dph': bool,
+        '--endless': bool,
+        '--hide': bool,
+        '--help': bool,
+        '--normalize': bool,
+        '--prevent-wrong': bool,
+        '--quiet': bool,
+        '--shuffle-words': bool,
+        '--version': bool,
+        '--verbose': int,
+        '--tag': list,
+        '--bg': Or(None, And(Use(int), iscolor, error=color_error('--bg'))),
+        '--fg': Or(None, And(Use(int), iscolor, error=color_error('--fg'))),
+        '--cc': Or(None, And(Use(int), iscolor, error=color_error('--cc'))),
+        '--wc': Or(None, And(Use(int), iscolor, error=color_error('--wc'))),
+        '--duration': Or(None, And(Use(int), gtzero, error=duration_error('--duration'))),
+        '--delimiters': Or(None, Use(to_unicode), error=delimiter_error('--delimiters')),
+        '--file': Or(None, path.isfile, error=file_error('--file')),
+        '--output': Or(None, path.exists, error=path_error('--output')),
+        '--root-dir': Or(None, path.isdir, error=directory_error('--root-dir'))
     })
 
     try:
         typetest.args = schema.validate(typetest.args)
     except SchemaError as e:
         exit(e)
+
 
 def add_default_args():
     try:
@@ -149,5 +184,5 @@ def add_default_args():
         if not typetest.args['--delimiters']:
             typetest.args['--delimiters'] = DELIMITERS
 
-    except IndexError as e:
+    except IndexError:
         exit(no_file_error(typetest.args['--root-dir']))

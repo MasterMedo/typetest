@@ -14,11 +14,12 @@
 
 # Copyright (C) 2019 Mislav Vuletić
 
-from re                     import split
-from time                   import time
-from typing                 import List
-from itertools              import chain, zip_longest, takewhile, dropwhile
-from typetest.keystrokes    import keystroke
+from time import time
+from typing import List
+from itertools import chain, zip_longest, takewhile
+from typetest.keystrokes import keystroke
+
+import re
 
 __all__ = ['accuracy', 'cpm', 'dph', 'TypeTestDone', 'TypeTest', 'wpm']
 
@@ -54,10 +55,10 @@ class TypeTest:
     """
 
     def __init__(self,
-            test: str,
-            delimiters: str=' \n',
-            word_by_word: bool=False,
-            ) -> None:
+                 test: str,
+                 delimiters: str = ' \n',
+                 word_by_word: bool = False,
+                 ) -> None:
 
         self.word_by_word = word_by_word
         self.delimiters = delimiters
@@ -73,22 +74,22 @@ class TypeTest:
         self.text = ''
 
         self.whitespaces = 0
-        self.backspaces  = 0
+        self.backspaces = 0
         self.corrections = 0
 
         self.text_char_i = 0
         self.test_char_i = 0
 
         self.tmp_correct_keystrokes = 0
-        self.tmp_speed_wpm          = 0
-        self.duration               = 0
+        self.tmp_speed_wpm = 0
+        self.duration = 0
 
         self.text_word = ''
         self.test_word = ''.join(takewhile(lambda x: x not in delimiters, self.test))
         self.last_text_word = ''
         self.last_test_word = ''
 
-## ---------------------- Public interface ----------------------------
+# ---------------------- Public interface ----------------------------
     def addch(self, char: str) -> bool:
         """Only text, no words
         """
@@ -99,7 +100,7 @@ class TypeTest:
         self.triggered_deletion = False
 
         self.text_raw += char
-        self.duration  = self.text_times[-1] - self.text_times[0]
+        self.duration = self.text_times[-1] - self.text_times[0]
 
         if char == '\b':
             if self.text and (not self.word_by_word or self.text[-1] not in self.delimiters):
@@ -122,7 +123,7 @@ class TypeTest:
                 self.triggered_new_word = True
                 if self.last_text_word == self.last_test_word[:len(self.last_text_word)] \
                         and self.last_text_word != self.last_test_word:
-                            self.tmp_correct_keystrokes -= sum(map(keystroke, self.last_text_word))
+                    self.tmp_correct_keystrokes -= sum(map(keystroke, self.last_text_word))
                 for i in range(self.test_char_i, len(self.test)):
                     if self.test[self.test_char_i] in self.delimiters:
                         self.test_char_i += 1
@@ -159,38 +160,37 @@ class TypeTest:
         zipped_words = list(zip(self.text_words, self.test_words))
         zipped_chars = list(chain(*[zip_longest(*cc) for cc in zipped_words]))
 
-        self.correct_words   = [i for i, j in zipped_words if i == j]
+        self.correct_words = [i for i, j in zipped_words if i == j]
         self.incorrect_words = [i for i, j in zipped_words if i != j]
-        self.invalid_words   = self.text_words[len(self.test_words)-1:]
+        self.invalid_words = self.text_words[len(self.test_words)-1:]
 
-        self.correct_chars   = [i for i, j in zipped_chars if i == j]
+        self.correct_chars = [i for i, j in zipped_chars if i == j]
         self.incorrect_chars = [i for i, j in zipped_chars if i != j and i]
-        self.invalid_chars   = [i for i, j in zipped_chars if not j and i] + \
-                               list(chain(*self.invalid_words))
+        self.invalid_chars = [i for i, j in zipped_chars if not j and i] + \
+            list(chain(*self.invalid_words))
 
-        self.correct_words_chars        = list(chain(*self.correct_words))
-        self.incorrect_words_chars      = list(chain(*self.incorrect_words))
-        self.invalid_words_chars        = list(chain(*self.invalid_words))
+        self.correct_words_chars = list(chain(*self.correct_words))
+        self.incorrect_words_chars = list(chain(*self.incorrect_words))
+        self.invalid_words_chars = list(chain(*self.invalid_words))
 
-        self.correct_words_keystrokes   = list(map(keystroke, self.correct_words_chars))
+        self.correct_words_keystrokes = list(map(keystroke, self.correct_words_chars))
         self.incorrect_words_keystrokes = list(map(keystroke, self.incorrect_words_chars))
-        self.invalid_words_keystrokes   = list(map(keystroke, self.invalid_words_chars))
+        self.invalid_words_keystrokes = list(map(keystroke, self.invalid_words_chars))
 
-        self.correct_chars_keystrokes   = list(map(keystroke, self.correct_chars))
+        self.correct_chars_keystrokes = list(map(keystroke, self.correct_chars))
         self.incorrect_chars_keystrokes = list(map(keystroke, self.incorrect_chars))
-        self.invalid_chars_keystrokes   = list(map(keystroke, self.invalid_chars))
+        self.invalid_chars_keystrokes = list(map(keystroke, self.invalid_chars))
 
         self.accuracy = accuracy(sum(len(i) for i in self.test_words[:len(self.text_words)]),
-                len(self.correct_words_chars),
-                self.corrections)
+                                 len(self.correct_words_chars),
+                                 self.corrections)
 
         self.true_speed_wpm = wpm(len(self.correct_words)*5,          self.duration)
         self.true_speed_cpm = cpm(len(self.correct_words_chars),      self.duration)
         self.true_speed_dph = dph(len(self.correct_words_chars),      self.duration)
-        self.speed_wpm      = wpm(sum(self.correct_words_keystrokes), self.duration)
-        self.speed_cpm      = cpm(sum(self.correct_words_keystrokes), self.duration)
-        self.speed_dph      = dph(sum(self.correct_words_keystrokes), self.duration)
-
+        self.speed_wpm = wpm(sum(self.correct_words_keystrokes), self.duration)
+        self.speed_cpm = cpm(sum(self.correct_words_keystrokes), self.duration)
+        self.speed_dph = dph(sum(self.correct_words_keystrokes), self.duration)
 
         self.results = {
             "duration":                     self.duration,
@@ -213,12 +213,13 @@ class TypeTest:
             "true_speed":                   self.true_speed_wpm,
         }
 
-## --------------------- Convinience interface -------------------------
+# --------------------- Convinience interface -------------------------
+
 
 def accuracy(total_keystrokes_required: int,
-        correct_keystrokes: int,
-        corrections: int) -> float:
-    """
+             correct_keystrokes: int,
+             corrections: int) -> float:
+    """Calculate accuracy.
     """
     total_keystrokes = total_keystrokes_required + corrections
     if total_keystrokes == 0:
@@ -226,27 +227,28 @@ def accuracy(total_keystrokes_required: int,
 
     return correct_keystrokes/total_keystrokes*100
 
+
 def cpm(keystrokes: int, duration: float) -> float:
     """Calculate typing speed in cpm (characters per minute).
 
     duration - in seconds
-
     """
     if duration == 0:
         return 0
 
     return keystrokes/duration*60
 
+
 def dph(keystrokes: int, duration: float) -> float:
     """Calculate typing speed in dph (depressions per hour).
 
     duration - in seconds
-
     """
     if duration == 0:
         return 0
 
     return keystrokes/duration*3600
+
 
 def wpm(keystrokes: int, duration: float) -> float:
     """Calculate typing speed in wpm (words per minute).
@@ -261,8 +263,9 @@ def wpm(keystrokes: int, duration: float) -> float:
     words = keystrokes/5
     return words/duration*60
 
-def split_by_delimiters(text: str, delimiters: str=' \n') -> List[str]:
+
+def split_by_delimiters(text: str, delimiters: str = ' \n') -> List[str]:
     """Split 'text' by 'delimiters'.
     """
 
-    return list(filter(None, split('['+delimiters+']+', text)))
+    return list(filter(None, re.split('['+delimiters+']+', text)))

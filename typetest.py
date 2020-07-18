@@ -1,8 +1,7 @@
-from json           import dumps
-from random         import shuffle
-from pathlib        import Path
-from typetest.util  import TypeTest, TypeTestDone, split_by_delimiters
-from typetest       import cli, gui
+from json import dumps
+from random import shuffle
+from typetest.util import TypeTest, TypeTestDone, split_by_delimiters
+from typetest import cli, gui
 
 import typetest
 
@@ -36,11 +35,13 @@ if __name__ == '__main__':
             if typetest.test.duration >= typetest.args['--duration']:
                 raise TypeTestDone('Time is up!')
 
-    except TypeTestDone as e:
+    except TypeTestDone:
         gui.shutdown()
-    except KeyboardInterrupt as e:
+
+    except KeyboardInterrupt:
         gui.shutdown()
-    except Exception as e:
+
+    except Exception:
         gui.shutdown()
         raise
 

@@ -6,6 +6,7 @@ _keystrokes = [
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890`-={}:"|<>?',  # count as 2 keystrokes
     '~!@#$%^&*()_+']                                    # count as 3 keystrokes
 
+
 def keystroke(char: str) -> int:
     """Return how many keystrokes does a 'char' count as.
 
@@ -13,7 +14,7 @@ def keystroke(char: str) -> int:
 
     1 keystroke:
         a b c d e f g h i j k l m n o p q r s t u v w x y z
-        [ ] ; ' \ / . ,
+        [ ] ; ' \\ / . ,
         ALL OTHER CHARACTERS NOT SPECIFIED IN THE 'keystrokes_file_path'
     2 keystrokes:
         A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
