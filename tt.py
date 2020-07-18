@@ -1,25 +1,33 @@
-from blessed    import Terminal
-from itertools  import zip_longest
-from functools  import partial
+from time import time, strftime, gmtime
+from itertools import zip_longest
+from functools import partial
 from contextlib import suppress
-import re, signal, time, random
 
-term = Terminal()
+from blessed import Terminal
+
+import os
+import re
+import signal
+import random
+
 
 DURATION = 60
 SHUFFLE = True
-FILE = 'typetest/tests/english/basic'
+DIR = os.path.dirname(os.path.realpath(__file__))
+FILE = DIR + '/typetest/tests/english/basic'
 NUMBER_OF_ROWS = 2
-normal, correct, wrong = term.normal, term.color(46), term.color(196)
 
-redraw = True
+term = Terminal()
+
+normal = term.normal
+correct = term.color(46)
+wrong = term.color(196)
+
+
 def on_resize(*_):
     global redraw
     redraw = True
 
-echo = partial(print, end = '', flush = True)
-signal.signal(signal.SIGWINCH, on_resize)
-get_words = partial(re.findall, r"[\w']+")
 
 def draw(words, inwords, word_i, text, wpm, timestamp):
     output_lines = []
@@ -30,31 +38,34 @@ def draw(words, inwords, word_i, text, wpm, timestamp):
             if print_line:
                 if len_line < term.width:
                     line += term.clear_eol
+
                 output_lines.append(line)
                 if len(output_lines) >= NUMBER_OF_ROWS:
                     break
+
             line, line_i, len_line = '', line_i+1, 0
 
         if line:
-             line += ' '
-             len_line += 1
+            line += ' '
+            len_line += 1
 
         if i == word_i:
             print_line = True
             color = correct if word == text else \
                     normal  if word.startswith(text) else \
                     wrong
+
             line += color + term.reverse(word)
         else:
             color = normal  if i >= len(inwords) else \
                     correct if word == inword else \
                     wrong
+
             line += color + word
 
         len_line += len(word)
 
-    carret = term.reverse(' ')
-    prompt = f'>>>{text}{carret}' + term.clear_eol
+    prompt = f'>>>{text}' + term.clear_eol
     stats = f'{wpm:3d} wpm | {timestamp}'
     position = term.move_x(term.width-len(stats))
     output_lines.append(prompt + position + stats)
@@ -62,28 +73,30 @@ def draw(words, inwords, word_i, text, wpm, timestamp):
     for line_i, line in enumerate(output_lines):
         if line_i >= term.height:
             break
+
         echo(term.move_yx(line_i, 0) + line)
+
+    echo(term.move_yx(len(output_lines)-1, 3+len(text)))
+
+
+redraw = True
+echo = partial(print, end='', flush=True)
+signal.signal(signal.SIGWINCH, on_resize)
 
 if __name__ == '__main__':
     with open(FILE) as f:
-        words = get_words(f.read()[:-1])
+        words = re.findall(r"[\w']+", f.read())
 
     if SHUFFLE:
         random.shuffle(words)
 
     timestamp = '00:00:00'
     counter = duration = wpm = 0
-    word_i  = start    = end = 0
+    word_i = start = end = 0
     text, inwords = '', []
 
-    with term.cbreak(), \
-            term.fullscreen(), \
-            term.hidden_cursor(), \
-            suppress(KeyboardInterrupt):
-        while True:
-            if word_i >= len(words) or start and time.time() - start > DURATION:
-                break
-
+    with term.cbreak(), term.fullscreen(), suppress(KeyboardInterrupt):
+        while word_i < len(words) and not start or time() - start < DURATION:
             word = words[word_i]
 
             if redraw:
@@ -95,24 +108,29 @@ if __name__ == '__main__':
                 continue
 
             if not start:
-                start = time.time()
-            else:
-                end = time.time()
-                duration = end - start
-                timestamp = time.strftime('%H:%M:%S', time.gmtime(duration))
+                start = time()
+
+            end = time()
+            duration = end - start
+            timestamp = strftime('%H:%M:%S', gmtime(duration))
 
             if char.name == 'KEY_BACKSPACE':
                 text = text[:-1]
+
             elif char == ' ':
                 if text:
                     inwords.append(text)
                     if text == word:
-                        counter += len(word)
+                        counter += len(word) + 1  # +1 for the space
                         wpm = min(int(counter*12/duration), 999)
+
                     text = ''
                     word_i += 1
             else:
                 text += char
+
             redraw = True
 
-    print(f'file: {FILE}\nspeed: {wpm} wpm\nduration: {timestamp}')
+    print(f'file:     {FILE}')
+    print(f'speed:    {wpm} wpm')
+    print(f'duration: {timestamp}')
