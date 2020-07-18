@@ -1,18 +1,33 @@
-# WIP
-
-# typetest
-test your typing speed without leaving the terminal
-
-This repo is home to two different programs, one is a minimal requirements self contained file `tt.py` and the other is `typetest` with extensible features.
+### test your typing speed without leaving the terminal
 
 ![example](./img/example.gif)
 
+This repo is home to two different programs, one is a minimal requirements self contained file `tt.py` and the other is `typetest` with extensible features.
+As is both are a near clone of [10fastfingers](10fastfingers.com) with an added bonus of being able to see typing speed as you're typing.
+They share the looks but not the wits.
+
+Differences in the way typing speed is calculated and feedback accross platforms got me interested in writing my own program for testing typing speed.
+I've come to love how simple and unrestrictive [10fastfingers](10fastfingers.com) is compared to [typingclub](typingclub.com) and [typeracer](typeracer.com).
+They all have great advantages for varying purposes but when it comes to warming up or just waiting for a compile of some program to finish I am yet to find a rival to [10fastfingers](10fastfingers.com).
+That is why I decided to clone its functionality and add some of the features I love from other sites.
+
+# tt.py
+`tt.py` is a self contained minimal typing test program written with [blessed](https://github.com/jquast/blessed/).
+It calculates typing speed as sum of spaces and characters from correctly written words divided by test duration.
+Adjustable settings are `DURATION`, `TEST_FILE`, `SHUFFLE`, and `NUMBER_OF_ROWS`, which are all set within the file itself.
+
+# typetest
+Typetest is a full fledged extensible program providing multiple ways of calculating, showing and storing typing speed.
+Gui is written with [curses](https://docs.python.org/3/howto/curses.html), cli with [docopt](https://github.com/docopt/docopt).
+
 ### TODO
 - cli
-	- implement options (-abd --cpm...)
-	- '#' in usage means not implemented
+  - implement options (-abd --cpm...)
+  - '#' in usage means not implemented
 - gui
-	-	handle ctrl keypresses manually
+  - handle ctrl keypresses manually
+- logic
+  - local wpm maximum
 
 ### Usage
 ```
@@ -67,5 +82,4 @@ Shortcuts:
     ^H / Ctrl+h                 Backspace.
     ^R / Ctrl+r                 Restart the same test. #
     ^W / Ctrl+w                 Delete a word. #
-
 ```
