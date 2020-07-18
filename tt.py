@@ -11,10 +11,10 @@ import signal
 import random
 
 
-DURATION = 60
-SHUFFLE = True
+DURATION = 60  # in seconds
+SHUFFLE = True  # shuffle words of a test file?
 DIR = os.path.dirname(os.path.realpath(__file__))
-FILE = DIR + '/typetest/tests/english/basic'
+TEST_FILE = DIR + '/typetest/tests/english/basic'
 NUMBER_OF_ROWS = 2
 
 term = Terminal()
@@ -50,14 +50,15 @@ def draw(words, inwords, word_i, text, wpm, timestamp):
             len_line += 1
 
         if i == word_i:
-            print_line = True
             color = correct if word == text else \
-                    normal  if word.startswith(text) else \
+                    normal if word.startswith(text) else \
                     wrong
 
+            print_line = True
             line += color + term.reverse(word)
+
         else:
-            color = normal  if i >= len(inwords) else \
+            color = normal if i >= len(inwords) else \
                     correct if word == inword else \
                     wrong
 
@@ -84,16 +85,18 @@ echo = partial(print, end='', flush=True)
 signal.signal(signal.SIGWINCH, on_resize)
 
 if __name__ == '__main__':
-    with open(FILE) as f:
+    with open(TEST_FILE) as f:
         words = re.findall(r"[\w']+", f.read())
 
     if SHUFFLE:
         random.shuffle(words)
 
     timestamp = '00:00:00'
-    counter = duration = wpm = 0
-    word_i = start = end = 0
-    text, inwords = '', []
+    correct_chars = total_chars = wpm = 0
+    duration = start = end = 0
+    word_i = 0
+    text = ''
+    inwords = []
 
     with term.cbreak(), term.fullscreen(), suppress(KeyboardInterrupt):
         while word_i < len(words) and not start or time() - start < DURATION:
@@ -119,10 +122,12 @@ if __name__ == '__main__':
 
             elif char == ' ':
                 if text:
+                    correct_chars += 1  # space
+                    total_chars += len(word) + 1
                     inwords.append(text)
                     if text == word:
-                        counter += len(word) + 1  # +1 for the space
-                        wpm = min(int(counter*12/duration), 999)
+                        correct_chars += len(word)
+                        wpm = min(int(correct_chars*12/duration), 999)
 
                     text = ''
                     word_i += 1
@@ -131,6 +136,6 @@ if __name__ == '__main__':
 
             redraw = True
 
-    print(f'file:     {FILE}')
+    print(f'accuracy: {100*correct_chars//total_chars}%')
     print(f'speed:    {wpm} wpm')
     print(f'duration: {timestamp}')
