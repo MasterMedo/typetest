@@ -28,6 +28,12 @@ Gui is written with [curses](https://docs.python.org/3/howto/curses.html), cli w
   - handle ctrl keypresses manually
 - logic
   - local wpm maximum
+    - keep a dictionary of word: speed
+    - keep a dictionary of letter: speed
+    - 20 letter sustained max speed
+    - 5 seconds sustained max speed
+  - common misspelling
+  - two letter mixups e.g. word -> wrod
 
 ### Usage
 ```
