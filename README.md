@@ -3,12 +3,12 @@
 ![example](./img/example.gif)
 
 This repo is home to two different programs, one is a minimal requirements self contained file `tt.py` and the other is `typetest` with extensible features.
-As is both are a near clone of [10fastfingers](10fastfingers.com) with an added bonus of being able to see typing speed as you're typing.
+As is both are a near clone of [10fastfingers](https://10fastfingers.com/typing-test/english) with an added bonus of being able to see typing speed as you're typing.
 They share the looks but not the wits.
 
 Differences in the way typing speed is calculated and feedback accross platforms got me interested in writing my own program for testing typing speed.
-I've come to love how simple and unrestrictive [10fastfingers](10fastfingers.com) is compared to [typingclub](typingclub.com) and [typeracer](typeracer.com).
-They all have great advantages for varying purposes but when it comes to warming up or just waiting for a compile of some program to finish I am yet to find a rival to [10fastfingers](10fastfingers.com).
+I've come to love how simple and unrestrictive [10fastfingers](https://10fastfingers.com/typing-test/english) is compared to [typingclub](https://www.typingclub.com/) and [typeracer](https://www.typeracer.com).
+They all have great advantages for varying purposes but when it comes to warming up or just waiting for a compile of some program to finish I am yet to find a rival to [10fastfingers](https://10fastfingers.com/typing-test/english).
 That is why I decided to clone its functionality and add some of the features I love from other sites.
 
 # tt.py
