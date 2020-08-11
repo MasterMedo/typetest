@@ -31,18 +31,20 @@ def on_resize(*_):
 
 
 def draw(words, inwords, word_i, text, wpm, timestamp):
-    output_lines = []
-    print_line = False
+    print_line = -1
     line, line_i, len_line = '', 0, 0
     for i, (word, inword) in enumerate(zip_longest(words, inwords)):
         if len_line + len(word) >= term.width:
-            if print_line:
+            if print_line >= 0:
+
                 if len_line < term.width:
                     line += term.clear_eol
 
-                output_lines.append(line)
-                if len(output_lines) >= NUMBER_OF_ROWS:
+                if print_line >= min(term.height, NUMBER_OF_ROWS):
                     break
+
+                echo(term.move_yx(print_line, 0) + line)
+                print_line += 1
 
             line, line_i, len_line = '', line_i+1, 0
 
@@ -55,7 +57,7 @@ def draw(words, inwords, word_i, text, wpm, timestamp):
                     normal if word.startswith(text) else \
                     wrong
 
-            print_line = True
+            print_line += 1
             line += color + term.reverse(word)
 
         else:
@@ -67,17 +69,9 @@ def draw(words, inwords, word_i, text, wpm, timestamp):
 
         len_line += len(word)
 
-    empty_space = ' ' * (term.width - len(text) - 21)
-    line = f">>>{text}{empty_space}{wpm:3d} wpm | {timestamp}"
-    output_lines.append(line)
-
-    for line_i, line in enumerate(output_lines):
-        if line_i >= term.height:
-            break
-
-        echo(term.move_yx(line_i, 0) + line)
-
-    echo(term.move_yx(len(output_lines)-1, 3+len(text)))
+    echo(term.move_yx(print_line, 0))
+    echo(f">>>{text}{' '*(term.width-len(text)-21)}{wpm:3d} wpm | {timestamp}")
+    echo(term.move_x(3+len(text)))
 
 
 redraw = True
