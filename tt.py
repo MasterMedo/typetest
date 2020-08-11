@@ -1,4 +1,5 @@
 from time import time, strftime, gmtime
+from datetime import datetime
 from itertools import zip_longest
 from functools import partial
 from contextlib import suppress
@@ -66,10 +67,9 @@ def draw(words, inwords, word_i, text, wpm, timestamp):
 
         len_line += len(word)
 
-    prompt = f'>>>{text}' + term.clear_eol
-    stats = f'{wpm:3d} wpm | {timestamp}'
-    position = term.move_x(term.width-len(stats))
-    output_lines.append(prompt + position + stats)
+    empty_space = ' ' * (term.width - len(text) - 21)
+    line = f">>>{text}{empty_space}{wpm:3d} wpm | {timestamp}"
+    output_lines.append(line)
 
     for line_i, line in enumerate(output_lines):
         if line_i >= term.height:
@@ -122,12 +122,15 @@ if __name__ == '__main__':
 
             elif char == ' ':
                 if text:
-                    correct_chars += 1  # space
                     total_chars += len(word) + 1
                     inwords.append(text)
-                    if text == word:
-                        correct_chars += len(word)
-                        wpm = min(int(correct_chars*12/duration), 999)
+
+                    if len(text) == len(word):
+                        correct_chars += 1  # space
+                        if text == word:
+                            correct_chars += len(word)
+
+                    wpm = min(int(correct_chars*12/duration), 999)
 
                     text = ''
                     word_i += 1
@@ -136,6 +139,8 @@ if __name__ == '__main__':
 
             redraw = True
 
-    print(f'accuracy: {100*correct_chars//total_chars}%')
-    print(f'speed:    {wpm} wpm')
-    print(f'duration: {timestamp}')
+    accuracy = 100 * correct_chars // total_chars
+    timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    print(f'accuracy: {accuracy}%')
+    print(f'speed:    {wpm}wpm')
+    print(f'duration: {duration:.0f}s')
