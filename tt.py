@@ -41,11 +41,11 @@ def draw(words, colors, word_i, text, wpm, timestamp):
     len_line = 0
     line_words = []
     for i, (word, color) in enumerate(zip_longest(words, colors, fillvalue=color_normal)):
-        if len_line + len(word) + len(line_words) > term.width:
-            if print_line >= min(term.height, NUMBER_OF_ROWS):
-                break
+        if print_line >= min(term.height, NUMBER_OF_ROWS):
+            break
 
-            elif print_line >= 0:
+        if len_line + len(word) + len(line_words) > term.width:
+            if print_line >= 0:
                 line = ' '.join(line_words)
                 if len_line + len(line_words) - 1 < term.width:
                     line += term.clear_eol
