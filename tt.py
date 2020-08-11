@@ -14,8 +14,8 @@ import random
 
 DURATION = 60  # in seconds
 SHUFFLE = True  # shuffle words of a test file?
-DIR = os.path.dirname(os.path.realpath(__file__))
-TEST_FILE = DIR + '/typetest/tests/english/basic'
+CURRENT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+TEST_FILE_PATH = CURRENT_DIRECTORY + '/typetest/tests/english/basic'
 NUMBER_OF_ROWS = 2
 
 term = Terminal()
@@ -26,19 +26,32 @@ color_wrong = term.color(196)
 
 
 def on_resize(*_):
+    """Called every time a resize signal (`signal.SIGWINCH`) is sent.
+
+    Sets the global `redraw` flag to true.
+    """
     global redraw
     redraw = True
 
 
 def draw(words, colors, word_i, text, wpm, timestamp):
-    color = color_correct if words[word_i] == text else \
-            color_normal if words[word_i].startswith(text) else \
-            color_wrong
+    """Text wraps the `words` list to the terminal width, and prints
+    `NUMBER_OF_ROWS` lines of wrapped words starting with the line
+    containing the current word that is being typed.
 
-    colors = colors + [color + term.reverse]
-    print_line = -1
+    Already typed words appear in either `color_correct` or `color_wrong`,
+    whereas the currently typed word can additionally be `color_normal`,
+    but appears reversed.
+    """
+    current_word_color = color_correct if words[word_i] == text else \
+        color_normal if words[word_i].startswith(text) else \
+        color_wrong
+
+    colors = colors + [current_word_color + term.reverse]
+
     line_i = 0
     len_line = 0
+    print_line = -1
     line_words = []
     for i, (word, color) in enumerate(zip_longest(words, colors, fillvalue=color_normal)):
         if print_line >= min(term.height, NUMBER_OF_ROWS):
@@ -72,7 +85,7 @@ echo = partial(print, end='', flush=True)
 signal.signal(signal.SIGWINCH, on_resize)
 
 if __name__ == '__main__':
-    with open(TEST_FILE) as f:
+    with open(TEST_FILE_PATH) as f:
         words = re.findall(r"[\w']+", f.read())
 
     if SHUFFLE:

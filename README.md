@@ -14,7 +14,7 @@ That is why I decided to clone its functionality and add some of the features I 
 # tt.py
 `tt.py` is a self contained minimal typing test program written with [blessed](https://github.com/jquast/blessed/).
 It calculates typing speed as sum of spaces and characters from correctly written words divided by test duration.
-Adjustable settings are `DURATION`, `TEST_FILE`, `SHUFFLE`, and `NUMBER_OF_ROWS`, which are all set within the file itself.
+Adjustable settings are `DURATION`, `TEST_FILE_PATH`, `SHUFFLE`, and `NUMBER_OF_ROWS`, which are all set within the file itself.
 
 # typetest
 Typetest is a full fledged extensible program providing multiple ways of calculating, showing and storing typing speed.
