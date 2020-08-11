@@ -47,7 +47,7 @@ def draw(words, colors, word_i, text, wpm, timestamp):
 
             elif print_line >= 0:
                 line = ' '.join(line_words)
-                if len_line + len(line_words) < term.width:
+                if len_line + len(line_words) - 1 < term.width:
                     line += term.clear_eol
                 echo(term.move_yx(print_line, 0) + line)
                 print_line += 1
