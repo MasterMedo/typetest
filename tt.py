@@ -30,48 +30,41 @@ def on_resize(*_):
     redraw = True
 
 
-def draw(words, correct_words, word_i, text, wpm, timestamp):
+def draw(words, colors, word_i, text, wpm, timestamp):
+    color = color_correct if words[word_i] == text else \
+            color_normal if words[word_i].startswith(text) else \
+            color_wrong
+
+    colors = colors + [color + term.reverse]
     print_line = -1
-    line, line_i, len_line = '', 0, 0
-    for i, (word, correct) in enumerate(zip_longest(words, correct_words)):
-        if len_line + len(word) >= term.width:
-            if print_line >= 0:
+    line_i = 0
+    len_line = 0
+    line_words = []
+    for i, (word, color) in enumerate(zip_longest(words, colors, fillvalue=color_normal)):
+        if len_line + len(word) + len(line_words) > term.width:
+            if print_line >= min(term.height, NUMBER_OF_ROWS):
+                break
 
-                if len_line < term.width:
+            elif print_line >= 0:
+                line = ' '.join(line_words)
+                if len_line + len(line_words) < term.width:
                     line += term.clear_eol
-
-                if print_line >= min(term.height, NUMBER_OF_ROWS):
-                    break
-
                 echo(term.move_yx(print_line, 0) + line)
                 print_line += 1
 
-            line, line_i, len_line = '', line_i+1, 0
-
-        if line:
-            line += ' '
-            len_line += 1
+            line_i += 1
+            len_line = 0
+            line_words = []
 
         if i == word_i:
-            color = color_correct if word == text else \
-                    color_normal if word.startswith(text) else \
-                    color_wrong
-
             print_line += 1
-            line += color + term.reverse(word)
 
-        else:
-            color = color_normal if i >= len(correct_words) else \
-                    color_correct if correct else \
-                    color_wrong
-
-            line += color + word
-
+        line_words.append(color + word + term.normal)
         len_line += len(word)
 
     echo(term.move_yx(print_line, 0))
     echo(f">>>{text}{' '*(term.width-len(text)-21)}{wpm:3d} wpm | {timestamp}")
-    echo(term.move_x(3+len(text)))
+    echo(term.move_x(3 + len(text)))
 
 
 redraw = True
@@ -90,14 +83,14 @@ if __name__ == '__main__':
     duration = start = end = 0
     word_i = 0
     text = ''
-    correct_words = []
+    colors = []
 
     with term.cbreak(), term.fullscreen(), suppress(KeyboardInterrupt):
         while word_i < len(words) and not start or time() - start < DURATION:
             word = words[word_i]
 
             if redraw:
-                draw(words, correct_words, word_i, text, wpm, timestamp)
+                draw(words, colors, word_i, text, wpm, timestamp)
                 redraw = False
 
             char = term.inkey(timeout=0.1)
@@ -117,11 +110,11 @@ if __name__ == '__main__':
             elif char == ' ':
                 if text:
                     total_chars += len(word) + 1
-                    correct_words.append(text == word)
+                    color = color_correct if text == word else color_wrong
+                    colors.append(color)
 
-                    correct_chars += 1  # space
                     if text == word:
-                        correct_chars += len(word)
+                        correct_chars += len(word) + 1
 
                     wpm = min(int(correct_chars*12/duration), 999)
 
