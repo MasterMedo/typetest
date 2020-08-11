@@ -20,9 +20,9 @@ NUMBER_OF_ROWS = 2
 
 term = Terminal()
 
-normal = term.normal
-correct = term.color(46)
-wrong = term.color(196)
+color_normal = term.normal
+color_correct = term.color(46)
+color_wrong = term.color(196)
 
 
 def on_resize(*_):
@@ -30,10 +30,10 @@ def on_resize(*_):
     redraw = True
 
 
-def draw(words, inwords, word_i, text, wpm, timestamp):
+def draw(words, correct_words, word_i, text, wpm, timestamp):
     print_line = -1
     line, line_i, len_line = '', 0, 0
-    for i, (word, inword) in enumerate(zip_longest(words, inwords)):
+    for i, (word, correct) in enumerate(zip_longest(words, correct_words)):
         if len_line + len(word) >= term.width:
             if print_line >= 0:
 
@@ -53,17 +53,17 @@ def draw(words, inwords, word_i, text, wpm, timestamp):
             len_line += 1
 
         if i == word_i:
-            color = correct if word == text else \
-                    normal if word.startswith(text) else \
-                    wrong
+            color = color_correct if word == text else \
+                    color_normal if word.startswith(text) else \
+                    color_wrong
 
             print_line += 1
             line += color + term.reverse(word)
 
         else:
-            color = normal if i >= len(inwords) else \
-                    correct if word == inword else \
-                    wrong
+            color = color_normal if i >= len(correct_words) else \
+                    color_correct if correct else \
+                    color_wrong
 
             line += color + word
 
@@ -90,14 +90,14 @@ if __name__ == '__main__':
     duration = start = end = 0
     word_i = 0
     text = ''
-    inwords = []
+    correct_words = []
 
     with term.cbreak(), term.fullscreen(), suppress(KeyboardInterrupt):
         while word_i < len(words) and not start or time() - start < DURATION:
             word = words[word_i]
 
             if redraw:
-                draw(words, inwords, word_i, text, wpm, timestamp)
+                draw(words, correct_words, word_i, text, wpm, timestamp)
                 redraw = False
 
             char = term.inkey(timeout=0.1)
@@ -117,12 +117,11 @@ if __name__ == '__main__':
             elif char == ' ':
                 if text:
                     total_chars += len(word) + 1
-                    inwords.append(text)
+                    correct_words.append(text == word)
 
-                    if len(text) == len(word):
-                        correct_chars += 1  # space
-                        if text == word:
-                            correct_chars += len(word)
+                    correct_chars += 1  # space
+                    if text == word:
+                        correct_chars += len(word)
 
                     wpm = min(int(correct_chars*12/duration), 999)
 
