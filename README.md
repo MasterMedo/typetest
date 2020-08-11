@@ -27,13 +27,16 @@ Gui is written with [curses](https://docs.python.org/3/howto/curses.html), cli w
 - gui
   - handle ctrl keypresses manually
 - logic
-  - local wpm maximum
-    - keep a dictionary of word: speed
-    - keep a dictionary of letter: speed
-    - 20 letter sustained max speed
-    - 5 seconds sustained max speed
+  - per letter typing speed
+  - per letter accuracy
+  - per word typing speed
+  - per word accuracy
+  - 5 seconds sustained max speed
+  - 10 seconds sustained max speed
   - common misspelling
   - two letter mixups e.g. word -> wrod
+  - add some vi commands (c-w, c-u)
+  - command (c-r) to restart test
 
 ### Usage
 ```
