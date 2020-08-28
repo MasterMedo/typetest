@@ -21,8 +21,9 @@ NUMBER_OF_ROWS = 2
 term = Terminal()
 
 color_normal = term.normal
-color_correct = term.color(46)
-color_wrong = term.color(196)
+color_correct = term.color_rgb(0, 230, 0)
+color_wrong = term.color_rgb(230, 0, 0)
+color_current_letter = term.color_rgb(120, 120, 120)
 
 
 def on_resize(*_):
@@ -76,15 +77,19 @@ def draw(words, colors, word_i, text, wpm, timestamp):
             len_line = 0
             line_words = []
 
-        if i == word_i:
-            line_height = 0
-
-        line_words.append(color + word + color_normal)
         len_line += len(word)
 
-    echo(term.move_yx(line_height, 0))
-    echo(f">>>{text}{' '*(term.width-len(text)-21)}{wpm:3d} wpm | {timestamp}")
-    echo(term.move_x(3 + len(text)))
+        if i == word_i:
+            line_height = 0
+            word = ''.join(
+                    c if j != len(text) else color_current_letter(c) + color
+                    for j, c in enumerate(word))
+
+        line_words.append(color + word + color_normal)
+
+    n = term.width-21
+    echo(term.move_yx(line_height, 0) + f'>>>{text[:n]: <{n}}')
+    echo(f"{wpm:3d} wpm | {timestamp}")
 
 
 redraw = True
@@ -105,7 +110,10 @@ if __name__ == '__main__':
     text = ''
     colors = []
 
-    with term.cbreak(), term.fullscreen(), suppress(KeyboardInterrupt):
+    with term.cbreak(),
+         term.fullscreen(),
+         term.hidden_cursor(),
+         suppress(KeyboardInterrupt):
         while word_i < len(words) and not start or time() - start < DURATION:
             word = words[word_i]
 
