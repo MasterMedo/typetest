@@ -110,10 +110,10 @@ if __name__ == '__main__':
     text = ''
     colors = []
 
-    with term.cbreak(),
-         term.fullscreen(),
-         term.hidden_cursor(),
-         suppress(KeyboardInterrupt):
+    with term.cbreak(), \
+            term.fullscreen(), \
+            term.hidden_cursor(), \
+            suppress(KeyboardInterrupt):
         while word_i < len(words) and not start or time() - start < DURATION:
             word = words[word_i]
 
