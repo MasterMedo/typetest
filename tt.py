@@ -23,7 +23,6 @@ term = Terminal()
 color_normal = term.normal
 color_correct = term.color_rgb(0, 230, 0)
 color_wrong = term.color_rgb(230, 0, 0)
-color_current_letter = term.color_rgb(120, 120, 120)
 
 
 def on_resize(*_):
@@ -81,9 +80,6 @@ def draw(words, colors, word_i, text, wpm, timestamp):
 
         if i == word_i:
             line_height = 0
-            word = ''.join(
-                    c if j != len(text) else color_current_letter(c) + color
-                    for j, c in enumerate(word))
 
         line_words.append(color + word + color_normal)
 
