@@ -8,6 +8,7 @@ from blessed import Terminal
 
 import os
 import re
+import sys
 import signal
 import random
 
@@ -85,7 +86,7 @@ def draw(words, colors, word_i, text, wpm, timestamp):
 
     n = term.width-21
     echo(term.move_yx(line_height, 0) + f'>>>{text[:n]: <{n}}')
-    echo(f"{wpm:3d} wpm | {timestamp}")
+    echo(term.move_yx(line_height, n+3) + f"{wpm:3d} wpm | {timestamp}")
 
 
 redraw = True
@@ -131,7 +132,13 @@ if __name__ == '__main__':
             if char.name == 'KEY_BACKSPACE':
                 text = text[:-1]
 
-            elif char == ' ':
+            elif char == '\x12':  # ctrl-r
+                os.execv(sys.executable, ['python'] + sys.argv)
+
+            elif char == '\x17' or char == '\x15':  # ctrl-w or ctrl-u
+                text = ''
+
+            elif char == ' ' or char == '\n':
                 if text:
                     total_chars += len(word) + 1
 
