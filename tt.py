@@ -4,14 +4,13 @@ from itertools import zip_longest
 from functools import partial
 from contextlib import suppress
 
-from blessed import Terminal
-
 import os
 import re
 import sys
 import signal
 import random
 
+from blessed import Terminal
 
 DURATION = 60  # in seconds
 SHUFFLE = True  # shuffle words of a test file?
@@ -92,10 +91,11 @@ def draw(words, colors, word_i, text, wpm, timestamp):
 redraw = True
 echo = partial(print, end='', flush=True)
 signal.signal(signal.SIGWINCH, on_resize)
+word_pattern = re.compile(r"[\w']+")
 
 if __name__ == '__main__':
     with open(TEST_FILE_PATH) as f:
-        words = re.findall(r"[\w']+", f.read())
+        words = re.findall(word_pattern, f.read())
 
     if SHUFFLE:
         random.shuffle(words)
@@ -129,31 +129,30 @@ if __name__ == '__main__':
             duration = end - start
             timestamp = strftime('%H:%M:%S', gmtime(duration))
 
-            if char.name == 'KEY_BACKSPACE':
+            if re.match(word_pattern, char):
+                text += char
+
+            elif char.name == 'KEY_BACKSPACE':
                 text = text[:-1]
+
+            elif (char == ' ' or char == '\n') and text:
+                if text == word:
+                    correct_chars += len(word) + 1
+                    colors.append(color_correct)
+                else:
+                    colors.append(color_wrong)
+
+                total_chars += len(word) + 1
+                wpm = min(int(correct_chars*12/duration), 999)
+
+                text = ''
+                word_i += 1
 
             elif char == '\x12':  # ctrl-r
                 os.execv(sys.executable, ['python'] + sys.argv)
 
-            elif char == '\x17' or char == '\x15':  # ctrl-w or ctrl-u
+            elif char == '\x15' or char == '\x17':  # ctrl-u or ctrl-w
                 text = ''
-
-            elif char == ' ' or char == '\n':
-                if text:
-                    total_chars += len(word) + 1
-
-                    if text == word:
-                        correct_chars += len(word) + 1
-                        colors.append(color_correct)
-                    else:
-                        colors.append(color_wrong)
-
-                    wpm = min(int(correct_chars*12/duration), 999)
-
-                    text = ''
-                    word_i += 1
-            else:
-                text += char
 
             redraw = True
 
