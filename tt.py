@@ -125,10 +125,6 @@ if __name__ == '__main__':
             if not start:
                 start = time()
 
-            end = time()
-            duration = end - start
-            timestamp = strftime('%H:%M:%S', gmtime(duration))
-
             if re.match(word_pattern, char):
                 text += char
 
@@ -143,7 +139,9 @@ if __name__ == '__main__':
                     colors.append(color_wrong)
 
                 total_chars += len(word) + 1
+                duration = time() - start
                 wpm = min(int(correct_chars*12/duration), 999)
+                timestamp = strftime('%H:%M:%S', gmtime(duration))
 
                 text = ''
                 word_i += 1
