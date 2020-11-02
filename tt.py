@@ -5,7 +5,6 @@ from functools import partial
 from contextlib import suppress
 
 import os
-import re
 import sys
 import signal
 
@@ -15,6 +14,9 @@ DURATION = float('inf')  # in seconds
 NUMBER_OF_ROWS = 2
 
 words = sys.stdin.read().split()
+if not words:
+    words = sys.argv[1:]
+
 sys.__stdin__ = os.fdopen(1)  # needs to be executed before term = Terminal()
 term = Terminal()
 
@@ -143,7 +145,7 @@ if __name__ == '__main__':
                 word_i += 1
 
             elif char == '\x12':  # ctrl-r
-                os.execv(sys.executable, ['python'] + sys.argv)
+                os.execv(sys.executable, ['python'] + sys.argv + words)
 
             elif char == '\x15' or char == '\x17':  # ctrl-u or ctrl-w
                 text = ''
