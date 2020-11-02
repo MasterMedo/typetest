@@ -1,6 +1,6 @@
+#!/usr/bin/env python3
 from time import time, strftime, gmtime
 from datetime import datetime
-from itertools import zip_longest
 from functools import partial
 from contextlib import suppress
 
@@ -8,16 +8,14 @@ import os
 import re
 import sys
 import signal
-import random
 
 from blessed import Terminal
 
-DURATION = 60  # in seconds
-SHUFFLE = True  # shuffle words of a test file?
-CURRENT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-TEST_FILE_PATH = CURRENT_DIRECTORY + '/typetest/tests/english/basic'
+DURATION = float('inf')  # in seconds
 NUMBER_OF_ROWS = 2
 
+words = sys.stdin.read().split()
+sys.__stdin__ = os.fdopen(1)  # needs to be executed before term = Terminal()
 term = Terminal()
 
 color_normal = term.normal
@@ -48,6 +46,13 @@ def draw(words, colors, word_i, text, wpm, timestamp):
     whereas the currently typed word can additionally be `color_normal` when
     the word starts with the typed text but isn't (yet) correct.
     """
+    def echo_line():
+        line = ' '.join(line_words)
+        if len_line + len(line_words) - 1 < term.width:
+            line += term.clear_eol
+
+        echo(term.move_yx(line_height, 0) + line)
+
     current_word_color = color_correct if words[word_i] == text else \
         color_normal if words[word_i].startswith(text) else \
         color_wrong
@@ -58,48 +63,42 @@ def draw(words, colors, word_i, text, wpm, timestamp):
     len_line = 0
     line_words = []
     line_height = None
-    for i, (word, color) in enumerate(zip_longest(words, colors,
-                                                  fillvalue=color_normal)):
-        if line_height and line_height >= min(term.height, NUMBER_OF_ROWS):
+    for i, word in enumerate(words):
+        color = colors[i] if i < len(colors) else color_normal
+
+        if line_height is not None and line_height >= min(term.height-1, NUMBER_OF_ROWS):
             break
 
         if len_line + len(word) + len(line_words) > term.width:
             if line_height is not None:
-                line = ' '.join(line_words)
-                if len_line + len(line_words) - 1 < term.width:
-                    line += term.clear_eol
-
-                echo(term.move_yx(line_height, 0) + line)
+                echo_line()
                 line_height += 1
 
             line_i += 1
             len_line = 0
             line_words = []
 
-        len_line += len(word)
-
         if i == word_i:
             line_height = 0
 
+        len_line += len(word)
         line_words.append(color + word + color_normal)
 
-    n = term.width-21
+    if i + 1 >= len(words) and line_height < min(term.height, NUMBER_OF_ROWS):
+        echo_line()
+        line_height += 1
+
+    n = term.width - 21
     echo(term.move_yx(line_height, 0) + f'>>>{text[:n]: <{n}}')
-    echo(term.move_yx(line_height, n+3) + f"{wpm:3d} wpm | {timestamp}")
+    echo(term.move_yx(line_height, n + 3) + f"{wpm:3d} wpm | {timestamp}")
+    for i in range(1, min(term.height, NUMBER_OF_ROWS) - line_height + 1):
+        echo(term.move_yx(line_height + i, 0) + term.clear_eol)
 
 
 redraw = True
 echo = partial(print, end='', flush=True)
 signal.signal(signal.SIGWINCH, on_resize)
-word_pattern = re.compile(r"[\w']+")
-
 if __name__ == '__main__':
-    with open(TEST_FILE_PATH) as f:
-        words = re.findall(word_pattern, f.read())
-
-    if SHUFFLE:
-        random.shuffle(words)
-
     timestamp = '00:00:00'
     correct_chars = total_chars = wpm = 0
     duration = start = end = 0
@@ -111,7 +110,7 @@ if __name__ == '__main__':
             term.fullscreen(), \
             term.hidden_cursor(), \
             suppress(KeyboardInterrupt):
-        while word_i < len(words) and not start or time() - start < DURATION:
+        while word_i < len(words) and (not start or time() - start < DURATION):
             word = words[word_i]
 
             if redraw:
@@ -125,10 +124,7 @@ if __name__ == '__main__':
             if not start:
                 start = time()
 
-            if re.match(word_pattern, char):
-                text += char
-
-            elif char.name == 'KEY_BACKSPACE':
+            if char.name == 'KEY_BACKSPACE':
                 text = text[:-1]
 
             elif (char == ' ' or char == '\n') and text:
@@ -151,6 +147,9 @@ if __name__ == '__main__':
 
             elif char == '\x15' or char == '\x17':  # ctrl-u or ctrl-w
                 text = ''
+
+            else:
+                text += char
 
             redraw = True
 
