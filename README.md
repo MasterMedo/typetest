@@ -16,12 +16,33 @@ It calculates typing speed as sum of spaces and characters from **correctly writ
 Adjustable settings are `DURATION`, `SHUFFLE` and `NUMBER_OF_ROWS`, which can be set using the the command arguments.
 The input text for the typing test is read from the standard input or using the [positional arguments](https://docs.python.org/3/glossary.html#term-argument).
 
-# scappers
-Along with `typetest` this repository features sample web scrappers.
-`wiki` finds a [featured article](https://en.wikipedia.org/wiki/Wikipedia:Featured_articles) on wikipedia and prints it.
-`wiki_common` scrapes common words.
-Write your own if need be, you may find some suggestions [here](https://en.wikipedia.org/wiki/Lists_of_English_words).
-Use them like so: `wiki | typetest` or `wiki_common | typetest`.
+# ideas for tests
+Along with `typetest` this repository features sample tests.
+Try them like so: `typetest -s -d 60 < common_200`.
+
+Scrape something of the net, like a [featured article](https://en.wikipedia.org/wiki/Wikipedia:Featured_articles) on wikipedia.
+If you create a file called `wiki_random` with the following contents:
+
+```python
+#!/usr/bin/env python3
+import re
+import requests
+from bs4 import BeautifulSoup
+
+word_pattern = re.compile(r"['A-Za-z\d\-]+[,\.\?\!]?")
+url = 'https://en.wikipedia.org/wiki/Special:RandomInCategory/Featured_articles'
+
+r = requests.get(url)
+soup = BeautifulSoup(r.text, 'html.parser')
+for sup in soup.select('sup'):
+    sup.extract()  # remove citations
+
+text = ' '.join(p.text for p in soup.select('p'))
+text = re.sub(r'\[.*?\]|\(.*?\)', '', text)
+print(' '.join(re.findall(word_pattern, text)))
+```
+you can start the test with `wiki_random | typetest`.
+Write your own scraper, you may find some suggestions [here](https://en.wikipedia.org/wiki/Lists_of_English_words).
 
 ```
 usage: typetest [-h] [-d DURATION] [-r ROWS] [-s] [words [words ...]]
