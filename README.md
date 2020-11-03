@@ -2,18 +2,18 @@
 
 ![example](./img/example.gif)
 
-This repo is home to a self contained file `typetest`.
+This repo is home to a self-contained file `typetest`.
 As is it is a near clone of [10fastfingers](https://10fastfingers.com/typing-test/english) with an added bonus of being able to see typing speed as you're typing.
 
-Differences in the way typing speed is calculated and feedback accross platforms got me interested in writing my own program for testing typing speed.
+Differences in the way typing speed is calculated and feedback across platforms got me interested in writing my own program for testing typing speed.
 I've come to love how simple and unrestrictive [10fastfingers](https://10fastfingers.com/typing-test/english) and [keybr](https://keybr.com) feel compared to [typingclub](https://www.typingclub.com/) and [typeracer](https://www.typeracer.com).
-They all have great advantages for varying purposes but when it comes to warming up or just waiting for a compile of some program to finish (*have you tried [compiling chromium](https://www.reddit.com/r/archlinux/comments/gdeiui/ungoogledchromium_taking_a_long_time_to_build/)?*) I am yet to find a rival to [10fastfingers](https://10fastfingers.com/typing-test/english).
-That is why I decided to clone its functionality and add some of the features I love from other sites.
+They all have great advantages for varying purposes but when it comes to warming up or just waiting for some program to compile (*have you tried [compiling chromium](https://www.reddit.com/r/archlinux/comments/gdeiui/ungoogledchromium_taking_a_long_time_to_build/)?*) I am yet to find a rival to [10fastfingers](https://10fastfingers.com/typing-test/english).
+That is why I decided to clone its functionality and add some features I love from other sites.
 
 # typetest
-`typetest` is a self contained minimal typing test program written with [blessed](https://github.com/jquast/blessed/).
+`typetest` is a self-contained minimal typing test program written with [blessed](https://github.com/jquast/blessed/).
 It calculates typing speed as sum of spaces and characters from **correctly written words** divided by test duration.
-Adjustable settings are `DURATION`, `SHUFFLE` and `NUMBER_OF_ROWS`, which can be set using the the command arguments.
+Adjustable settings are `DURATION`, `SHUFFLE` and `NUMBER_OF_ROWS`, which can be set using the command arguments.
 The input text for the typing test is read from the standard input or using the [positional arguments](https://docs.python.org/3/glossary.html#term-argument).
 
 # ideas for tests
