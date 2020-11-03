@@ -1,4 +1,4 @@
-### test your typing speed without leaving the terminal
+## test your typing speed without leaving the terminal
 
 ![example](./img/example.gif)
 
@@ -13,12 +13,12 @@ That is why I decided to clone its functionality and add some of the features I 
 # typetest
 `typetest` is a self contained minimal typing test program written with [blessed](https://github.com/jquast/blessed/).
 It calculates typing speed as sum of spaces and characters from **correctly written words** divided by test duration.
-Adjustable settings are `DURATION`, `SHUFFLE` and `NUMBER_OF_ROWS`, can be set using the the command arguments.
+Adjustable settings are `DURATION`, `SHUFFLE` and `NUMBER_OF_ROWS`, which can be set using the the command arguments.
 The input text for the typing test is read from the standard input or using the [positional arguments](https://docs.python.org/3/glossary.html#term-argument).
 
 # scappers
 Along with `typetest` this repository features sample web scrappers.
-`wiki` find a [featured article](https://en.wikipedia.org/wiki/Wikipedia:Featured_articles) on wikipedia and prints it.
+`wiki` finds a [featured article](https://en.wikipedia.org/wiki/Wikipedia:Featured_articles) on wikipedia and prints it.
 `wiki_common` scrapes common words.
 Write your own if need be, you may find some suggestions [here](https://en.wikipedia.org/wiki/Lists_of_English_words).
 Use them like so: `wiki | typetest` or `wiki_common | typetest`.
