@@ -1,4 +1,4 @@
-## test your typing speed without leaving the terminal
+# test your typing speed without leaving the terminal
 
 ![example](./img/example.gif)
 
@@ -19,9 +19,7 @@ The input text for the typing test is read from the standard input or using the 
 # ideas for tests
 Along with `typetest` this repository features sample tests.
 Try them like so: `typetest -s -d 60 < common_200`.
-
 Scrape something of the net, like a [featured article](https://en.wikipedia.org/wiki/Wikipedia:Featured_articles) on wikipedia.
-If you create a file called `wiki_random` with the following contents:
 
 ```python
 #!/usr/bin/env python3
@@ -41,8 +39,10 @@ text = ' '.join(p.text for p in soup.select('p'))
 text = re.sub(r'\[.*?\]|\(.*?\)', '', text)
 print(' '.join(re.findall(word_pattern, text)))
 ```
-you can start the test with `wiki_random | typetest`.
+If you create a file called `wiki_random` you can start the test with `wiki_random | typetest`.
 Write your own scraper, you may find some suggestions [here](https://en.wikipedia.org/wiki/Lists_of_English_words).
+
+# usage
 
 ```
 usage: typetest [-h] [-d DURATION] [-r ROWS] [-s] [words [words ...]]
