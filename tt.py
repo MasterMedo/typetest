@@ -7,17 +7,32 @@ from contextlib import suppress
 import os
 import sys
 import signal
+import argparse
 
 from blessed import Terminal
 
-DURATION = float('inf')  # in seconds
-NUMBER_OF_ROWS = 2
+parser = argparse.ArgumentParser(description=f"""example:
+  {__file__} -d 3.5 The typing seems really strong today.
+  echo 'I love typing' | {__file__}
+  {__file__} < test.txt
+""", formatter_class=argparse.RawTextHelpFormatter)
 
-words = sys.stdin.read().split()
+parser.add_argument('-d', '--duration', type=float, default=float('inf'),
+                    help='duration in seconds')
+parser.add_argument('-r', '--rows', type=int, default=2,
+                    help='number of test rows to show')
+parser.add_argument('words', nargs='*',
+                    help='provide words via args in lieu of stdin')
+
+args = parser.parse_args()
+DURATION = args.duration
+NUMBER_OF_ROWS = args.rows
+words = args.words
 if not words:
-    words = sys.argv[1:]
+    words = sys.stdin.read().split()
+    sys.argv.extend(words)
 
-sys.__stdin__ = os.fdopen(1)  # needs to be executed before term = Terminal()
+sys.__stdin__ = os.fdopen(1)
 term = Terminal()
 
 color_normal = term.normal
@@ -145,7 +160,7 @@ if __name__ == '__main__':
                 word_i += 1
 
             elif char == '\x12':  # ctrl-r
-                os.execv(sys.executable, ['python'] + sys.argv + words)
+                os.execv(sys.executable, ['python'] + sys.argv)
 
             elif char == '\x15' or char == '\x17':  # ctrl-u or ctrl-w
                 text = ''
