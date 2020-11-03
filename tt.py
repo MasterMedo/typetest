@@ -7,6 +7,7 @@ from contextlib import suppress
 import os
 import sys
 import signal
+import random
 import argparse
 
 from blessed import Terminal
@@ -21,6 +22,8 @@ parser.add_argument('-d', '--duration', type=float, default=float('inf'),
                     help='duration in seconds')
 parser.add_argument('-r', '--rows', type=int, default=2,
                     help='number of test rows to show')
+parser.add_argument('-s', '--shuffle', action='store_true',
+                    help='shuffle words')
 parser.add_argument('words', nargs='*',
                     help='provide words via args in lieu of stdin')
 
@@ -31,6 +34,9 @@ words = args.words
 if not words:
     words = sys.stdin.read().split()
     sys.argv.extend(words)
+
+if args.shuffle:
+    random.shuffle(words)
 
 sys.__stdin__ = os.fdopen(1)
 term = Terminal()
