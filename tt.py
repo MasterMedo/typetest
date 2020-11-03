@@ -172,8 +172,9 @@ if __name__ == '__main__':
 
             redraw = True
 
-    accuracy = 100 * correct_chars // total_chars
-    timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    print(f'accuracy: {accuracy}%')
-    print(f'speed:    {wpm}wpm')
-    print(f'duration: {duration:.0f}s')
+    if total_chars != 0:
+        accuracy = 100 * correct_chars // total_chars
+        timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        print(f'accuracy: {accuracy}%')
+        print(f'speed:    {wpm}wpm')
+        print(f'duration: {duration:.2f}s')
