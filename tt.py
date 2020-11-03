@@ -167,6 +167,8 @@ if __name__ == '__main__':
 
             else:
                 text += char
+                if word_i + 1 >= len(words) and words[-1] == text:
+                    term.ungetch(' ')
 
             redraw = True
 
