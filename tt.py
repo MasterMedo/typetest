@@ -32,6 +32,9 @@ DURATION = args.duration
 NUMBER_OF_ROWS = args.rows
 words = args.words
 if not words:
+    if sys.stdin.isatty():
+        parser.print_help()
+        exit()
     words = sys.stdin.read().split()
     sys.argv.extend(words)
 
