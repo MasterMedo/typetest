@@ -92,7 +92,6 @@ def draw(words, colors, word_i, text, wpm, timestamp):
 
     colors = colors + [current_word_color + term.reverse]
 
-    line_i = 0
     len_line = 0
     line_words = []
     line_height = None
@@ -107,7 +106,6 @@ def draw(words, colors, word_i, text, wpm, timestamp):
                 echo_line()
                 line_height += 1
 
-            line_i += 1
             len_line = 0
             line_words = []
 
