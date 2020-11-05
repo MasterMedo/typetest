@@ -2,7 +2,6 @@
 from time import time, strftime, gmtime
 from datetime import datetime
 from functools import partial
-from contextlib import suppress
 
 import os
 import sys
@@ -141,9 +140,9 @@ if __name__ == '__main__':
     colors = []
 
     with term.cbreak(), \
+            term.raw(), \
             term.fullscreen(), \
-            term.hidden_cursor(), \
-            suppress(KeyboardInterrupt):
+            term.hidden_cursor():
         while word_i < len(words) and (not start or time() - start < DURATION):
             word = words[word_i]
 
@@ -192,6 +191,6 @@ if __name__ == '__main__':
     if total_chars != 0:
         accuracy = 100 * correct_chars // total_chars
         timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        print(f'accuracy: {accuracy}%')
-        print(f'speed:    {wpm}wpm')
+        print(f'accuracy: {accuracy}%', flush=True)
+        print(f'speed:    {wpm}wpm', flush=True)
         print(f'duration: {duration:.2f}s')
