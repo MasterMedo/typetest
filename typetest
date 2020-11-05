@@ -84,12 +84,12 @@ def main(words, duration, rows, shuffle, help):
 
             elif char.isspace() and text:
                 if text == word:
-                    correct_chars += len(word) + 1
+                    correct_chars += len(word) + (word_i + 1 < len(words))
                     colors[word_i] = color_correct
                 else:
                     colors[word_i] = color_wrong
 
-                total_chars += len(word) + 1
+                total_chars += len(word) + (word_i + 1 < len(words))
                 duration_ = time() - start
                 wpm = min(int(correct_chars*12/duration_), 999)
                 timestamp = strftime('%H:%M:%S', gmtime(duration_))
