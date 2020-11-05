@@ -154,10 +154,19 @@ if __name__ == '__main__':
             if not start:
                 start = time()
 
-            if char.name == 'KEY_BACKSPACE':
+            if char == '\x03' or char == '\x1b':  # ctrl-c or esc
+                break
+
+            elif char == '\x08' or char == '\x7f':  # ctrl-h or backspace
                 text = text[:-1]
 
-            elif (char == ' ' or char == '\n') and text:
+            elif char == '\x12':  # ctrl-r
+                os.execv(sys.executable, ['python'] + sys.argv)
+
+            elif char == '\x15' or char == '\x17':  # ctrl-u or ctrl-w
+                text = ''
+
+            elif char.isspace() and text:
                 if text == word:
                     correct_chars += len(word) + 1
                     colors.append(color_correct)
@@ -172,13 +181,7 @@ if __name__ == '__main__':
                 text = ''
                 word_i += 1
 
-            elif char == '\x12':  # ctrl-r
-                os.execv(sys.executable, ['python'] + sys.argv)
-
-            elif char == '\x15' or char == '\x17':  # ctrl-u or ctrl-w
-                text = ''
-
-            else:
+            elif not char.isspace():
                 text += char
                 if word_i + 1 >= len(words) and words[-1] == text:
                     term.ungetch(' ')
