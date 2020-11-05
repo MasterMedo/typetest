@@ -147,7 +147,7 @@ def draw(term, rows, words, colors, word_i, text, wpm, timestamp):
         len_line += len(word)
         line_words.append(color + word + term.normal)
 
-    if i + 1 >= len(words) and line_height < allowed_height:
+    if i + 1 >= len(words):
         echo(term.move_yx(line_height, 0) + join(line_words, len_line))
         line_height += 1
 
