@@ -16,12 +16,11 @@ def main(words, duration, rows, shuffle, help):
     global redraw
 
     def on_resize(*_):
-        """Called every time a resize signal (`signal.SIGWINCH`) is sent.
-
-        Sets the global `redraw` flag to true.
-        """
         global redraw
         redraw = True
+
+    redraw = True
+    signal.signal(signal.SIGWINCH, on_resize)
 
     if not words:
         if sys.stdin.isatty():
@@ -39,9 +38,6 @@ def main(words, duration, rows, shuffle, help):
     color_normal = term.normal
     color_correct = term.color_rgb(0, 230, 0)
     color_wrong = term.color_rgb(230, 0, 0)
-
-    redraw = True
-    signal.signal(signal.SIGWINCH, on_resize)
 
     timestamp = '00:00:00'
     correct_chars = total_chars = wpm = 0
