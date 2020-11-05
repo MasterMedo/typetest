@@ -78,12 +78,9 @@ def draw(words, colors, word_i, text, wpm, timestamp):
     whereas the currently typed word can additionally be `color_normal` when
     the word starts with the typed text but isn't (yet) correct.
     """
-    def echo_line():
-        line = ' '.join(line_words)
-        if len_line + len(line_words) - 1 < term.width:
-            line += term.clear_eol
-
-        echo(term.move_yx(line_height, 0) + line)
+    def join(words, length):
+        eol = term.clear_eol if length + len(words) - 1 < term.width else ''
+        return ' '.join(line_words) + eol
 
     allowed_height = min(term.height, NUMBER_OF_ROWS)
 
@@ -101,7 +98,7 @@ def draw(words, colors, word_i, text, wpm, timestamp):
 
         if len_line + len(word) + len(line_words) > term.width:
             if line_height is not None:
-                echo_line()
+                echo(term.move_yx(line_height, 0) + join(line_words, len_line))
                 line_height += 1
                 if line_height >= allowed_height:
                     break
@@ -116,7 +113,7 @@ def draw(words, colors, word_i, text, wpm, timestamp):
         line_words.append(color + word + color_normal)
 
     if i + 1 >= len(words) and line_height < allowed_height:
-        echo_line()
+        echo(term.move_yx(line_height, 0) + join(line_words, len_line))
         line_height += 1
 
     if allowed_height > 1:
