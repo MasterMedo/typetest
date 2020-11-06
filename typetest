@@ -13,6 +13,14 @@ from blessed import Terminal
 
 
 def main(words, duration, rows, shuffle, help):
+    """Takes chars from user input forming a word everytime a whitespace is
+    pressed and compares them word by word with `words`. Updates the screen
+    calling `draw` every time a key is pressed or every 0.1 seconds, whichever
+    comes first.
+
+    The test ends when `duration` time has passed or all words have been typed.
+    Upon exiting test results are printed.
+    """
     global redraw
 
     def on_resize(*_):
@@ -23,7 +31,7 @@ def main(words, duration, rows, shuffle, help):
     signal.signal(signal.SIGWINCH, on_resize)
 
     if not words:
-        if sys.stdin.isatty():
+        if sys.stdin.isatty():  # no test words provided
             sys.exit(help())
 
         words = sys.stdin.read().split()
@@ -32,7 +40,7 @@ def main(words, duration, rows, shuffle, help):
     if shuffle:
         random.shuffle(words)
 
-    sys.__stdin__ = os.fdopen(1)
+    sys.__stdin__ = os.fdopen(1)  # force stdin from user
     term = Terminal()
 
     color_normal = term.normal
@@ -113,12 +121,8 @@ def main(words, duration, rows, shuffle, help):
 
 def draw(term, rows, words, colors, word_i, text, wpm, timestamp):
     """Text wraps the `words` list to the terminal width, and prints `rows`
-    lines of wrapped words starting with the line containing the current word
-    that is being typed.
-
-    Already typed words appear in either `color_correct` or `color_wrong`,
-    whereas the currently typed word can additionally be `color_normal` when
-    the word starts with the typed text but isn't (yet) correct.
+    lines of wrapped words colored with `colors` starting with the line
+    containing the current word that is being typed.
     """
     def join(words, length):
         eol = term.clear_eol if length + len(words) - 1 < term.width else ''
@@ -161,7 +165,7 @@ def draw(term, rows, words, colors, word_i, text, wpm, timestamp):
 
 
 def parse_args():
-    """Parse sys.argv, returning dict suitable for main()."""
+    """Parses `sys.argv` and returs `dict` suitable for `main`."""
 
     parser = ArgumentParser(description="""example:
   typetest -d 3.5 The typing seems really strong today.
