@@ -62,16 +62,16 @@ def main(words, duration, rows, shuffle, help):
             word = words[word_i]
 
             if redraw:
-                color = color_correct if words[word_i] == text else \
-                    color_normal if words[word_i].startswith(text) else \
+                redraw = False
+
+                color = color_correct if word == text else \
+                    color_normal if word.startswith(text) else \
                     color_wrong
 
                 colors[word_i] = color + term.reverse
-
                 draw(term, rows, words, colors, word_i, text, wpm, timestamp)
-                redraw = False
 
-            char = term.inkey(timeout=0.1)
+            char = term.inkey(timeout=0.1, esc_delay=0)
             if not char:
                 continue
 
@@ -151,7 +151,7 @@ def draw(term, rows, words, colors, word_i, text, wpm, timestamp):
         len_line += len(word)
         line_words.append(color + word + term.normal)
 
-    if i + 1 >= len(words):
+    else:
         echo(term.move_yx(line_height, 0) + join(line_words, len_line))
         line_height += 1
 
