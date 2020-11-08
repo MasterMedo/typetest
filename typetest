@@ -13,8 +13,8 @@ from blessed import Terminal
 
 
 def main(words, duration, rows, shuffle, help):
-    """Takes chars from user input forming a word everytime a whitespace is
-    pressed and compares them word by word with `words`. Updates the screen
+    """Takes chars from user input forming a word every time a whitespace is
+    pressed and compares typed words with test `words`. Updates the screen
     calling `draw` every time a key is pressed or every 0.1 seconds, whichever
     comes first.
 
@@ -165,12 +165,12 @@ def draw(term, rows, words, colors, word_i, text, wpm, timestamp):
 
 
 def parse_args():
-    """Parses `sys.argv` and returs `dict` suitable for `main`."""
+    """Parses `sys.argv` and returns `dict` suitable for `main`."""
 
-    parser = ArgumentParser(description="""example:
-  typetest -d 3.5 The typing seems really strong today.
-  echo 'I love typing' | typetest
-  typetest < test.txt
+    parser = ArgumentParser(description=f"""example:
+  {os.path.basename(sys.argv[0])} -d 3.5 The typing seems really strong today.
+  echo 'I love typing' | {os.path.basename(sys.argv[0])}
+  {os.path.basename(sys.argv[0])} < test.txt
 """, epilog="""shortcuts:
   ^c / ctrl+c           end the test and get results now
   ^h / ctrl+h           backspace
