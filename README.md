@@ -1,8 +1,7 @@
 # test your typing speed without leaving the terminal
-
 ![example](./img/example.gif)
 
-This repo is home to a self-contained file `typetest`.
+This repository is home to a self-contained file `typetest`.
 As is it is a near clone of [10fastfingers](https://10fastfingers.com/typing-test/english) with an added bonus of being able to see typing speed as you're typing.
 
 Differences in the way typing speed is calculated and feedback across platforms got me interested in writing my own program for testing typing speed.
@@ -27,7 +26,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
-word_pattern = re.compile(r"['A-Za-z\d\-]+[,\.\?\!]?")
+word_pattern = re.compile(r"['A-Za-z\d\-]+[,\.\?\!]?")  # symbols to keep
 url = 'https://en.wikipedia.org/wiki/Special:RandomInCategory/Featured_articles'
 
 r = requests.get(url)
@@ -36,7 +35,7 @@ for sup in soup.select('sup'):
     sup.extract()  # remove citations
 
 text = ' '.join(p.text for p in soup.select('p'))
-text = re.sub(r'\[.*?\]|\(.*?\)', '', text)
+text = re.sub(r'\[.*?\]|\(.*?\)', '', text)  # remove parenthesis
 print(' '.join(re.findall(word_pattern, text)))
 ```
 If you create a file called `wiki_random` you can start the test with `wiki_random | typetest`.
@@ -69,3 +68,23 @@ shortcuts:
   ^w / ctrl+w           delete a word
   ^u / ctrl+u           delete a word
 ```
+
+# installation
+
+## \*nix
+
+1. install python 3
+2. install [blessed](https://pypi.org/project/blessed/)
+3. clone this repository
+4. run `python typetest -s -d 60 < common_300`
+5. (optional) add `typetest` to path or make an alias like `tt`
+6. (optional) store your results in some file and analyze
+
+## windows
+
+Two caveats:
+1. [signal.SIGWINCH](https://docs.python.org/3/library/signal.html#signal.SIGWINCH) is not available on windows, you can get a similar behaviour by decreasing the `inkey's` `timeout` parameter.
+2. a way for getting test words via stdin and then reading user input has to be found (file handles 0, 1, and 2 aren't the same file descriptor as in \*nix), maybe a [`'/dev/tty'` equivalent](https://rubytalk.org/t/dev-tty-in-windows/19140)?
+
+A way to completely avoid the aforementioned caveats is to use a [linux subsystem (WSL)](https://docs.microsoft.com/en-us/windows/wsl/about), installation details can be found [here](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+The rest of the installation steps are the same as for \*nix.
