@@ -103,6 +103,7 @@ def main(words, duration, rows, shuffle, help):
                     correct_chars += len(word) + (word_i + 1 < len(words))
                     colors[word_i] = color_correct
                 else:
+                    correct_chars += (word_i + 1 < len(words))
                     colors[word_i] = color_wrong
 
                 total_chars += len(word) + (word_i + 1 < len(words))
