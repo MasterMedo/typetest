@@ -22,10 +22,8 @@ def main(words, duration, rows, shuffle, help):
     The test ends when `duration` time has passed or all words have been typed.
     Upon exiting test results are printed.
     """
-    global redraw
-
     def on_resize(*_):
-        global redraw
+        nonlocal redraw
         redraw = True
 
     redraw = True
