@@ -55,7 +55,7 @@ def main(words, duration, rows, shuffle, help):
 
     timestamp = '00:00:00'
     correct_chars = total_chars = wpm = 0
-    duration_ = start = 0
+    actual_duration = start = 0
     word_i = 0
     text = ''
     colors = [color_normal]*len(words)
@@ -97,17 +97,18 @@ def main(words, duration, rows, shuffle, help):
                 text = ''
 
             elif char.isspace() and text:
+                count_space = word_i + 1 < len(words)  # if not last space
                 if text == word:
-                    correct_chars += len(word) + (word_i + 1 < len(words))
+                    correct_chars += len(word) + count_space
                     colors[word_i] = color_correct
                 else:
-                    correct_chars += (word_i + 1 < len(words))
+                    correct_chars += count_space
                     colors[word_i] = color_wrong
 
-                total_chars += len(word) + (word_i + 1 < len(words))
-                duration_ = time() - start
-                wpm = min(int(correct_chars*12/duration_), 999)
-                timestamp = strftime('%H:%M:%S', gmtime(duration_))
+                total_chars += len(word) + count_space
+                actual_duration = time() - start
+                wpm = min(int(correct_chars*12/actual_duration), 999)
+                timestamp = strftime('%H:%M:%S', gmtime(actual_duration))
 
                 text = ''
                 word_i += 1
@@ -121,10 +122,12 @@ def main(words, duration, rows, shuffle, help):
 
     accuracy = 100 * correct_chars // total_chars if total_chars else 0
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    results = f'{timestamp},{wpm},{accuracy},{duration_},{duration}'
+
     print(f'accuracy: {accuracy}%', flush=True, file=term.stream)
     print(f'speed:    {wpm}wpm', flush=True, file=term.stream)
-    print(f'duration: {duration_:.2f}s', file=term.stream)
+    print(f'duration: {actual_duration:.2f}s', file=term.stream)
+
+    results = f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}'
     if sys.stdout.isatty():  # results not redirected
         with open(results_file, 'a') as f:
             f.write(results + '\n')
