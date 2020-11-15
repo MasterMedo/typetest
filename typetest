@@ -125,9 +125,11 @@ def main(words, duration, rows, shuffle, help):
     print(f'accuracy: {accuracy}%', flush=True, file=term.stream)
     print(f'speed:    {wpm}wpm', flush=True, file=term.stream)
     print(f'duration: {duration_:.2f}s', file=term.stream)
-    print(results)
-    with open(results_file, 'a') as f:
-        f.write(results + '\n')
+    if sys.stdout.isatty():  # results not redirected
+        with open(results_file, 'a') as f:
+            f.write(results + '\n')
+    else:
+        print(results)
 
 
 def draw(term, rows, words, colors, word_i, text, wpm, timestamp):

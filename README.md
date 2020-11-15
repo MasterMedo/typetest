@@ -14,6 +14,8 @@ That is why I decided to clone its functionality and add some features I love fr
 It calculates typing speed as sum of spaces and characters from **correctly written words** divided by test duration.
 Adjustable settings are `DURATION`, `SHUFFLE` and `NUMBER_OF_ROWS`, which can be set using the command arguments.
 The input text for the typing test is read from the standard input or using the [positional arguments](https://docs.python.org/3/glossary.html#term-argument).
+The results of `typetest` go into a file aptly named `results` positioned in the same directory as `typetest`.
+If you wish to redirect results to another file do so in a standard unix way, by adding `>> my_results` to the command arguments.
 
 # ideas for tests
 Along with `typetest` this repository features sample tests.
