@@ -12,6 +12,19 @@ from functools import partial
 
 from blessed import Terminal
 
+doc = f"""example:
+  {os.path.basename(sys.argv[0])} -d 3.5 The typing seems really strong today.
+  echo 'I love typing' | {os.path.basename(sys.argv[0])}
+  {os.path.basename(sys.argv[0])} < test.txt
+
+shortcuts:
+  ^c / ctrl+c           end the test and get results now
+  ^h / ctrl+h           backspace
+  ^r / ctrl+r           restart the same test
+  ^w / ctrl+w           delete a word
+  ^u / ctrl+u           delete a word
+"""
+
 
 def main(words, duration, rows, shuffle, help):
     """Takes chars from user input forming a word every time a whitespace is
@@ -20,7 +33,8 @@ def main(words, duration, rows, shuffle, help):
     comes first.
 
     The test ends when `duration` time has passed or all words have been typed.
-    Upon exiting test results are printed.
+    Upon exiting test results are printed and stored in './results' or
+    propagated to stdout if stdout is not a tty.
     """
     def on_resize(*_):
         nonlocal redraw
@@ -181,19 +195,9 @@ def draw(term, rows, words, colors, word_i, text, wpm, timestamp):
 
 
 def parse_args():
-    """Parses `sys.argv` and returns `dict` suitable for `main`."""
+    """Parses `sys.argv` and returns a dictionary suitable for `main`."""
 
-    parser = ArgumentParser(description=f"""example:
-  {os.path.basename(sys.argv[0])} -d 3.5 The typing seems really strong today.
-  echo 'I love typing' | {os.path.basename(sys.argv[0])}
-  {os.path.basename(sys.argv[0])} < test.txt
-""", epilog="""shortcuts:
-  ^c / ctrl+c           end the test and get results now
-  ^h / ctrl+h           backspace
-  ^r / ctrl+r           restart the same test
-  ^w / ctrl+w           delete a word
-  ^u / ctrl+u           delete a word
-""", formatter_class=RawTextHelpFormatter)
+    parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
 
     parser.add_argument('-d', '--duration', type=float, default=float('inf'),
                         help='duration in seconds')
