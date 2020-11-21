@@ -12,14 +12,12 @@ That is why I decided to clone its functionality and add some features I love fr
 # typetest
 `typetest` is a self-contained minimal typing test program written with [blessed](https://github.com/jquast/blessed/).
 It calculates typing speed as sum of spaces and characters from **correctly written words** divided by test duration.
-Adjustable settings are `duration`, `output`, `rows` and `shuffle`, which can be set using the command arguments.
-The input text for the typing test is read from the standard input or using the [positional arguments](https://docs.python.org/3/glossary.html#term-argument).
+Adjustable settings are `duration`, `input`, `output`, `rows` and `shuffle`, which can be set using the command arguments.
 The results of `typetest` by default go into a file aptly named `results` positioned in the same directory as `typetest`.
 
 # ideas for tests
 Along with `typetest` this repository features sample tests.
-Try them like so: `typetest -s -d 60 < common_200`.
-Scrape something of the net, like a [featured article](https://en.wikipedia.org/wiki/Wikipedia:Featured_articles) on wikipedia.
+Try them like so: `typetest -s -d 60 -i common_200` or scrape something of the internet, like a [featured article](https://en.wikipedia.org/wiki/Wikipedia:Featured_articles) on wikipedia.
 
 ```python
 #!/usr/bin/env python3
@@ -45,12 +43,14 @@ Write your own scraper, you may find some suggestions [here](https://en.wikipedi
 # usage
 
 ```
-usage: typetest [-h] [-d DURATION] [-o OUTPUT] [-s] [-r ROWS]
+usage: typetest [-h] [-d DURATION] [-i INPUT] [-o OUTPUT] [-s] [-r ROWS]
 
 optional arguments:
   -h, --help            show this help message and exit
   -d DURATION, --duration DURATION
                         duration in seconds (default: inf)
+  -i INPUT, --input INPUT
+                        file to read words from (default: sys.stdin)
   -o OUTPUT, --output OUTPUT
                         file to store results in
                         (default: /home/medo/repos/typetest/results)
@@ -58,6 +58,7 @@ optional arguments:
   -r ROWS, --rows ROWS  number of test rows to show (default: 2)
 
 example:
+  typetest -i test.txt -s -d 60
   echo 'The typing seems really strong today.' | typetest -d 3.5
   typetest < test.txt
 
@@ -83,8 +84,8 @@ shortcuts:
 ## windows
 
 Two caveats:
-1. [signal.SIGWINCH](https://docs.python.org/3/library/signal.html#signal.SIGWINCH) is not available on windows, you can get a similar behaviour by decreasing the `inkey's` `timeout` parameter.
-2. a way for getting test words via stdin and then reading user input has to be found (file handles 0, 1, and 2 aren't the same file descriptor as in \*nix), maybe a [`'/dev/tty'` equivalent](https://rubytalk.org/t/dev-tty-in-windows/19140)?
+1. [signal.SIGWINCH](https://docs.python.org/3/library/signal.html#signal.SIGWINCH) is not available on windows meaning the screen won't update instantly as you resize the terminal, you can get a similar behaviour by decreasing the `inkey's` `timeout` parameter.
+2. Redirecting or piping test words into the program isn't tested yet (`typetest -i input.txt` should work as intended).
 
 A way to completely avoid the aforementioned caveats is to use a [linux subsystem (WSL)](https://docs.microsoft.com/en-us/windows/wsl/about), installation details can be found [here](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 The rest of the installation steps are the same as for \*nix.

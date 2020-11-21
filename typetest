@@ -7,13 +7,14 @@ import platform
 
 from time import time, strftime, gmtime
 from datetime import datetime
-from argparse import ArgumentParser, RawTextHelpFormatter
+from argparse import ArgumentParser, RawTextHelpFormatter, FileType
 from functools import partial
 
 from blessed import Terminal
 
 filename = os.path.basename(sys.argv[0])
 doc = f"""example:
+  {filename} -i test.txt -s -d 60
   echo 'The typing seems really strong today.' | {filename} -d 3.5
   {filename} < test.txt
 
@@ -26,30 +27,28 @@ shortcuts:
 """
 
 
-def main(duration, output, rows, shuffle, help):
-    """Takes chars from user input forming a word every time a whitespace is
-    pressed and compares typed words with test `words`. Updates the screen
-    calling `draw` every time a key is pressed or every 0.1 seconds, whichever
-    comes first.
+def main(duration, input, output, rows, shuffle, help):
+    """Reads words from `input` delimited by whitespace characters.
+    Takes keys from console forming a word every time a whitespace is sent and
+    compares typed words with test words. Updates the screen calling `draw`
+    every time a key is pressed or every 0.1 seconds, whichever comes first.
 
     The test ends when `duration` time has passed or all words have been typed.
-    Upon exiting test results are printed and stored in './results' or
-    propagated to stdout if stdout is not a tty.
+    Upon exiting, test results are printed and stored in `output`.
     """
-    if sys.stdin.isatty():  # no test words provided
-        sys.exit(help(file=sys.__stdout__))
+    if input.isatty():  # no test words provided
+        sys.exit(help())
 
-    words = sys.stdin.read().split()
+    words = input.read().split()
 
     if shuffle:
         random.shuffle(words)
 
-    if platform.system() == 'Windows':
-        sys.__stdin__ = open('con:', 'r')  # force stdin from user NOT TESTED
-        sys.__stdout__ = open('con:', 'w')  # force stdout to user NOT TESTED
-    else:
-        sys.__stdin__ = open('/dev/tty', 'r')  # force stdin from user
-        sys.__stdout__ = open('/dev/tty', 'w')  # force stdout to user
+    if not sys.__stdin__.isatty():  # force stdin from user
+        if platform.system() == 'Windows':
+            sys.__stdin__ = open('con:', 'r')  # NOT TESTED
+        else:
+            sys.__stdin__ = open('/dev/tty', 'r')
 
     def on_resize(*_):
         nonlocal redraw
@@ -96,7 +95,7 @@ def main(duration, output, rows, shuffle, help):
             if not start:
                 start = time()
 
-            if char == '\x03' or char == '\x1b':  # ctrl-c or esc
+            if char == '\x03' or char == '\x1b':  # ctrl-c or ctrl-[ or escape
                 break
 
             elif char == '\x08' or char == '\x7f':  # ctrl-h or backspace
@@ -138,16 +137,13 @@ def main(duration, output, rows, shuffle, help):
     accuracy = 100 * correct_chars // total_chars if total_chars else 0
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-    print(f'accuracy: {accuracy}%', file=term.stream)
-    print(f'speed:    {wpm}wpm', file=term.stream)
-    print(f'duration: {actual_duration:.2f}s', file=term.stream)
+    print(f'accuracy: {accuracy}%')
+    print(f'speed:    {wpm}wpm')
+    print(f'duration: {actual_duration:.2f}s')
 
-    results = f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}'
-    if sys.stdout.isatty():  # results not redirected
-        with open(output, 'a') as f:
-            f.write(results + '\n')
-    else:
-        print(results)
+    if actual_duration > 0:
+        results = f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}'
+        print(results, file=output)
 
 
 def draw(term, rows, words, colors, word_i, text, wpm, timestamp):
@@ -202,7 +198,10 @@ def parse_args():
     default = '(default: %(default)s)'
     parser.add_argument('-d', '--duration', type=float, default=float('inf'),
                         help='duration in seconds ' + default)
-    parser.add_argument('-o', '--output',
+    parser.add_argument('-i', '--input', type=FileType('r'),
+                        default=sys.stdin,
+                        help='file to read words from (default: sys.stdin)')
+    parser.add_argument('-o', '--output', type=FileType('a'),
                         default=os.path.dirname(__file__) + '/results',
                         help='file to store results in\n' + default)
     parser.add_argument('-s', '--shuffle', action='store_true',
