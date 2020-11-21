@@ -56,7 +56,7 @@ def main(duration, input, output, rows, shuffle, help):
     color_wrong = term.color_rgb(230, 0, 0)
 
     correct_chars = total_chars = wpm = 0
-    actual_duration = start = 0
+    time_passed = actual_duration = start = 0
     word_i = 0
     text = ''
     colors = [color_normal]*len(words)
@@ -66,7 +66,6 @@ def main(duration, input, output, rows, shuffle, help):
             term.fullscreen(), \
             term.hidden_cursor():
         while word_i < len(words) and (not start or time() - start < duration):
-            timestamp = strftime('%H:%M:%S', gmtime(actual_duration))
             word = words[word_i]
 
             color = color_correct if word == text else \
@@ -74,10 +73,12 @@ def main(duration, input, output, rows, shuffle, help):
                 color_wrong
             colors[word_i] = color + term.reverse
 
-                colors[word_i] = color + term.reverse
-                draw(term, rows, words, colors, word_i, text, wpm, timestamp)
+            draw(term, rows, words, colors, word_i, text, wpm, time_passed)
 
             char = term.inkey(timeout=0.1, esc_delay=0)
+
+            time_passed = time() - start if start else 0
+
             if not char:
                 continue
 
@@ -92,7 +93,7 @@ def main(duration, input, output, rows, shuffle, help):
 
             elif char == '\x12':  # ctrl-r
                 correct_chars = total_chars = wpm = 0
-                actual_duration = start = 0
+                time_passed = actual_duration = start = 0
                 word_i = 0
                 text = ''
                 colors = [color_normal]*len(words)
@@ -110,7 +111,7 @@ def main(duration, input, output, rows, shuffle, help):
                     colors[word_i] = color_wrong
 
                 total_chars += len(word) + count_space
-                actual_duration = time() - start
+                actual_duration = time_passed
                 wpm = min(int(correct_chars*12/actual_duration), 999)
 
                 text = ''
@@ -133,10 +134,11 @@ def main(duration, input, output, rows, shuffle, help):
         print(results, file=output)
 
 
-def draw(term, rows, words, colors, word_i, text, wpm, timestamp):
+def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
     """Text wraps the `words` list to the terminal width, and prints `rows`
     lines of wrapped words colored with `colors` starting with the line
     containing the current word that is being typed.
+    Then, if there is space, prints `prompt` + `text` + `stats`.
     """
     def join(words, length):
         eol = term.clear_eol if length + len(words) - 1 < term.width else ''
@@ -170,9 +172,11 @@ def draw(term, rows, words, colors, word_i, text, wpm, timestamp):
         line_height += 1
 
     if allowed_height > 1:
-        n = term.width - 21
-        echo(term.move_yx(line_height, 0) + f'>>>{text[:n]: <{n}}')
-        echo(term.move_yx(line_height, n + 3) + f"{wpm:3d} wpm | {timestamp}")
+        prompt = '>>>'
+        timestamp = strftime('%H:%M:%S', gmtime(time_passed))
+        stats = f'{wpm:3d} wpm | {timestamp}'
+        n = term.width - len(prompt) - len(stats)
+        echo(term.move_yx(line_height, 0) + f'{prompt}{text[:n]: <{n}}{stats}')
 
     for i in range(1, allowed_height - line_height + 1):
         echo(term.move_yx(line_height + i, 0) + term.clear_eol)
