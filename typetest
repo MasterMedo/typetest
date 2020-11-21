@@ -12,10 +12,10 @@ from functools import partial
 
 from blessed import Terminal
 
+filename = os.path.basename(sys.argv[0])
 doc = f"""example:
-  {os.path.basename(sys.argv[0])} -d 3.5 The typing seems really strong today.
-  echo 'I love typing' | {os.path.basename(sys.argv[0])}
-  {os.path.basename(sys.argv[0])} < test.txt
+  echo 'The typing seems really strong today.' | {filename} -d 3.5
+  {filename} < test.txt
 
 shortcuts:
   ^c / ctrl+c           end the test and get results now
@@ -26,7 +26,7 @@ shortcuts:
 """
 
 
-def main(words, duration, rows, shuffle, help):
+def main(duration, output, rows, shuffle, help):
     """Takes chars from user input forming a word every time a whitespace is
     pressed and compares typed words with test `words`. Updates the screen
     calling `draw` every time a key is pressed or every 0.1 seconds, whichever
@@ -36,28 +36,28 @@ def main(words, duration, rows, shuffle, help):
     Upon exiting test results are printed and stored in './results' or
     propagated to stdout if stdout is not a tty.
     """
+    if sys.stdin.isatty():  # no test words provided
+        sys.exit(help(file=sys.__stdout__))
+
+    words = sys.stdin.read().split()
+
+    if shuffle:
+        random.shuffle(words)
+
+    if platform.system() == 'Windows':
+        sys.__stdin__ = open('con:', 'r')  # force stdin from user NOT TESTED
+        sys.__stdout__ = open('con:', 'w')  # force stdout to user NOT TESTED
+    else:
+        sys.__stdin__ = open('/dev/tty', 'r')  # force stdin from user
+        sys.__stdout__ = open('/dev/tty', 'w')  # force stdout to user
+
     def on_resize(*_):
         nonlocal redraw
         redraw = True
 
     redraw = True
-    if platform.system() == 'Windows':
-        sys.__stdin__ = open('con:', 'r')  # force stdin from user NOT TESTED
-        sys.__stdout__ = open('con:', 'w')  # force stdout to user NOT TESTED
-    else:
+    if platform.system() != 'Windows':
         signal.signal(signal.SIGWINCH, on_resize)
-        sys.__stdin__ = open('/dev/tty', 'r')  # force stdin from user
-        sys.__stdout__ = open('/dev/tty', 'w')  # force stdout to user
-
-    if not words:
-        if sys.stdin.isatty():  # no test words provided
-            sys.exit(help(file=sys.__stdout__))
-
-        words = sys.stdin.read().split()
-        sys.argv.extend(words)
-
-    if shuffle:
-        random.shuffle(words)
 
     term = Terminal()
 
@@ -65,9 +65,6 @@ def main(words, duration, rows, shuffle, help):
     color_correct = term.color_rgb(0, 230, 0)
     color_wrong = term.color_rgb(230, 0, 0)
 
-    results_file = os.path.dirname(__file__) + '/results'
-
-    timestamp = '00:00:00'
     correct_chars = total_chars = wpm = 0
     actual_duration = start = 0
     word_i = 0
@@ -79,6 +76,7 @@ def main(words, duration, rows, shuffle, help):
             term.fullscreen(), \
             term.hidden_cursor():
         while word_i < len(words) and (not start or time() - start < duration):
+            timestamp = strftime('%H:%M:%S', gmtime(actual_duration))
             word = words[word_i]
 
             if redraw:
@@ -105,7 +103,11 @@ def main(words, duration, rows, shuffle, help):
                 text = text[:-1]
 
             elif char == '\x12':  # ctrl-r
-                os.execv(sys.executable, ['python'] + sys.argv)
+                correct_chars = total_chars = wpm = 0
+                actual_duration = start = 0
+                word_i = 0
+                text = ''
+                colors = [color_normal]*len(words)
 
             elif char == '\x15' or char == '\x17':  # ctrl-u or ctrl-w
                 text = ''
@@ -122,7 +124,6 @@ def main(words, duration, rows, shuffle, help):
                 total_chars += len(word) + count_space
                 actual_duration = time() - start
                 wpm = min(int(correct_chars*12/actual_duration), 999)
-                timestamp = strftime('%H:%M:%S', gmtime(actual_duration))
 
                 text = ''
                 word_i += 1
@@ -137,13 +138,13 @@ def main(words, duration, rows, shuffle, help):
     accuracy = 100 * correct_chars // total_chars if total_chars else 0
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-    print(f'accuracy: {accuracy}%', flush=True, file=term.stream)
-    print(f'speed:    {wpm}wpm', flush=True, file=term.stream)
+    print(f'accuracy: {accuracy}%', file=term.stream)
+    print(f'speed:    {wpm}wpm', file=term.stream)
     print(f'duration: {actual_duration:.2f}s', file=term.stream)
 
     results = f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}'
     if sys.stdout.isatty():  # results not redirected
-        with open(results_file, 'a') as f:
+        with open(output, 'a') as f:
             f.write(results + '\n')
     else:
         print(results)
@@ -196,17 +197,18 @@ def draw(term, rows, words, colors, word_i, text, wpm, timestamp):
 
 def parse_args():
     """Parses `sys.argv` and returns a dictionary suitable for `main`."""
-
     parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
 
+    default = '(default: %(default)s)'
     parser.add_argument('-d', '--duration', type=float, default=float('inf'),
-                        help='duration in seconds')
-    parser.add_argument('-r', '--rows', type=int, default=2,
-                        help='number of test rows to show')
+                        help='duration in seconds ' + default)
+    parser.add_argument('-o', '--output',
+                        default=os.path.dirname(__file__) + '/results',
+                        help='file to store results in\n' + default)
     parser.add_argument('-s', '--shuffle', action='store_true',
-                        help='shuffle words')
-    parser.add_argument('words', nargs='*',
-                        help='provide words via args in lieu of stdin')
+                        help='shuffle words ' + default)
+    parser.add_argument('-r', '--rows', type=int, default=2,
+                        help='number of test rows to show ' + default)
 
     return dict(parser.parse_args()._get_kwargs(), help=parser.print_help)
 

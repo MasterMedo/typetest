@@ -12,10 +12,9 @@ That is why I decided to clone its functionality and add some features I love fr
 # typetest
 `typetest` is a self-contained minimal typing test program written with [blessed](https://github.com/jquast/blessed/).
 It calculates typing speed as sum of spaces and characters from **correctly written words** divided by test duration.
-Adjustable settings are `DURATION`, `SHUFFLE` and `NUMBER_OF_ROWS`, which can be set using the command arguments.
+Adjustable settings are `duration`, `output`, `rows` and `shuffle`, which can be set using the command arguments.
 The input text for the typing test is read from the standard input or using the [positional arguments](https://docs.python.org/3/glossary.html#term-argument).
-The results of `typetest` go into a file aptly named `results` positioned in the same directory as `typetest`.
-If you wish to redirect results to another file do so in a standard unix way, by adding `>> my_results` to the command arguments.
+The results of `typetest` by default go into a file aptly named `results` positioned in the same directory as `typetest`.
 
 # ideas for tests
 Along with `typetest` this repository features sample tests.
@@ -46,22 +45,21 @@ Write your own scraper, you may find some suggestions [here](https://en.wikipedi
 # usage
 
 ```
-usage: typetest [-h] [-d DURATION] [-r ROWS] [-s] [words [words ...]]
-
-example:
-  typetest -d 3.5 The typing seems really strong today.
-  echo 'I love typing' | typetest
-  typetest < test.txt
-
-positional arguments:
-  words                 provide words via args in lieu of stdin
+usage: typetest [-h] [-d DURATION] [-o OUTPUT] [-s] [-r ROWS]
 
 optional arguments:
   -h, --help            show this help message and exit
   -d DURATION, --duration DURATION
-                        duration in seconds
-  -r ROWS, --rows ROWS  number of test rows to show
-  -s, --shuffle         shuffle words
+                        duration in seconds (default: inf)
+  -o OUTPUT, --output OUTPUT
+                        file to store results in
+                        (default: /home/medo/repos/typetest/results)
+  -s, --shuffle         shuffle words (default: False)
+  -r ROWS, --rows ROWS  number of test rows to show (default: 2)
+
+example:
+  echo 'The typing seems really strong today.' | typetest -d 3.5
+  typetest < test.txt
 
 shortcuts:
   ^c / ctrl+c           end the test and get results now
