@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import sys
-import signal
 import random
 import platform
 
@@ -50,14 +49,6 @@ def main(duration, input, output, rows, shuffle, help):
         else:
             sys.__stdin__ = open('/dev/tty', 'r')
 
-    def on_resize(*_):
-        nonlocal redraw
-        redraw = True
-
-    redraw = True
-    if platform.system() != 'Windows':
-        signal.signal(signal.SIGWINCH, on_resize)
-
     term = Terminal()
 
     color_normal = term.normal
@@ -78,12 +69,10 @@ def main(duration, input, output, rows, shuffle, help):
             timestamp = strftime('%H:%M:%S', gmtime(actual_duration))
             word = words[word_i]
 
-            if redraw:
-                redraw = False
-
-                color = color_correct if word == text else \
-                    color_normal if word.startswith(text) else \
-                    color_wrong
+            color = color_correct if word == text else \
+                color_normal if word.startswith(text) else \
+                color_wrong
+            colors[word_i] = color + term.reverse
 
                 colors[word_i] = color + term.reverse
                 draw(term, rows, words, colors, word_i, text, wpm, timestamp)
@@ -131,8 +120,6 @@ def main(duration, input, output, rows, shuffle, help):
                 text += char
                 if word_i + 1 >= len(words) and words[-1] == text:
                     term.ungetch(' ')
-
-            redraw = True
 
     accuracy = 100 * correct_chars // total_chars if total_chars else 0
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")

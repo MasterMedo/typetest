@@ -83,9 +83,8 @@ shortcuts:
 
 ## windows
 
-Two caveats:
-1. [signal.SIGWINCH](https://docs.python.org/3/library/signal.html#signal.SIGWINCH) is not available on windows meaning the screen won't update instantly as you resize the terminal, you can get a similar behaviour by decreasing the `inkey's` `timeout` parameter.
-2. Redirecting or piping test words into the program isn't tested yet (`typetest -i input.txt` should work as intended).
+caveats:
+1. Redirecting or piping test words into the program isn't tested yet (`typetest -i input.txt` should work as intended).
 
 A way to completely avoid the aforementioned caveats is to use a [linux subsystem (WSL)](https://docs.microsoft.com/en-us/windows/wsl/about), installation details can be found [here](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 The rest of the installation steps are the same as for \*nix.
