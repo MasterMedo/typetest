@@ -102,15 +102,16 @@ def main(duration, input, output, rows, shuffle, help):
                 text = ''
 
             elif char.isspace() and text:
-                count_space = word_i + 1 < len(words)  # if not last space
+                if word_i + 1 < len(words):  # if not last space
+                    total_chars += 1
+                    correct_chars += 1
+
                 if text == word:
-                    correct_chars += len(word) + count_space
+                    correct_chars += len(word)
                     colors[word_i] = color_correct
                 else:
-                    correct_chars += count_space
                     colors[word_i] = color_wrong
 
-                total_chars += len(word) + count_space
                 actual_duration = time_passed
                 wpm = min(int(correct_chars*12/actual_duration), 999)
 
@@ -118,10 +119,12 @@ def main(duration, input, output, rows, shuffle, help):
                 word_i += 1
 
             elif not char.isspace():
+                total_chars += 1
                 text += char
                 if word_i + 1 >= len(words) and words[-1] == text:
                     term.ungetch(' ')
 
+    total_chars -= len(text)
     accuracy = 100 * correct_chars // total_chars if total_chars else 0
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
