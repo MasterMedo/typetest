@@ -88,3 +88,7 @@ caveats:
 
 A way to completely avoid the aforementioned caveats is to use a [linux subsystem (WSL)](https://docs.microsoft.com/en-us/windows/wsl/about), installation details can be found [here](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 The rest of the installation steps are the same as for \*nix.
+
+# notes
+
+- [A Note on Calculating Text Entry Speed](https://www.yorku.ca/mack/RN-TextEntrySpeed.html)
