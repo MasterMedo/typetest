@@ -55,7 +55,8 @@ def main(duration, input, output, rows, shuffle, help):
     color_correct = term.color_rgb(0, 230, 0)
     color_wrong = term.color_rgb(230, 0, 0)
 
-    correct_chars = total_chars = wpm = 0
+    correct_chars = total_chars = -1
+    wpm = 0
     time_passed = actual_duration = start = 0
     word_i = 0
     text = ''
