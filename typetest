@@ -26,7 +26,7 @@ shortcuts:
 """
 
 
-def main(duration, input, output, mistyped, rows, shuffle, help):
+def main(duration, input, output, mistyped, char_speeds, rows, shuffle, help):
     """Reads words from `input` delimited by whitespace characters.
     Takes keys from console forming a word every time a whitespace is sent and
     compares typed words with test words. Updates the screen calling `draw`
@@ -63,6 +63,7 @@ def main(duration, input, output, mistyped, rows, shuffle, help):
     colors = [color_normal]*len(words)
 
     mistyped_words = []
+    char_times = []
 
     with term.raw(), \
             term.cbreak(), \
@@ -79,8 +80,8 @@ def main(duration, input, output, mistyped, rows, shuffle, help):
             draw(term, rows, words, colors, word_i, text, wpm, time_passed)
 
             char = term.inkey(timeout=0.1, esc_delay=0)
-
-            time_passed = time() - start if start else 0
+            char_time = time()
+            time_passed = char_time - start if start else 0
 
             if not char:
                 continue
@@ -101,6 +102,7 @@ def main(duration, input, output, mistyped, rows, shuffle, help):
                 text = ''
                 colors = [color_normal]*len(words)
                 mistyped_words = []
+                char_times = []
 
             elif char == '\x15' or char == '\x17':  # ctrl-u or ctrl-w
                 text = ''
@@ -122,12 +124,14 @@ def main(duration, input, output, mistyped, rows, shuffle, help):
 
                 text = ''
                 word_i += 1
+                char_times.append((char, char_time))
 
             elif not char.isspace():
                 total_chars += 1
                 text += char
                 if word_i + 1 >= len(words) and words[-1] == text:
                     term.ungetch(' ')
+                char_times.append((char, char_time))
 
     total_chars -= len(text)
     accuracy = 100 * correct_chars // total_chars if total_chars else 0
@@ -143,6 +147,15 @@ def main(duration, input, output, mistyped, rows, shuffle, help):
     output.write(f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}\n')
     for a, b in mistyped_words:
         mistyped.write(f'{a},{b}\n')
+
+    char_durations = []
+    for i in range(1, len(char_times)):
+        _, t0 = char_times[i-1]
+        c, t1 = char_times[i]
+        char_durations.append((c, t1-t0))
+
+    for char, t in char_durations:
+        char_speeds.write(f'{char},{t},{12/t}\n')
 
 
 def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
@@ -209,6 +222,9 @@ def parse_args():
     parser.add_argument('-m', '--mistyped', type=FileType('a'),
                         default=os.path.dirname(__file__) + '/mistyped_words',
                         help='file to store mistyped words in\n' + default)
+    parser.add_argument('-c', '--char_speeds', type=FileType('a'),
+                        default=os.path.dirname(__file__) + '/char_speeds',
+                        help='file to store character speeds in\n' + default)
     parser.add_argument('-s', '--shuffle', action='store_true',
                         help='shuffle words ' + default)
     parser.add_argument('-r', '--rows', type=int, default=2,
