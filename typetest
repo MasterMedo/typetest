@@ -133,9 +133,11 @@ def main(duration, input, output, rows, shuffle, help):
     print(f'speed:    {wpm}wpm')
     print(f'duration: {actual_duration:.2f}s')
 
-    if actual_duration > 0:
-        results = f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}'
-        print(results, file=output)
+    if actual_duration <= 0:
+        return
+
+    print(f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}',
+          file=output)
 
 
 def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
