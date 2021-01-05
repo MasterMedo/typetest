@@ -26,7 +26,7 @@ shortcuts:
 """
 
 
-def main(duration, input, output, rows, shuffle, help):
+def main(duration, input, output, mistyped, rows, shuffle, help):
     """Reads words from `input` delimited by whitespace characters.
     Takes keys from console forming a word every time a whitespace is sent and
     compares typed words with test words. Updates the screen calling `draw`
@@ -61,6 +61,8 @@ def main(duration, input, output, rows, shuffle, help):
     word_i = 0
     text = ''
     colors = [color_normal]*len(words)
+
+    mistyped_words = []
 
     with term.raw(), \
             term.cbreak(), \
@@ -98,6 +100,7 @@ def main(duration, input, output, rows, shuffle, help):
                 word_i = 0
                 text = ''
                 colors = [color_normal]*len(words)
+                mistyped_words = []
 
             elif char == '\x15' or char == '\x17':  # ctrl-u or ctrl-w
                 text = ''
@@ -112,6 +115,7 @@ def main(duration, input, output, rows, shuffle, help):
                     colors[word_i] = color_correct
                 else:
                     colors[word_i] = color_wrong
+                    mistyped_words.append((word, text))
 
                 actual_duration = time_passed
                 wpm = min(int(correct_chars*12/actual_duration), 999)
@@ -136,8 +140,9 @@ def main(duration, input, output, rows, shuffle, help):
     if actual_duration <= 0:
         return
 
-    print(f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}',
-          file=output)
+    output.write(f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}\n')
+    for a, b in mistyped_words:
+        mistyped.write(f'{a},{b}\n')
 
 
 def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
@@ -201,6 +206,9 @@ def parse_args():
     parser.add_argument('-o', '--output', type=FileType('a'),
                         default=os.path.dirname(__file__) + '/results',
                         help='file to store results in\n' + default)
+    parser.add_argument('-m', '--mistyped', type=FileType('a'),
+                        default=os.path.dirname(__file__) + '/mistyped_words',
+                        help='file to store mistyped words in\n' + default)
     parser.add_argument('-s', '--shuffle', action='store_true',
                         help='shuffle words ' + default)
     parser.add_argument('-r', '--rows', type=int, default=2,
