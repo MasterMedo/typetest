@@ -148,7 +148,7 @@ def main(duration, input, rows, shuffle, help,
 
     output.write(f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}\n')
     for a, b in mistyped_words:
-        mistyped.write(f'{a},{b}\n')
+        mistyped.write(f'{a},{b},{timestamp}\n')
 
     char_durations = []
     for i in range(1, len(char_times)):
@@ -157,7 +157,7 @@ def main(duration, input, rows, shuffle, help,
         char_durations.append((c, t1-t0))
 
     for char, t in char_durations:
-        char_speeds.write(f'{char},{t},{12/t}\n')
+        char_speeds.write(f'{char},{t},{12/t},{timestamp}\n')
 
     word = ''
     word_i = 0
@@ -175,7 +175,7 @@ def main(duration, input, rows, shuffle, help,
             word_duration += duration
 
     for word, t in word_durations:
-        word_speeds.write(f'{word},{t},{len(word)*12/t}\n')
+        word_speeds.write(f'{word},{t},{len(word)*12/t},{timestamp}\n')
 
 
 def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
