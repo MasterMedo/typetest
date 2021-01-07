@@ -1,6 +1,10 @@
 # test your typing speed without leaving the terminal
 ![example](./img/example.gif)
 
+# analyze: sneak peek of what's comming
+![char_speed](./img/char_speed.png)
+
+# typetest
 This repository is home to a self-contained file `typetest`.
 As is it is a near clone of [10fastfingers](https://10fastfingers.com/typing-test/english) with an added bonus of being able to see typing speed as you're typing.
 
