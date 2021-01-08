@@ -22,6 +22,7 @@ shortcuts:
   ^[ / ctrl+[           escape; end the test and get results now
   ^h / ctrl+h           backspace; delete a character
   ^r / ctrl+r           restart the same test
+  ^s / ctrl+s           restart the test with words reshuffled
   ^w / ctrl+w           delete a word
   ^u / ctrl+u           delete a word
 """
@@ -97,14 +98,17 @@ def main(duration, input, rows, shuffle, help,
             elif char == '\x08' or char == '\x7f':  # ctrl-h or backspace
                 text = text[:-1]
 
-            elif char == '\x12':  # ctrl-r
-                correct_chars = total_chars = wpm = 0
+            elif char == '\x12' or char == '\x13':  # ctrl-r or ctrl-s
+                correct_chars = total_chars = -1
+                wpm = 0
                 time_passed = actual_duration = start = 0
                 word_i = 0
                 text = ''
                 colors = [color_normal]*len(words)
                 mistyped_words = []
                 char_times = []
+                if char == '\x13':
+                    random.shuffle(words)
 
             elif char == '\x15' or char == '\x17':  # ctrl-u or ctrl-w
                 text = ''
@@ -180,7 +184,7 @@ def main(duration, input, rows, shuffle, help,
 
 def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
     """Text wraps the `words` list to the terminal width, and prints `rows`
-    lines of wrapped words colored with `colors` starting with the line
+    lines of wrapped words coloured with `colors` starting with the line
     containing the current word that is being typed.
     Then, if there is space, prints `prompt` + `text` + `stats`.
     """
