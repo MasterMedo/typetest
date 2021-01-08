@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+# TODO: graph the speed throughout the duration of a single test
+# TODO: graph the speed by timestamp
+from io import StringIO
+from collections import deque
+from argparse import ArgumentParser, RawTextHelpFormatter, FileType
+
+import os
+import sys
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+filename = os.path.basename(sys.argv[0])
+doc = f"""example:
+  {filename}
+  {filename} wpm
+  {filename} char word
+"""
+
+
+def main(graphs, output, mistyped, char_speeds, word_speeds, help):
+    if 'wpm' in graphs:
+        plot_wpm(output)
+    if 'char' in graphs:
+        plot_char_speeds(char_speeds)
+    if 'word' in graphs:
+        plot_word_speeds(word_speeds)
+
+
+def plot_wpm(output):
+    """Reads `output` and plots typing speeds uniformly apart.
+    Adds a trendline.
+    """
+    df = pd.read_csv(output)
+
+    # df.timestamp = pd.to_datetime(df.timestamp)
+    # df = df.set_index(df.timestamp)
+
+    fig, ax = plt.subplots()
+    x = np.arange(len(df))
+    y = df.wpm
+    trendline = np.poly1d(np.polyfit(x, y, 1))(x)
+    ax.fill_between(x, y, 1)
+    ax.plot(x, trendline, "r--", label='trendline')
+    ax.set_xlabel('test number')
+    ax.set_ylabel('wpm')
+    ax.legend()
+    ticks = plt.yticks()[0]
+    plt.yticks(np.arange(max(0, ticks[0]), ticks[-1], 10))
+    plt.show()
+
+
+def plot_char_speeds(char_speeds):
+    """Reads last 10000 lines of `char_speeds` and groups them by characters.
+    Removes lowest and highest 10% and boxplots the data.
+    """
+    q = [next(char_speeds)]
+    q.extend(deque(char_speeds, 10000))
+    df = pd.read_csv(StringIO(''.join(q)))[['char', 'wpm']]
+
+    grouped = tuple(df.groupby(['char']))
+    wpms = []
+    chars = []
+    mean = []
+    for char, df in grouped:
+        q1 = df['wpm'].quantile(0.1)  # noqa
+        q3 = df['wpm'].quantile(0.9)  # noqa
+        wpm = df.query('@q1 <= wpm <= @q3')['wpm']
+        chars.append(char)
+        wpms.append(wpm)
+        mean.append(df['wpm'].mean())
+
+    fig, ax = plt.subplots()
+    ax.boxplot(wpms, labels=chars)
+    ax.set_xlabel('letters')
+    ax.set_ylabel('wpm')
+    ticks = plt.yticks()[0]
+    ax.axhline(y=sum(mean)/len(mean), color='r', linestyle='-', label='mean')
+    plt.yticks(np.arange(ticks[0], ticks[-1], 10))
+    ax.legend()
+    plt.show()
+
+
+def plot_word_speeds(word_speeds):
+    """Loads all words from `word_speeds` and groups them by word.
+    Boxplots words with 5 or more entries.
+    """
+    df = pd.read_csv(word_speeds)[['word', 'wpm']]
+    grouped = tuple(df.groupby(['word']))
+    words = []
+    wpms = []
+    mean = []
+    for word, df in grouped:
+        if len(df) >= 5:
+            words.append(word)
+            wpms.append(df['wpm'])
+            mean.append(df['wpm'].mean())
+
+    assert words, 'Not enough data, showing only words with at least 5 entries'
+    fig, ax = plt.subplots()
+    ax.boxplot(wpms, labels=words)
+    ax.set_xlabel('words')
+    ax.set_yscale('linear')
+    ax.set_ylabel('wpm')
+    ax.axhline(y=sum(mean)/len(mean), color='r', linestyle='-', label='mean')
+    ax.legend()
+    ticks = plt.yticks()[0]
+    plt.yticks(np.arange(ticks[0], ticks[-1], 10))
+    plt.xticks(rotation=45)
+    plt.show()
+
+
+def parse_args():
+    """Parses `sys.argv` and returns a dictionary suitable for `main`."""
+    parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
+
+    default = '(default: %(default)s)'
+    basedir = os.path.dirname(__file__)
+    resultsdir = 'results'
+    parser.add_argument('graphs', type=str, nargs='*',
+                        default=['wpm'],
+                        help='graphs to plot: wpm char word\n' + default)
+    parser.add_argument('-o', '--output', type=FileType('r'),
+                        default=f'{basedir}/{resultsdir}/results.csv',
+                        help='file to store results in\n' + default)
+    parser.add_argument('-m', '--mistyped', type=FileType('r'),
+                        default=f'{basedir}/{resultsdir}/mistyped_words.csv',
+                        help='file to store mistyped words in\n' + default)
+    parser.add_argument('-c', '--char_speeds', type=FileType('r'),
+                        default=f'{basedir}/{resultsdir}/char_speeds.csv',
+                        help='file to store character speeds in\n' + default)
+    parser.add_argument('-w', '--word_speeds', type=FileType('r'),
+                        default=f'{basedir}/{resultsdir}/word_speeds.csv',
+                        help='file to store word speeds in\n' + default)
+
+    return dict(parser.parse_args()._get_kwargs(), help=parser.print_help)
+
+
+if __name__ == '__main__':
+    main(**parse_args())

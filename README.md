@@ -1,8 +1,10 @@
-# test your typing speed without leaving the terminal
+# test your typing speed
 ![example](./img/example.gif)
 
-# analyze: sneak peek of what's comming
-![char_speed](./img/char_speed.png)
+# analyse your results
+![wpm](./img/wpm.png)
+![char_speeds](./img/char_speeds.png)
+![word_speeds](./img/word_speeds.png)
 
 # typetest
 This repository is home to a self-contained file `typetest`.
@@ -83,7 +85,7 @@ shortcuts:
 3. clone this repository
 4. run `python typetest -s -d 60 < common_300`
 5. (optional) add `typetest` to path or make an alias like `tt`
-6. (optional) store your results in some file and analyze
+6. (optional) store your results in some file and analyse
 
 ## windows
 

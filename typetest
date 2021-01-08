@@ -231,22 +231,23 @@ def parse_args():
     parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
 
     default = '(default: %(default)s)'
+    basedir = os.path.dirname(__file__)
     parser.add_argument('-d', '--duration', type=float, default=float('inf'),
                         help='duration in seconds ' + default)
     parser.add_argument('-i', '--input', type=FileType('r'),
                         default=sys.stdin,
                         help='file to read words from (default: sys.stdin)')
     parser.add_argument('-o', '--output', type=FileType('a'),
-                        default=os.path.dirname(__file__) + '/results',
+                        default=basedir + '/results/results.csv',
                         help='file to store results in\n' + default)
     parser.add_argument('-m', '--mistyped', type=FileType('a'),
-                        default=os.path.dirname(__file__) + '/mistyped_words',
+                        default=basedir + '/results/mistyped_words.csv',
                         help='file to store mistyped words in\n' + default)
     parser.add_argument('-c', '--char_speeds', type=FileType('a'),
-                        default=os.path.dirname(__file__) + '/char_speeds',
+                        default=basedir + '/results/char_speeds.csv',
                         help='file to store character speeds in\n' + default)
     parser.add_argument('-w', '--word_speeds', type=FileType('a'),
-                        default=os.path.dirname(__file__) + '/word_speeds',
+                        default=basedir + '/results/word_speeds.csv',
                         help='file to store word speeds in\n' + default)
     parser.add_argument('-s', '--shuffle', action='store_true',
                         help='shuffle words ' + default)
