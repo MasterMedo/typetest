@@ -10,12 +10,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# plt.style.use('seaborn-dark-palette')
 filename = os.path.basename(sys.argv[0])
 doc = f"""example:
   {filename}
   {filename} wpm
   {filename} char word
 """
+
+known_hashes = {
+        '275eb003c4fba77d7e61893c3d9fa869822e06c8': '1000 most common english words',
+        'da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3': '300 most common english words'
+}
 
 
 def main(graphs, output, mistyped, char_speeds, word_speeds, help):
@@ -46,9 +52,14 @@ def plot_wpm(output):
         hdf = hdf.append(row)
         gdf[h] = indexes, hdf
 
+    grouped = sorted(gdf.items(), key=lambda x: x[1][1]['wpm'].mean(),
+                     reverse=True)
+
     fig, ax = plt.subplots()
     colors = iter(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-    for h, (indexes, hdf) in gdf.items():
+    for h, (indexes, hdf) in grouped:
+        if h in known_hashes:
+            h = known_hashes[h]
         x = indexes
         y = hdf.wpm
         color = next(colors)
@@ -59,6 +70,7 @@ def plot_wpm(output):
         ax.plot(x, trendline, '--', lw=2, color=color, label='trendline')
         # ax.plot(x, hdf.accuracy, 'r-', label='accuracy')
 
+    ax.plot(df.accuracy, color=next(colors), lw=3, label='accuracy [%]')
     ticks = plt.yticks()[0]
     plt.yticks(np.arange(max(0, ticks[0]), ticks[-1], 10))
     plt.xticks(df.index, df.timestamp.dt.date, rotation=90)
@@ -105,7 +117,7 @@ def plot_char_speeds(char_speeds):
     ticks = plt.yticks()[0]
     plt.yticks(np.arange(ticks[0], ticks[-1], 10))
 
-    ax.set_title('typing speed per character of last 10000 written characters')
+    ax.set_title('typing speed per character of last 10000 characters')
     ax.set_xlabel('characters')
     ax.set_ylabel('wpm')
     ax.legend()

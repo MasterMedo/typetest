@@ -30,7 +30,7 @@ shortcuts:
 
 
 def main(duration, input, rows, shuffle, help,
-         output, mistyped, char_speeds, word_speeds):
+         output, mistyped, char_speeds, word_speeds, hash):
     """Reads words from `input` delimited by whitespace characters.
     Takes keys from console forming a word every time a whitespace is sent and
     compares typed words with test words. Updates the screen calling `draw`
@@ -43,7 +43,8 @@ def main(duration, input, rows, shuffle, help,
         sys.exit(help())
 
     test = input.read()
-    test_hash = hashlib.sha1(test.encode("utf-8")).hexdigest()
+    if hash is None:
+        hash = hashlib.sha1(test.encode("utf-8")).hexdigest()
     words = test.split()
 
     if shuffle:
@@ -153,8 +154,14 @@ def main(duration, input, rows, shuffle, help,
     if actual_duration <= 0 or wpm < 20:
         return
 
-    output.write(f'{timestamp},{wpm},{accuracy},{actual_duration},{duration},{test_hash}\n')
+    output.write(f'{timestamp},{wpm},{accuracy},{actual_duration},{duration},{hash}\n')
     for a, b in mistyped_words:
+        a = a.replace('"', '""')
+        b = b.replace('"', '""')
+        if ',' in a:
+            a = f'"{a}"'
+        if ',' in b:
+            b = f'"{b}"'
         mistyped.write(f'{a},{b},{timestamp}\n')
 
     char_durations = []
@@ -164,6 +171,9 @@ def main(duration, input, rows, shuffle, help,
         char_durations.append((c, t1-t0))
 
     for char, t in char_durations:
+        char = char.replace('"', '""')
+        if char == ',':
+            char = '","'
         char_speeds.write(f'{char},{t},{12/t},{timestamp}\n')
 
     word = ''
@@ -245,6 +255,8 @@ def parse_args():
     basedir = os.path.dirname(__file__)
     parser.add_argument('-d', '--duration', type=float, default=float('inf'),
                         help='duration in seconds ' + default)
+    parser.add_argument('--hash', type=str, default=None,
+                        help='custom hash (generated from input by default)')
     parser.add_argument('-i', '--input', type=FileType('r'),
                         default=sys.stdin,
                         help='file to read words from (default: sys.stdin)')
