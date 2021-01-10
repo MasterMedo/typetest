@@ -182,7 +182,11 @@ def main(duration, input, rows, shuffle, help,
             word_duration += duration
 
     for word, t in word_durations:
-        word_speeds.write(f'{word},{t},{len(word)*12/t},{timestamp}\n')
+        speed = len(word)*12/t
+        word = word.replace('"', '""')
+        if ',' in word:
+            word = f'"{word}"'
+        word_speeds.write(f'{word},{t},{speed},{timestamp}\n')
 
 
 def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
