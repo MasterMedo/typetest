@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import hashlib
 import random
 import platform
 
@@ -41,7 +42,9 @@ def main(duration, input, rows, shuffle, help,
     if input.isatty():  # no test words provided
         sys.exit(help())
 
-    words = input.read().split()
+    test = input.read()
+    test_hash = hashlib.sha1(test.encode("utf-8")).hexdigest()
+    words = test.split()
 
     if shuffle:
         random.shuffle(words)
@@ -140,17 +143,17 @@ def main(duration, input, rows, shuffle, help,
                 char_times.append((char, char_time))
 
     total_chars -= len(text)
-    accuracy = 100 * correct_chars // total_chars if total_chars else 0
+    accuracy = 100 * correct_chars // total_chars if total_chars > 0 else 0
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     print(f'accuracy: {accuracy}%')
     print(f'speed:    {wpm}wpm')
     print(f'duration: {actual_duration:.2f}s')
 
-    if actual_duration <= 0:
+    if actual_duration <= 0 or wpm < 20:
         return
 
-    output.write(f'{timestamp},{wpm},{accuracy},{actual_duration},{duration}\n')
+    output.write(f'{timestamp},{wpm},{accuracy},{actual_duration},{duration},{test_hash}\n')
     for a, b in mistyped_words:
         mistyped.write(f'{a},{b},{timestamp}\n')
 

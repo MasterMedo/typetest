@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-# TODO: graph the speed throughout the duration of a single test
-# TODO: graph the speed by timestamp
 from io import StringIO
-from collections import deque
+from collections import deque, defaultdict
 from argparse import ArgumentParser, RawTextHelpFormatter, FileType
 
 import os
 import sys
+import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -25,29 +24,54 @@ def main(graphs, output, mistyped, char_speeds, word_speeds, help):
     if 'char' in graphs:
         plot_char_speeds(char_speeds)
     if 'word' in graphs:
-        plot_word_speeds(word_speeds)
+        plot_n_best_word_speeds(word_speeds, 50)
 
 
 def plot_wpm(output):
     """Reads `output` and plots typing speeds uniformly apart.
     Adds a trendline.
     """
-    df = pd.read_csv(output)
+    df = pd.read_csv(output, header=None,
+                     names=['timestamp', 'wpm', 'accuracy',
+                            'actual_duration', 'duration', 'hash'])
 
-    # df.timestamp = pd.to_datetime(df.timestamp)
+    df.timestamp = pd.to_datetime(df.timestamp)
     # df = df.set_index(df.timestamp)
 
+    gdf = defaultdict(lambda: [[], pd.DataFrame()])
+    for index, row in df.iterrows():
+        h = row['hash']
+        indexes, hdf = gdf[h]
+        indexes.append(index)
+        hdf = hdf.append(row)
+        gdf[h] = indexes, hdf
+
     fig, ax = plt.subplots()
-    x = np.arange(len(df))
-    y = df.wpm
-    trendline = np.poly1d(np.polyfit(x, y, 1))(x)
-    ax.fill_between(x, y, 1)
-    ax.plot(x, trendline, "r--", label='trendline')
+    colors = iter(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+    for h, (indexes, hdf) in gdf.items():
+        x = indexes
+        y = hdf.wpm
+        color = next(colors)
+        ax.plot(x, y, label=h, color=color)
+        ax.fill_between(x, y, facecolor=color)
+        trendline = np.poly1d(np.polyfit(x, y, 1))(x)
+        ax.plot(x, trendline, '-', lw=4, color='white')
+        ax.plot(x, trendline, '--', lw=2, color=color, label='trendline')
+        # ax.plot(x, hdf.accuracy, 'r-', label='accuracy')
+
+    ticks = plt.yticks()[0]
+    plt.yticks(np.arange(max(0, ticks[0]), ticks[-1], 10))
+    plt.xticks(df.index, df.timestamp.dt.date, rotation=90)
+
+    # label only every 50th tick
+    for i, label in enumerate(ax.xaxis.get_ticklabels()):
+        if i % math.ceil(len(df) / 50):
+            label.set_visible(False)
+
+    ax.set_title('typing speed per typing test')
     ax.set_xlabel('test number')
     ax.set_ylabel('wpm')
     ax.legend()
-    ticks = plt.yticks()[0]
-    plt.yticks(np.arange(max(0, ticks[0]), ticks[-1], 10))
     plt.show()
 
 
@@ -57,7 +81,8 @@ def plot_char_speeds(char_speeds):
     """
     q = [next(char_speeds)]
     q.extend(deque(char_speeds, 10000))
-    df = pd.read_csv(StringIO(''.join(q)))[['char', 'wpm']]
+    df = pd.read_csv(StringIO(''.join(q)), header=None,
+                     names=['char', 'duration', 'wpm', 'timestamp'])
 
     grouped = tuple(df.groupby(['char']))
     wpms = []
@@ -71,43 +96,56 @@ def plot_char_speeds(char_speeds):
         wpms.append(wpm)
         mean.append(df['wpm'].mean())
 
+    assert chars, 'Not enough data'
     fig, ax = plt.subplots()
+
     ax.boxplot(wpms, labels=chars)
-    ax.set_xlabel('letters')
-    ax.set_ylabel('wpm')
-    ticks = plt.yticks()[0]
     ax.axhline(y=sum(mean)/len(mean), color='r', linestyle='-', label='mean')
+
+    ticks = plt.yticks()[0]
     plt.yticks(np.arange(ticks[0], ticks[-1], 10))
+
+    ax.set_title('typing speed per character of last 10000 written characters')
+    ax.set_xlabel('characters')
+    ax.set_ylabel('wpm')
     ax.legend()
     plt.show()
 
 
-def plot_word_speeds(word_speeds):
+def plot_n_best_word_speeds(word_speeds, n):
     """Loads all words from `word_speeds` and groups them by word.
-    Boxplots words with 5 or more entries.
     """
-    df = pd.read_csv(word_speeds)[['word', 'wpm']]
-    grouped = tuple(df.groupby(['word']))
+    df = pd.read_csv(word_speeds, header=None,
+                     names=['word', 'duration', 'wpm', 'timestamp'])
+
+    gdf = sorted(df.groupby(['word']),
+                 key=lambda x: x[1]['wpm'].median())
+    mean = np.mean([df['wpm'].mean() for _, df in gdf])
+
+    gdf = gdf[:n//2] + gdf[-n//2:]
+
     words = []
     wpms = []
-    mean = []
-    for word, df in grouped:
-        if len(df) >= 5:
-            words.append(word)
-            wpms.append(df['wpm'])
-            mean.append(df['wpm'].mean())
+    for word, df in gdf:
+        words.append(word)
+        wpms.append(df['wpm'])
 
-    assert words, 'Not enough data, showing only words with at least 5 entries'
+    assert words, 'Not enough data'
+
     fig, ax = plt.subplots()
+
     ax.boxplot(wpms, labels=words)
+    ax.axhline(y=mean, color='r', linestyle='-', label='mean wpm of all words')
+
+    ticks = plt.yticks()[0]
+    plt.yticks(np.arange(ticks[0], ticks[-1], 10))
+    plt.xticks(rotation=90)
+
+    ax.set_title(f'worst and best {n//2} words')
     ax.set_xlabel('words')
     ax.set_yscale('linear')
     ax.set_ylabel('wpm')
-    ax.axhline(y=sum(mean)/len(mean), color='r', linestyle='-', label='mean')
     ax.legend()
-    ticks = plt.yticks()[0]
-    plt.yticks(np.arange(ticks[0], ticks[-1], 10))
-    plt.xticks(rotation=45)
     plt.show()
 
 
