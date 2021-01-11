@@ -2,8 +2,10 @@
 from io import StringIO
 from collections import deque, defaultdict
 from argparse import ArgumentParser, RawTextHelpFormatter, FileType
+from functools import partial
 
 import os
+import re
 import sys
 import math
 import numpy as np
@@ -19,8 +21,10 @@ doc = f"""example:
 """
 
 known_hashes = {
-        '275eb003c4fba77d7e61893c3d9fa869822e06c8': '1000 most common english words',
-        'da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3': '300 most common english words'
+    'da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3':
+        '300 most common english words',
+    '275eb003c4fba77d7e61893c3d9fa869822e06c8':
+        '1000 most common english words (no double letters)'
 }
 
 
@@ -28,9 +32,10 @@ def main(graphs, output, mistyped, char_speeds, word_speeds, help):
     if 'wpm' in graphs:
         plot_wpm(output)
     if 'char' in graphs:
-        plot_char_speeds(char_speeds)
+        plot_char_speeds(char_speeds, filter_func=str.islower)
     if 'word' in graphs:
-        plot_n_best_word_speeds(word_speeds, 50)
+        is_word = partial(re.match, r'^[a-z]+$')
+        plot_n_best_word_speeds(word_speeds, 50, filter_func=is_word)
 
 
 def plot_wpm(output):
@@ -68,7 +73,6 @@ def plot_wpm(output):
         trendline = np.poly1d(np.polyfit(x, y, 1))(x)
         ax.plot(x, trendline, '-', lw=4, color='white')
         ax.plot(x, trendline, '--', lw=2, color=color, label='trendline')
-        # ax.plot(x, hdf.accuracy, 'r-', label='accuracy')
 
     ax.plot(df.accuracy, color=next(colors), lw=3, label='accuracy [%]')
     ticks = plt.yticks()[0]
@@ -87,26 +91,30 @@ def plot_wpm(output):
     plt.show()
 
 
-def plot_char_speeds(char_speeds):
+def plot_char_speeds(char_speeds, filter_func=lambda c: True):
     """Reads last 10000 lines of `char_speeds` and groups them by characters.
     Removes lowest and highest 10% and boxplots the data.
+
+    filter_func: function taking a `char` returning `True` if char should be
+    plotted, `False` otherwise. By default plots all characters.
     """
-    q = [next(char_speeds)]
-    q.extend(deque(char_speeds, 10000))
+    q = deque(char_speeds, maxlen=10000)
     df = pd.read_csv(StringIO(''.join(q)), header=None,
                      names=['char', 'duration', 'wpm', 'timestamp'])
 
-    grouped = tuple(df.groupby(['char']))
+    gdf = filter(lambda t: filter_func(t[1]['char'].iloc[0]),
+                 df.groupby(['char']))
     wpms = []
     chars = []
     mean = []
-    for char, df in grouped:
-        q1 = df['wpm'].quantile(0.1)  # noqa
-        q3 = df['wpm'].quantile(0.9)  # noqa
-        wpm = df.query('@q1 <= wpm <= @q3')['wpm']
-        chars.append(char)
-        wpms.append(wpm)
-        mean.append(df['wpm'].mean())
+    for char, df in gdf:
+        if filter_func(char):
+            q1 = df['wpm'].quantile(0.1)  # noqa
+            q3 = df['wpm'].quantile(0.9)  # noqa
+            wpm = df.query('@q1 <= wpm <= @q3')['wpm']
+            chars.append(char)
+            wpms.append(wpm)
+            mean.append(df['wpm'].mean())
 
     assert chars, 'Not enough data'
     fig, ax = plt.subplots()
@@ -124,23 +132,25 @@ def plot_char_speeds(char_speeds):
     plt.show()
 
 
-def plot_n_best_word_speeds(word_speeds, n):
+def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     """Loads all words from `word_speeds` and groups them by word.
     """
     df = pd.read_csv(word_speeds, header=None,
                      names=['word', 'duration', 'wpm', 'timestamp'])
 
-    gdf = sorted(df.groupby(['word']),
-                 key=lambda x: x[1]['wpm'].median())
-    mean = np.mean([df['wpm'].mean() for _, df in gdf])
+    gdf = filter(lambda t: filter_func(t[0]), df.groupby(['word']))
+    gdf = sorted(gdf, key=lambda x: x[1]['wpm'].median())
 
-    gdf = gdf[:n//2] + gdf[-n//2:]
-
-    words = []
-    wpms = []
+    first_half = deque(maxlen=n//2)
+    second_half = deque(maxlen=n//2)
     for word, df in gdf:
-        words.append(word)
-        wpms.append(df['wpm'])
+        if len(first_half) < first_half.maxlen:
+            first_half.append((word, df['wpm'], df['wpm'].mean()))
+        else:
+            second_half.append((word, df['wpm'], df['wpm'].mean()))
+
+    words, wpms, means = zip(*list(first_half) + list(second_half))
+    mean = sum(means)/len(means)
 
     assert words, 'Not enough data'
 
