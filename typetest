@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import os
 import sys
-import hashlib
 import random
+import hashlib
 import platform
+import pandas as pd
 
 from time import time, strftime, gmtime
 from datetime import datetime
@@ -144,37 +145,29 @@ def main(duration, input, rows, shuffle, help,
                 char_times.append((char, char_time))
 
     total_chars -= len(text)
-    accuracy = 100 * correct_chars // total_chars if total_chars > 0 else 0
+
+    if actual_duration <= 0 or total_chars <= 0:
+        return
+
+    accuracy = 100 * correct_chars // total_chars
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     print(f'accuracy: {accuracy}%')
     print(f'speed:    {wpm}wpm')
     print(f'duration: {actual_duration:.2f}s')
 
-    if actual_duration <= 0 or wpm < 20:
-        return
+    chars, times = zip(*char_times)
+    durations = [t1-t0 for t0, t1 in zip(times, times[1:])]
+    char_durations = list(zip(chars, durations))
 
-    output.write(f'{timestamp},{wpm},{accuracy},{actual_duration},{duration},{hash}\n')
-    for a, b in mistyped_words:
-        a = a.replace('"', '""')
-        b = b.replace('"', '""')
-        if ',' in a:
-            a = f'"{a}"'
-        if ',' in b:
-            b = f'"{b}"'
-        mistyped.write(f'{a},{b},{timestamp}\n')
+    row = [timestamp, wpm, accuracy, actual_duration, duration, hash]
+    output.write(','.join(map(str, row)) + '\n')
 
-    char_durations = []
-    for i in range(1, len(char_times)):
-        _, t0 = char_times[i-1]
-        c, t1 = char_times[i]
-        char_durations.append((c, t1-t0))
+    df = pd.DataFrame([(w1, w2, timestamp) for w1, w2 in mistyped_words])
+    mistyped.write(df.to_csv(index=False, header=False))
 
-    for char, t in char_durations:
-        char = char.replace('"', '""')
-        if char == ',':
-            char = '","'
-        char_speeds.write(f'{char},{t},{12/t},{timestamp}\n')
+    df = pd.DataFrame([(c, t, 12/t, timestamp) for c, t in char_durations])
+    char_speeds.write(df.to_csv(index=False, header=False))
 
     word = ''
     word_i = 0
@@ -191,12 +184,9 @@ def main(duration, input, rows, shuffle, help,
             word += char
             word_duration += duration
 
-    for word, t in word_durations:
-        speed = len(word)*12/t
-        word = word.replace('"', '""')
-        if ',' in word:
-            word = f'"{word}"'
-        word_speeds.write(f'{word},{t},{speed},{timestamp}\n')
+    df = pd.DataFrame([(word, t, len(word)*12/t, timestamp)
+                       for word, t in word_durations])
+    word_speeds.write(df.to_csv(header=False, index=False))
 
 
 def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
