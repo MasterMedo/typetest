@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# plt.style.use('seaborn-dark-palette')
 filename = os.path.basename(sys.argv[0])
 doc = f"""example:
   {filename}
@@ -138,8 +137,17 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     df = pd.read_csv(word_speeds, header=None,
                      names=['word', 'duration', 'wpm', 'timestamp'])
 
-    gdf = filter(lambda t: filter_func(t[0]), df.groupby(['word']))
+    gdf = list(filter(lambda t: filter_func(t[0]), df.groupby(['word'])))
+
+    # with open('least_typed_words', 'w') as f:
+    #     words_by_freq = list(zip(*sorted(gdf, key=lambda t: len(t[1]))))[0]
+    #     f.write(' '.join(words_by_freq))
+
     gdf = sorted(gdf, key=lambda x: x[1]['wpm'].median())
+
+    # with open('worst_words', 'w') as f:
+    #     words_by_median = list(zip(*gdf))[0]
+    #     f.write(' '.join(words_by_median))
 
     first_half = deque(maxlen=n//2)
     second_half = deque(maxlen=n//2)
