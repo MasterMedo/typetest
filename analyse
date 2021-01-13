@@ -113,7 +113,7 @@ def plot_char_speeds(char_speeds, filter_func=lambda c: True):
             wpm = df.query('@q1 <= wpm <= @q3')['wpm']
             chars.append(char)
             wpms.append(wpm)
-            mean.append(df['wpm'].mean())
+            mean.append(wpm.mean())
 
     assert chars, 'Not enough data'
     fig, ax = plt.subplots()
