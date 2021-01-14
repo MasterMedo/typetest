@@ -3,6 +3,7 @@ from io import StringIO
 from collections import deque, defaultdict
 from argparse import ArgumentParser, RawTextHelpFormatter, FileType
 from functools import partial
+from itertools import cycle
 
 import os
 import re
@@ -10,8 +11,10 @@ import sys
 import math
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 
+sns.set(font_scale=1.5)
 filename = os.path.basename(sys.argv[0])
 doc = f"""example:
   {filename}
@@ -28,13 +31,15 @@ known_hashes = {
 
 
 def main(graphs, output, mistyped, char_speeds, word_speeds, help):
+    is_word = partial(re.match, r'^[a-z]+$')
     if 'wpm' in graphs:
         plot_wpm(output)
     if 'char' in graphs:
         plot_char_speeds(char_speeds, filter_func=str.islower)
     if 'word' in graphs:
-        is_word = partial(re.match, r'^[a-z]+$')
         plot_n_best_word_speeds(word_speeds, 50, filter_func=is_word)
+    if 'dist' in graphs:
+        plot_word_wpm_distribution(word_speeds, filter_func=is_word)
 
 
 def plot_wpm(output):
@@ -48,6 +53,7 @@ def plot_wpm(output):
     df.timestamp = pd.to_datetime(df.timestamp)
     # df = df.set_index(df.timestamp)
 
+    min_wpm = None
     gdf = defaultdict(lambda: [[], pd.DataFrame()])
     for index, row in df.iterrows():
         h = row['hash']
@@ -55,49 +61,54 @@ def plot_wpm(output):
         indexes.append(index)
         hdf = hdf.append(row)
         gdf[h] = indexes, hdf
+        if min_wpm is None or row['wpm'] < min_wpm:
+            min_wpm = row['wpm']
 
-    grouped = sorted(gdf.items(), key=lambda x: x[1][1]['wpm'].mean(),
-                     reverse=True)
+    # grouped = sorted(gdf.items(), key=lambda x: x[1][1]['wpm'].mean(),
+    #                  reverse=True)
+    grouped = gdf.items()
 
     fig, ax = plt.subplots()
-    colors = iter(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+    colors = cycle(sns.color_palette())
     for h, (indexes, hdf) in grouped:
         if h in known_hashes:
             h = known_hashes[h]
         x = indexes
         y = hdf.wpm
         color = next(colors)
-        ax.plot(x, y, label=h, color=color)
-        ax.fill_between(x, y, facecolor=color)
+        ax.plot(x, y, color=color, lw=3, label=h)
+        # ax.fill_between(x, y, min_wpm, facecolor=color, label=h)
         trendline = np.poly1d(np.polyfit(x, y, 1))(x)
         ax.plot(x, trendline, '-', lw=4, color='white')
         ax.plot(x, trendline, '--', lw=2, color=color, label='trendline')
 
-    ax.plot(df.accuracy, color=next(colors), lw=3, label='accuracy [%]')
-    ticks = plt.yticks()[0]
-    plt.yticks(np.arange(max(0, ticks[0]), ticks[-1], 10))
-    plt.xticks(df.index, df.timestamp.dt.date, rotation=90)
+    ax.plot(df.accuracy, color='white', lw=4, alpha=0.5)
+    ax.plot(df.accuracy, color=next(colors), lw=1.5, label='accuracy [%]', alpha=0.5)
 
+    ax.set_title('typing speed per typing test')
+    ax.set_xlabel('')
+    ax.set_ylabel('typing speed [wpm]')
+    ax.legend()
+
+    # ticks = plt.yticks()[0]
+    # plt.yticks(np.arange(0, ticks[-1], 10))
+    plt.xticks(df.index, df.timestamp.dt.date, rotation=90)
     # label only every 50th tick
     for i, label in enumerate(ax.xaxis.get_ticklabels()):
         if i % math.ceil(len(df) / 50):
             label.set_visible(False)
 
-    ax.set_title('typing speed per typing test')
-    ax.set_xlabel('test number')
-    ax.set_ylabel('wpm')
-    ax.legend()
     plt.show()
 
 
-def plot_char_speeds(char_speeds, filter_func=lambda c: True):
-    """Reads last 10000 lines of `char_speeds` and groups them by characters.
+def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
+    """Reads last `size` lines of `char_speeds` and groups them by characters.
     Removes lowest and highest 10% and boxplots the data.
 
     filter_func: function taking a `char` returning `True` if char should be
     plotted, `False` otherwise. By default plots all characters.
     """
-    q = deque(char_speeds, maxlen=10000)
+    q = deque(char_speeds, maxlen=size)
     df = pd.read_csv(StringIO(''.join(q)), header=None,
                      names=['char', 'duration', 'wpm', 'timestamp'])
 
@@ -105,7 +116,7 @@ def plot_char_speeds(char_speeds, filter_func=lambda c: True):
                  df.groupby(['char']))
     wpms = []
     chars = []
-    mean = []
+    means = []
     for char, df in gdf:
         if filter_func(char):
             q1 = df['wpm'].quantile(0.1)  # noqa
@@ -113,27 +124,30 @@ def plot_char_speeds(char_speeds, filter_func=lambda c: True):
             wpm = df.query('@q1 <= wpm <= @q3')['wpm']
             chars.append(char)
             wpms.append(wpm)
-            mean.append(wpm.mean())
+            means.append(wpm.mean())
 
     assert chars, 'Not enough data'
     fig, ax = plt.subplots()
 
     ax.boxplot(wpms, labels=chars)
-    ax.axhline(y=sum(mean)/len(mean), color='r', linestyle='-', label='mean')
+    mean = round(sum(means)/len(means))
+    ax.axhline(y=mean, color='r', linestyle='-', label=f'mean {mean} wpm')
+
+    ax.set_title(f'typing speed per character of last {size} characters')
+    ax.set_xlabel('')
+    ax.set_ylabel('typing speed [wpm]')
+    ax.legend()
 
     ticks = plt.yticks()[0]
-    plt.yticks(np.arange(ticks[0], ticks[-1], 10))
+    plt.yticks(np.arange(0, ticks[-1], 10))
 
-    ax.set_title('typing speed per character of last 10000 characters')
-    ax.set_xlabel('characters')
-    ax.set_ylabel('wpm')
-    ax.legend()
     plt.show()
 
 
 def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     """Loads all words from `word_speeds` and groups them by word.
     """
+    half = n//2
     df = pd.read_csv(word_speeds, header=None,
                      names=['word', 'duration', 'wpm', 'timestamp'])
 
@@ -149,8 +163,8 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     #     words_by_median = list(zip(*gdf))[0]
     #     f.write(' '.join(words_by_median))
 
-    first_half = deque(maxlen=n//2)
-    second_half = deque(maxlen=n//2)
+    first_half = deque(maxlen=half)
+    second_half = deque(maxlen=half)
     for word, df in gdf:
         if len(first_half) < first_half.maxlen:
             first_half.append((word, df['wpm'], df['wpm'].mean()))
@@ -158,24 +172,39 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
             second_half.append((word, df['wpm'], df['wpm'].mean()))
 
     words, wpms, means = zip(*list(first_half) + list(second_half))
-    mean = sum(means)/len(means)
+    mean = round(sum(means)/len(means))
 
     assert words, 'Not enough data'
 
     fig, ax = plt.subplots()
 
     ax.boxplot(wpms, labels=words)
-    ax.axhline(y=mean, color='r', linestyle='-', label='mean wpm of all words')
+    ax.axhline(y=mean, color='r', linestyle='-', label=f'mean {mean} wpm')
+
+    ax.set_title(f'worst and best {half} words')
+    ax.set_xlabel('')
+    ax.set_yscale('linear')
+    ax.set_ylabel('typing speed [wpm]')
+    ax.legend()
 
     ticks = plt.yticks()[0]
     plt.yticks(np.arange(ticks[0], ticks[-1], 10))
     plt.xticks(rotation=90)
 
-    ax.set_title(f'worst and best {n//2} words')
-    ax.set_xlabel('words')
-    ax.set_yscale('linear')
-    ax.set_ylabel('wpm')
-    ax.legend()
+    plt.show()
+
+
+def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
+    df = pd.read_csv(word_speeds, header=None,
+                     names=['word', 'duration', 'wpm', 'timestamp'])
+
+    gdf = list(filter(lambda t: filter_func(t[0]), df.groupby(['word'])))
+    wpms = [df['wpm'].median() for word, df in gdf]
+
+    ax = sns.histplot(wpms, kde=True, stat='probability')
+    ax.set_title('percentage of words typed at a certain speed')
+    ax.set_xlabel('typing speed in wpm')
+    ax.set_ylabel('percentage of words')
     plt.show()
 
 
@@ -188,7 +217,7 @@ def parse_args():
     resultsdir = 'results'
     parser.add_argument('graphs', type=str, nargs='*',
                         default=['wpm'],
-                        help='graphs to plot: wpm char word\n' + default)
+                        help='graphs to plot: wpm char word dist\n' + default)
     parser.add_argument('-o', '--output', type=FileType('r'),
                         default=f'{basedir}/{resultsdir}/results.csv',
                         help='file to store results in\n' + default)
