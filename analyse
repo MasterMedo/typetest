@@ -98,6 +98,7 @@ def plot_wpm(output):
         if i % math.ceil(len(df) / 50):
             label.set_visible(False)
 
+    plt.gcf().subplots_adjust(bottom=0.2)
     plt.show()
 
 
@@ -191,6 +192,7 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     plt.yticks(np.arange(ticks[0], ticks[-1], 10))
     plt.xticks(rotation=90)
 
+    plt.gcf().subplots_adjust(bottom=0.2)
     plt.show()
 
 
