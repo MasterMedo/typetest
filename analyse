@@ -4,6 +4,7 @@ from collections import deque, defaultdict
 from argparse import ArgumentParser, RawTextHelpFormatter, FileType
 from functools import partial
 from itertools import cycle
+from matplotlib import rcParams
 
 import os
 import re
@@ -14,6 +15,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+rcParams.update({'figure.autolayout': True})
 sns.set(font_scale=1.5)
 filename = os.path.basename(sys.argv[0])
 doc = f"""example:
@@ -98,7 +100,6 @@ def plot_wpm(output):
         if i % math.ceil(len(df) / 50):
             label.set_visible(False)
 
-    plt.gcf().subplots_adjust(bottom=0.2)
     plt.show()
 
 
@@ -192,7 +193,6 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     plt.yticks(np.arange(ticks[0], ticks[-1], 10))
     plt.xticks(rotation=90)
 
-    plt.gcf().subplots_adjust(bottom=0.2)
     plt.show()
 
 
