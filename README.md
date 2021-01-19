@@ -3,8 +3,9 @@
 
 # analyse your results
 ![wpm](./img/wpm.png)
-![char_speeds](./img/char_speeds.png)
-![word_speeds](./img/word_speeds.png)
+```
+You can find the rest of the charts at the bottom of this file.
+```
 
 # typetest
 This repository is home to a self-contained file `typetest`.
@@ -98,3 +99,9 @@ The rest of the installation steps are the same as for \*nix.
 # notes
 
 - [A Note on Calculating Text Entry Speed](https://www.yorku.ca/mack/RN-TextEntrySpeed.html)
+
+# charts
+![char_speeds](./img/char_speeds.png)
+![word_speeds](./img/word_speeds.png)
+![mistypes](./img/mistypes.png)
+![dist](./img/dist.png)

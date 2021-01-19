@@ -16,6 +16,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from utils import damerau_levensthein_distance
+
 warnings.simplefilter('ignore', np.RankWarning)
 rcParams.update({'figure.autolayout': True})
 sns.set(font_scale=1.5)
@@ -44,6 +46,8 @@ def main(graphs, output, mistyped, char_speeds, word_speeds, help):
         plot_n_best_word_speeds(word_speeds, 50, filter_func=is_word)
     if 'dist' in graphs:
         plot_word_wpm_distribution(word_speeds, filter_func=is_word)
+    if 'mistypes' in graphs:
+        plot_mistypes_distribution(mistyped, filter_func=is_word)
 
 
 def plot_wpm(output):
@@ -212,6 +216,35 @@ def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     plt.show()
 
 
+def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
+    df = pd.read_csv(mistyped, header=None,
+                     names=['word', 'mistype', 'timestamp'])
+
+    mistakes = defaultdict(int)
+    words, mistypes = df['word'], df['mistype']
+    for word, mistype in zip(words, mistypes):
+        if abs(len(word) - len(mistype)) < 10:
+            distance = damerau_levensthein_distance(word, mistype)
+            if distance >= max(len(word), len(mistype)):
+                # wrong word has been typed
+                continue
+            if distance > 3 and word.startswith(mistype):
+                # word might be formed of multiple words
+                # if mistype in dictionary:
+                continue
+
+            mistakes[distance] += 1
+
+    fig, ax = plt.subplots()
+    labels, sizes = zip(*sorted(mistakes.items()))
+    explode = [0] + [0.2]*(len(mistakes) - 1)
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%',
+           explode=explode)
+    # ax = sns.histplot(mistakes, stat='probability')
+    ax.set_title('number of mistakes made when typing a word')
+    plt.show()
+
+
 def parse_args():
     """Parses `sys.argv` and returns a dictionary suitable for `main`."""
     parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
@@ -221,7 +254,7 @@ def parse_args():
     resultsdir = 'results'
     parser.add_argument('graphs', type=str, nargs='*',
                         default=['wpm'],
-                        help='graphs to plot: wpm char word dist\n' + default)
+                        help='graphs to plot: wpm char word dist mistypes\n' + default)
     parser.add_argument('-o', '--output', type=FileType('r'),
                         default=f'{basedir}/{resultsdir}/results.csv',
                         help='file to store results in\n' + default)
