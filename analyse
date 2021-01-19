@@ -10,11 +10,13 @@ import os
 import re
 import sys
 import math
+import warnings
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+warnings.simplefilter('ignore', np.RankWarning)
 rcParams.update({'figure.autolayout': True})
 sns.set(font_scale=1.5)
 filename = os.path.basename(sys.argv[0])
