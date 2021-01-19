@@ -16,7 +16,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from utils import damerau_levensthein_distance
+from utils import damerau_levenshtein_distance
 
 warnings.simplefilter('ignore', np.RankWarning)
 rcParams.update({'figure.autolayout': True})
@@ -161,15 +161,15 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
 
     gdf = list(filter(lambda t: filter_func(t[0]), df.groupby(['word'])))
 
-    # with open('least_typed_words', 'w') as f:
-    #     words_by_freq = list(zip(*sorted(gdf, key=lambda t: len(t[1]))))[0]
-    #     f.write(' '.join(words_by_freq))
+    with open('least_typed_words', 'w') as f:
+        words_by_freq = list(zip(*sorted(gdf, key=lambda t: len(t[1]))))[0]
+        f.write(' '.join(words_by_freq))
 
     gdf = sorted(gdf, key=lambda x: x[1]['wpm'].median())
 
-    # with open('worst_words', 'w') as f:
-    #     words_by_median = list(zip(*gdf))[0]
-    #     f.write(' '.join(words_by_median))
+    with open('worst_words', 'w') as f:
+        words_by_median = list(zip(*gdf))[0]
+        f.write(' '.join(words_by_median))
 
     first_half = deque(maxlen=half)
     second_half = deque(maxlen=half)
@@ -224,7 +224,7 @@ def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
     words, mistypes = df['word'], df['mistype']
     for word, mistype in zip(words, mistypes):
         if abs(len(word) - len(mistype)) < 10:
-            distance = damerau_levensthein_distance(word, mistype)
+            distance = damerau_levenshtein_distance(word, mistype)
             if distance >= max(len(word), len(mistype)):
                 # wrong word has been typed
                 continue

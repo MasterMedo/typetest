@@ -1,4 +1,4 @@
-def damerau_levensthein_distance(word1: str, word2: str) -> int:
+def damerau_levenshtein_distance(word1: str, word2: str) -> int:
     inf = len(word1) + len(word2)
     table = [[inf for _ in range(len(word1) + 2)]
              for _ in range(len(word2) + 2)]
