@@ -20,10 +20,10 @@ doc = f"""example:
   {filename} < test.txt
 
 shortcuts:
-  ^c / ctrl+c           escape; end the test and get results now
-  ^[ / ctrl+[           escape; end the test and get results now
-  ^h / ctrl+h           backspace; delete a character
-  ^r / ctrl+r           restart the same test
+  ^c / ctrl+c           end the test and get results now
+  ^[ / ctrl+[ / esc     end the test and get results now
+  ^h / ctrl+h / bksp    delete a character
+  ^r / ctrl+r / tab     restart the same test
   ^s / ctrl+s           restart the test with words reshuffled
   ^w / ctrl+w           delete a word
   ^u / ctrl+u           delete a word
@@ -97,13 +97,13 @@ def main(duration, input, rows, shuffle, help,
             if not start:
                 start = time()
 
-            if char == '\x03' or char == '\x1b':  # ctrl-c or ctrl-[ or escape
+            if char == '\x03' or char == '\x1b':  # ctrl-c or ctrl-[ or esc
                 break
 
-            elif char == '\x08' or char == '\x7f':  # ctrl-h or backspace
+            elif char == '\x08' or char == '\x7f':  # ctrl-h or bksp
                 text = text[:-1]
 
-            elif char == '\x12' or char == '\x13':  # ctrl-r or ctrl-s
+            elif char in ('\x12', '\x13', '\t'):  # ctrl-r or ctrl-s or tab
                 correct_chars = total_chars = -1
                 wpm = 0
                 time_passed = actual_duration = start = 0
