@@ -32,10 +32,11 @@ shortcuts:
 
 def main(duration, input, rows, shuffle, help,
          output, mistyped, char_speeds, word_speeds, hash):
-    """Reads words from `input` delimited by whitespace characters.
-    Takes keys from console forming a word every time a whitespace is sent and
-    compares typed words with test words. Updates the screen calling `draw`
-    every time a key is pressed or every 0.1 seconds, whichever comes first.
+    """Reads test words from `input` delimited by whitespace characters.
+    Listens to standard input forming a typed word every time a
+    whitespace is pressed. Compares typed words with test words. Updates the
+    screen calling `draw` every time a key is pressed or every 0.1 seconds,
+    whichever comes first.
 
     The test ends when `duration` time has passed or all words have been typed.
     Upon exiting, test results are printed and stored in `output`.
