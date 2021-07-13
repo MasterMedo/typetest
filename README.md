@@ -49,7 +49,7 @@ As is, it is a near clone of [10fastfingers](https://10fastfingers.com/typing-te
 
 ## :bulb: ideas for tests
 Along with `typetest` this repository features sample tests.
-Try them like so: `typetest -s -d 60 -i common_200` or scrape something of the internet, like a [featured article](https://en.wikipedia.org/wiki/Wikipedia:Featured_articles) on wikipedia.
+Try them like so: `typetest -s -d 60 -i common_200` or scrape something off the internet, like a [featured article](https://en.wikipedia.org/wiki/Wikipedia:Featured_articles) on wikipedia.
 
 ```python
 #!/usr/bin/env python3
