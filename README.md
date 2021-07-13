@@ -1,4 +1,6 @@
-<h1 align="center" style="font-family: serif; font-weight: 900;">typetest</h1>
+<p align="center">
+  <img src="./img/logo.png" width="300"/>
+</p>
 <p align="center">Test your typing speed without leaving the terminal.</p>
 
 <p align="center">
