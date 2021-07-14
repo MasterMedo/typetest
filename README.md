@@ -103,7 +103,7 @@ shortcuts:
 ```
 
 <p align="center">
-  <a href="https://github.com/mastermedo/typetest#">
+  <a href="#">
     <img src="https://img.shields.io/badge/⬆️back_to_top_⬆️-white" alt="Back to top" title="Back to top"/>
   </a>
 </p>
