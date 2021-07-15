@@ -13,7 +13,6 @@ from functools import partial
 
 from blessed import Terminal
 
-from typetest import analyse
 
 filename = os.path.basename(sys.argv[0])
 doc = f"""example:
@@ -47,8 +46,11 @@ def main(duration, input, rows, shuffle, help,
     The test ends when `duration` time has passed or all words have been typed.
     Upon exiting, test results are printed and stored in `output`.
     """
-    if input.isatty():  # no test words provided
-        sys.exit(help())
+    if input.isatty():  # no test words provided, fallback to a default test
+        basedir = os.path.dirname(__file__)
+        input = open(basedir + '/tests/common_300', 'r')
+        duration = 60
+        shuffle = True
 
     test = input.read()
     if hash is None:
