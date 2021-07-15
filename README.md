@@ -4,11 +4,14 @@
 <p align="center">Test your typing speed without leaving the terminal.</p>
 
 <p align="center">
-  <a href="https://github.com/mastermedo/typetest">
-    <img src="https://img.shields.io/github/languages/code-size/mastermedo/typetest" alt="build" title="build"/>
+  <a href="https://pypi.org/project/typetest/">
+    <img src="https://img.shields.io/pypi/v/typetest" alt="build" title="build"/>
   </a>
   <a href="https://github.com/mastermedo/typetest/LICENSE">
     <img src="https://img.shields.io/github/license/mastermedo/typetest" alt="license" title="license"/>
+  </a>
+  <a href="https://github.com/mastermedo/typetest">
+    <img src="https://img.shields.io/github/languages/code-size/mastermedo/typetest" alt="build" title="build"/>
   </a>
   <a href="https://github.com/mastermedo/typetest/stargazers">
     <img src="https://img.shields.io/badge/maintainer-mastermedo-yellow" alt="maintainer" title="maintainer"/>
