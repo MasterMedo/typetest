@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 from typetest.utils import damerau_levenshtein_distance
 
 warnings.simplefilter('ignore', np.RankWarning)
+warnings.simplefilter('error', UserWarning)
 rcParams.update({'figure.autolayout': True})
 sns.set(font_scale=1.5)
 filename = os.path.basename(sys.argv[0])
@@ -38,6 +39,17 @@ known_hashes = {
 
 def run():
     main(**parse_args())
+
+
+def show_diagram():
+    try:
+        plt.show()
+    except UserWarning:
+        print("No matplotlib backend found that supports drawing charts.")
+        print("Solve this by installing tkinter!")
+        print("For example:")
+        print("  sudo apt-get install python-tk")
+        print("  sudo pacman -S tk")
 
 
 def main(graphs, output, mistyped, char_speeds, word_speeds, help):
@@ -110,7 +122,7 @@ def plot_wpm(output):
         if i % math.ceil(len(df) / 50):
             label.set_visible(False)
 
-    plt.show()
+    show_diagram()
 
 
 def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
@@ -153,7 +165,7 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     ticks = plt.yticks()[0]
     plt.yticks(np.arange(0, ticks[-1], 10))
 
-    plt.show()
+    show_diagram()
 
 
 def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
@@ -203,7 +215,7 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     plt.yticks(np.arange(ticks[0], ticks[-1], 10))
     plt.xticks(rotation=90)
 
-    plt.show()
+    show_diagram()
 
 
 def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
@@ -217,7 +229,7 @@ def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     ax.set_title('percentage of words typed at a certain speed')
     ax.set_xlabel('typing speed in wpm')
     ax.set_ylabel('percentage of words')
-    plt.show()
+    show_diagram()
 
 
 def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
@@ -246,7 +258,7 @@ def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
            explode=explode)
     # ax = sns.histplot(mistakes, stat='probability')
     ax.set_title('number of mistakes made when typing a word')
-    plt.show()
+    show_diagram()
 
 
 def parse_args():
