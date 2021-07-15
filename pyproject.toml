@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "typetest"
+version = "0.1.1"
+description = "Test your typing speed without leaving the terminal."
+authors = ["MasterMedo <mislav.vuletic@gmail.com>"]
+maintainers = ["MasterMedo <mislav.vuletic@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/MasterMedo/typetest"
+repository = "https://github.com/MasterMedo/typetest"
+documentation = "https://github.com/MasterMedo/typetest"
+keywords = ["typing", "test", "wpm", "speed", "terminal"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+blessed = "^1.18.1"
+pandas = "^1.3.0"
+matplotlib = "^3.4.2"
+seaborn = "^0.11.1"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.scripts]
+typetest = 'typetest.__main__:run'
+typetest-analyse = 'typetest.analyse:run'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

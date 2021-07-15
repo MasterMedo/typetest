@@ -13,6 +13,8 @@ from functools import partial
 
 from blessed import Terminal
 
+from typetest import analyse
+
 filename = os.path.basename(sys.argv[0])
 doc = f"""example:
   {filename} -i test.txt -s -d 60
@@ -28,6 +30,10 @@ shortcuts:
   ^w / ctrl+w           delete a word
   ^u / ctrl+u           delete a word
 """
+
+
+def run():
+    main(**parse_args())
 
 
 def main(duration, input, rows, shuffle, help,

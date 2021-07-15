@@ -36,6 +36,10 @@ known_hashes = {
 }
 
 
+def run():
+    main(**parse_args())
+
+
 def main(graphs, output, mistyped, char_speeds, word_speeds, help):
     is_word = partial(re.match, r'^[a-z]+$')
     if 'wpm' in graphs:
