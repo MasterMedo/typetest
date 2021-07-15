@@ -16,7 +16,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from utils import damerau_levenshtein_distance
+from typetest.utils import damerau_levenshtein_distance
 
 warnings.simplefilter('ignore', np.RankWarning)
 rcParams.update({'figure.autolayout': True})
