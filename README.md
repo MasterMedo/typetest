@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./img/logo.png" width="300"/>
+  <img src="https://user-images.githubusercontent.com/16375100/125825025-74b5b1cd-c5d2-40f1-902a-5b5902720d90.png" width="300"/>
 </p>
 <p align="center">Test your typing speed without leaving the terminal.</p>
 
@@ -31,12 +31,12 @@ As is, it is a near clone of [10fastfingers](https://10fastfingers.com/typing-te
 3. analysing mistakes
 4. easy to track improvement
 
-## :chart_with_upwards_trend: analyse test results
-![wpm](./img/wpm.png)
-![char_speeds](./img/char_speeds.png)
-![word_speeds](./img/word_speeds.png)
-![mistypes](./img/mistypes.png)
-![dist](./img/dist.png)
+## :chart_with_upwards_trend: analyse test results!
+![wpm](https://user-images.githubusercontent.com/16375100/125824726-6304ee64-ddf1-4456-879c-10daca45d91c.png)
+[char_speeds](https://user-images.githubusercontent.com/16375100/125824817-5c2cbcae-fdcc-45c9-9a3b-ed5c3ec497a5.png)
+![word_speeds](https://user-images.githubusercontent.com/16375100/125824889-a01bb4bb-1ed2-49ed-a0aa-9bd5f6b411c7.png)
+![mistypes](https://user-images.githubusercontent.com/16375100/125824921-3ecdf9f4-804e-41ec-98a4-6343d0ffbbe2.png)
+![dist](https://user-images.githubusercontent.com/16375100/125824933-01294d91-92c9-4ae0-9910-539f6d16507e.png)
 
 ## :shipit: installation
 
