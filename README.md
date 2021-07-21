@@ -34,7 +34,7 @@ As is, it is a near clone of [10fastfingers](https://10fastfingers.com/typing-te
 3. analysing mistakes
 4. easy to track improvement
 
-## :chart_with_upwards_trend: analyse test results!
+## :chart_with_upwards_trend: analyse test results with `typetest-analyse`!
 ![wpm](https://user-images.githubusercontent.com/16375100/125824726-6304ee64-ddf1-4456-879c-10daca45d91c.png)
 ![char_speeds](https://user-images.githubusercontent.com/16375100/125824817-5c2cbcae-fdcc-45c9-9a3b-ed5c3ec497a5.png)
 ![word_speeds](https://user-images.githubusercontent.com/16375100/125824889-a01bb4bb-1ed2-49ed-a0aa-9bd5f6b411c7.png)
@@ -43,12 +43,14 @@ As is, it is a near clone of [10fastfingers](https://10fastfingers.com/typing-te
 
 ## :shipit: installation
 
-1. install python 3
-2. install [blessed](https://pypi.org/project/blessed/)
-3. clone this repository
-4. run `python typetest -s -d 60 < common_300`
-5. (optional) add `typetest` to path or make an alias like `tt`
-6. (optional) store your results in some file and analyse
+1. install python3
+2. install pip (python package manager)
+3. run `pip install typetest`
+4. run `typetest`
+
+Optionally
+- make an alias for `typetest`, I use `tt`
+- run `typetest-analyse` to get insights
 
 ## :bulb: ideas for tests
 Along with `typetest` this repository features sample tests.
