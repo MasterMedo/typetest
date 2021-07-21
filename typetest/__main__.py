@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import os
+import csv
 import sys
 import random
 import hashlib
 import platform
-import pandas as pd
 
 from time import time, strftime, gmtime
 from datetime import datetime
@@ -42,10 +42,7 @@ def main(
     rows,
     shuffle,
     help,
-    output,
-    mistyped,
-    char_speeds,
-    word_speeds,
+    output_directory,
     hash,
 ):
     """Reads test words from `input` delimited by whitespace characters.
@@ -55,7 +52,7 @@ def main(
     whichever comes first.
 
     The test ends when `duration` time has passed or all words have been typed.
-    Upon exiting, test results are printed and stored in `output`.
+    Upon exiting, test results are printed and stored in `test_results_file`.
     """
     if input.isatty():  # no test words provided, fallback to a default test
         basedir = os.path.dirname(__file__)
@@ -63,7 +60,11 @@ def main(
         duration = 60
         shuffle = True
 
-    words = input.read().split()
+    test = input.read()
+    words = test.split()
+
+    if hash is None:
+        hash = hashlib.sha1(test.encode("utf-8")).hexdigest()
 
     if shuffle:
         random.shuffle(words)
@@ -81,13 +82,12 @@ def main(
     color_wrong = term.color_rgb(230, 0, 0)
 
     correct_chars = total_chars = -1
-    wpm = 0
+    wpm = 0  # words per minute
     time_passed = actual_duration = start = 0
     word_i = 0
-    text = ""
+    text = ""  # text the user writes
     colors = [color_normal] * len(words)
 
-    mistyped_words = []
     char_times = []
 
     with term.raw(), term.cbreak(), term.fullscreen(), term.hidden_cursor():
@@ -116,28 +116,32 @@ def main(
                 start = time()
 
             if char == "\x03" or char == "\x1b":  # ctrl-c or ctrl-[ or esc
+                # stop the test
                 break
 
             elif char == "\x08" or char == "\x7f":  # ctrl-h or bksp
+                # delete last character
                 text = text[:-1]
 
             elif char in ("\x12", "\x13", "\t"):  # ctrl-r or ctrl-s or tab
+                # restart test
                 correct_chars = total_chars = -1
                 wpm = 0
                 time_passed = actual_duration = start = 0
                 word_i = 0
                 text = ""
                 colors = [color_normal] * len(words)
-                mistyped_words = []
                 char_times = []
-                if char == "\x13":
+                if char == "\x13":  # ctrl-s
                     random.shuffle(words)
 
             elif char == "\x15" or char == "\x17":  # ctrl-u or ctrl-w
+                # clear user input
                 text = ""
 
-            elif char.isspace() and text:
+            elif char.isspace() and text:  # word is submitted
                 if word_i + 1 < len(words):  # if not last space
+                    # count the space character as correct
                     total_chars += 1
                     correct_chars += 1
 
@@ -146,7 +150,6 @@ def main(
                     colors[word_i] = color_correct
                 else:
                     colors[word_i] = color_wrong
-                    mistyped_words.append((word, text))
 
                 actual_duration = time_passed
                 wpm = min(int(correct_chars * 12 / actual_duration), 999)
@@ -156,16 +159,21 @@ def main(
                 char_times.append((char, char_time))
 
             elif not char.isspace():
+                # append the character to user input
                 total_chars += 1
                 text += char
-                if word_i + 1 >= len(words) and words[-1] == text:
+                if word_i + 1 >= len(words) and words[-1] == text:  # last word
+                    # end test without needing to submit a space
                     term.ungetch(" ")
                 char_times.append((char, char_time))
 
+    # remove excess user input
     total_chars -= len(text)
 
-    if actual_duration <= 0 or total_chars <= 0:
+    if actual_duration <= 0 or total_chars <= 0:  # test is invalid
         return
+
+    # calculate results and write them to output files
 
     accuracy = 100 * correct_chars // total_chars
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -174,41 +182,46 @@ def main(
     print(f"speed:    {wpm}wpm")
     print(f"duration: {actual_duration:.2f}s")
 
-    if hash is None:
-        hash = hashlib.sha1(' '.join(words).encode("utf-8")).hexdigest()
+    test_results_file = open(output_directory + '/results.csv', 'a')
+    mistyped_words_file = open(output_directory + '/mistyped_words.csv', 'a')
+    char_speeds_file = open(output_directory + '/char_speeds.csv', 'a')
+    word_speeds_file = open(output_directory + '/word_speeds.csv', 'a')
+
+    test_results_writer = csv.writer(test_results_file, lineterminator='\n')
+    row = [timestamp, wpm, accuracy, actual_duration, duration, hash]
+    test_results_writer.writerow(row)
 
     chars, times = zip(*char_times)
-    durations = [t1 - t0 for t0, t1 in zip(times, times[1:])]
-    char_durations = list(zip(chars, durations))
-
-    row = [timestamp, wpm, accuracy, actual_duration, duration, hash]
-    output.write(",".join(map(str, row)) + "\n")
-
-    df = pd.DataFrame([(w1, w2, timestamp) for w1, w2 in mistyped_words])
-    mistyped.write(df.to_csv(index=False, header=False))
-
-    df = pd.DataFrame([(c, t, 12 / t, timestamp) for c, t in char_durations])
-    char_speeds.write(df.to_csv(index=False, header=False))
+    char_durations = [t1 - t0 for t0, t1 in zip(times, times[1:])]
+    char_speeds_writer = csv.writer(char_speeds_file, lineterminator='\n')
+    for char, duration in zip(chars, char_durations):
+        char_speeds_writer.writerow([char, duration, 12 / duration, timestamp])
 
     word = ""
     word_i = 0
     word_duration = 0
     word_durations = []
-    for char, duration in char_durations:
+    mistyped_writer = csv.writer(mistyped_words_file, lineterminator='\n')
+    word_speeds_writer = csv.writer(word_speeds_file, lineterminator='\n')
+    for char, duration in zip(chars, char_durations):
         if char.isspace():
             if word == words[word_i]:
                 word_durations.append((word, word_duration))
+                word_speeds_writer.writerow([
+                    word,
+                    word_duration,
+                    len(word) * 12 / word_duration,
+                    timestamp,
+                ])
+            else:
+                mistyped_writer.writerow([words[word_i], word, timestamp])
+
             word_i += 1
             word = ""
             word_duration = 0
         else:
             word += char
             word_duration += duration
-
-    df = pd.DataFrame(
-        [(word, t, len(word) * 12 / t, timestamp) for word, t in word_durations]
-    )
-    word_speeds.write(df.to_csv(header=False, index=False))
 
 
 def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
@@ -262,6 +275,12 @@ def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
 
 def parse_args():
     """Parses `sys.argv` and returns a dictionary suitable for `main`."""
+    def dir_path(string):
+        if os.path.isdir(string):
+            return string
+        else:
+            raise NotADirectoryError(string)
+
     parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
 
     default = "(default: %(default)s)"
@@ -288,31 +307,10 @@ def parse_args():
     )
     parser.add_argument(
         "-o",
-        "--output",
-        type=FileType("a"),
-        default=basedir + "/results/results.csv",
+        "--output-directory",
+        type=dir_path,
+        default=basedir + "/results",
         help="file to store results in\n" + default,
-    )
-    parser.add_argument(
-        "-m",
-        "--mistyped",
-        type=FileType("a"),
-        default=basedir + "/results/mistyped_words.csv",
-        help="file to store mistyped words in\n" + default,
-    )
-    parser.add_argument(
-        "-c",
-        "--char_speeds",
-        type=FileType("a"),
-        default=basedir + "/results/char_speeds.csv",
-        help="file to store character speeds in\n" + default,
-    )
-    parser.add_argument(
-        "-w",
-        "--word_speeds",
-        type=FileType("a"),
-        default=basedir + "/results/word_speeds.csv",
-        help="file to store word speeds in\n" + default,
     )
     parser.add_argument(
         "-s", "--shuffle", action="store_true", help="shuffle words " + default

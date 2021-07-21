@@ -36,7 +36,7 @@ As is, it is a near clone of [10fastfingers](https://10fastfingers.com/typing-te
 
 ## :chart_with_upwards_trend: analyse test results!
 ![wpm](https://user-images.githubusercontent.com/16375100/125824726-6304ee64-ddf1-4456-879c-10daca45d91c.png)
-[char_speeds](https://user-images.githubusercontent.com/16375100/125824817-5c2cbcae-fdcc-45c9-9a3b-ed5c3ec497a5.png)
+![char_speeds](https://user-images.githubusercontent.com/16375100/125824817-5c2cbcae-fdcc-45c9-9a3b-ed5c3ec497a5.png)
 ![word_speeds](https://user-images.githubusercontent.com/16375100/125824889-a01bb4bb-1ed2-49ed-a0aa-9bd5f6b411c7.png)
 ![mistypes](https://user-images.githubusercontent.com/16375100/125824921-3ecdf9f4-804e-41ec-98a4-6343d0ffbbe2.png)
 ![dist](https://user-images.githubusercontent.com/16375100/125824933-01294d91-92c9-4ae0-9910-539f6d16507e.png)
@@ -78,17 +78,18 @@ Write your own scraper, you may find some suggestions [here](https://en.wikipedi
 ## :question: usage
 
 ```
-usage: typetest [-h] [-d DURATION] [-i INPUT] [-o OUTPUT] [-s] [-r ROWS]
+usage: typetest [-h] [-d DURATION] [--hash HASH] [-i INPUT] [-o OUTPUT_DIRECTORY] [-s] [-r ROWS]
 
 optional arguments:
   -h, --help            show this help message and exit
   -d DURATION, --duration DURATION
                         duration in seconds (default: inf)
+  --hash HASH           custom hash (generated from input by default)
   -i INPUT, --input INPUT
                         file to read words from (default: sys.stdin)
-  -o OUTPUT, --output OUTPUT
+  -o OUTPUT_DIRECTORY, --output-directory OUTPUT_DIRECTORY
                         file to store results in
-                        (default: /home/medo/repos/typetest/results)
+                        (default: /home/medo/repos/typetest/typetest/results)
   -s, --shuffle         shuffle words (default: False)
   -r ROWS, --rows ROWS  number of test rows to show (default: 2)
 
@@ -99,8 +100,10 @@ example:
 
 shortcuts:
   ^c / ctrl+c           end the test and get results now
-  ^h / ctrl+h           backspace
-  ^r / ctrl+r           restart the same test
+  ^[ / ctrl+[ / esc     end the test and get results now
+  ^h / ctrl+h / bksp    delete a character
+  ^r / ctrl+r / tab     restart the same test
+  ^s / ctrl+s           restart the test with words reshuffled
   ^w / ctrl+w           delete a word
   ^u / ctrl+u           delete a word
 ```
