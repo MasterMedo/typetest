@@ -20,7 +20,7 @@
 
 <p align="center">
   <a href="https://github.com/mastermedo/typetest">
-    <img src="https://mislav.dev/assets/img/out.gif" alt="demo" title="demo"/>
+    <img src="https://raw.githubusercontent.com/MasterMedo/mastermedo.github.io/master/assets/img/typetest.svg" alt="demo" title="demo"/>
   </a>
 </p>
 
