@@ -91,6 +91,10 @@ def plot_wpm(output):
         if min_wpm is None or row["wpm"] < min_wpm:
             min_wpm = row["wpm"]
 
+    if len(gdf) < 2:
+        print("More data is needed, before analysing is possible. " +
+            "A minimum of 2 tests is required.")
+        sys.exit(0)
     # grouped = sorted(gdf.items(), key=lambda x: x[1][1]['wpm'].mean(),
     #                  reverse=True)
     grouped = gdf.items()
@@ -105,10 +109,9 @@ def plot_wpm(output):
         color = next(colors)
         ax.plot(x, y, color=color, lw=3, label=h)
         # ax.fill_between(x, y, min_wpm, facecolor=color, label=h)
-        if len(grouped) > 1:
-            trendline = np.poly1d(np.polyfit(x, y, 1))(x)
-            ax.plot(x, trendline, "-", lw=4, color="white")
-            ax.plot(x, trendline, "--", lw=2, color=color, label="trendline")
+        trendline = np.poly1d(np.polyfit(x, y, 1))(x)
+        ax.plot(x, trendline, "-", lw=4, color="white")
+        ax.plot(x, trendline, "--", lw=2, color=color, label="trendline")
 
     ax.plot(df.accuracy, color="white", lw=4, alpha=0.5)
     ax.plot(df.accuracy, color=next(colors), lw=1.5, label="accuracy [%]", alpha=0.5)
