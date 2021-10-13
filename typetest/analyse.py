@@ -77,6 +77,11 @@ def plot_wpm(output):
         names=["timestamp", "wpm", "accuracy", "actual_duration", "duration", "hash"],
     )
 
+    if len(df) < 2:
+        print("More data is needed, before analysing is possible. " +
+            "A minimum of 2 tests is required.")
+        return
+
     df.timestamp = pd.to_datetime(df.timestamp)
     # df = df.set_index(df.timestamp)
 
@@ -91,10 +96,6 @@ def plot_wpm(output):
         if min_wpm is None or row["wpm"] < min_wpm:
             min_wpm = row["wpm"]
 
-    if len(gdf) < 2:
-        print("More data is needed, before analysing is possible. " +
-            "A minimum of 2 tests is required.")
-        sys.exit(0)
     # grouped = sorted(gdf.items(), key=lambda x: x[1][1]['wpm'].mean(),
     #                  reverse=True)
     grouped = gdf.items()
