@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-from io import StringIO
-from collections import deque, defaultdict
-from argparse import ArgumentParser, RawTextHelpFormatter, FileType
-from functools import partial
-from itertools import cycle
-from matplotlib import rcParams
 
 import os
 import re
 import sys
 import math
 import warnings
+
+from io import StringIO
+from collections import deque, defaultdict
+from argparse import ArgumentParser, RawTextHelpFormatter, FileType
+from functools import partial
+from itertools import cycle
+from matplotlib import rcParams
 import numpy as np
 import pandas as pd
 import seaborn as sns
