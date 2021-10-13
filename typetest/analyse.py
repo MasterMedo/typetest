@@ -105,9 +105,10 @@ def plot_wpm(output):
         color = next(colors)
         ax.plot(x, y, color=color, lw=3, label=h)
         # ax.fill_between(x, y, min_wpm, facecolor=color, label=h)
-        trendline = np.poly1d(np.polyfit(x, y, 1))(x)
-        ax.plot(x, trendline, "-", lw=4, color="white")
-        ax.plot(x, trendline, "--", lw=2, color=color, label="trendline")
+        if len(grouped) > 1:
+            trendline = np.poly1d(np.polyfit(x, y, 1))(x)
+            ax.plot(x, trendline, "-", lw=4, color="white")
+            ax.plot(x, trendline, "--", lw=2, color=color, label="trendline")
 
     ax.plot(df.accuracy, color="white", lw=4, alpha=0.5)
     ax.plot(df.accuracy, color=next(colors), lw=1.5, label="accuracy [%]", alpha=0.5)
