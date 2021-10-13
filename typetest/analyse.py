@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Provide analysis of tests that have been run.
+"""
+
 from io import StringIO
 from collections import deque, defaultdict
 from argparse import ArgumentParser, RawTextHelpFormatter, FileType
