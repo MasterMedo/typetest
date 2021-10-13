@@ -77,6 +77,11 @@ def plot_wpm(output):
         names=["timestamp", "wpm", "accuracy", "actual_duration", "duration", "hash"],
     )
 
+    if len(df) < 2:
+        print("More data is needed, before analysing is possible. " +
+            "A minimum of 2 tests is required.")
+        return
+
     df.timestamp = pd.to_datetime(df.timestamp)
     # df = df.set_index(df.timestamp)
 
