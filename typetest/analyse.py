@@ -56,7 +56,7 @@ def show_diagram():
         print("  sudo pacman -S tk")
 
 
-def main(graphs, output, mistyped, char_speeds, word_speeds, help):
+def main(graphs, output, mistyped, char_speeds, word_speeds):
     """Draw diagrams the user has requested."""
     is_word = partial(re.match, r"^[a-z]+$")
     if "wpm" in graphs:
@@ -68,7 +68,7 @@ def main(graphs, output, mistyped, char_speeds, word_speeds, help):
     if "dist" in graphs:
         plot_word_wpm_distribution(word_speeds, filter_func=is_word)
     if "mistypes" in graphs:
-        plot_mistypes_distribution(mistyped, filter_func=is_word)
+        plot_mistypes_distribution(mistyped)
 
 
 def plot_wpm(output):
@@ -104,7 +104,7 @@ def plot_wpm(output):
     #                  reverse=True)
     grouped = gdf.items()
 
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     colors = cycle(sns.color_palette())
     for h, (indexes, hdf) in grouped:
         if h in known_hashes:
@@ -165,7 +165,7 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
             means.append(wpm.mean())
 
     assert chars, "Not enough data"
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
 
     ax.boxplot(wpms, labels=chars)
     mean = round(sum(means) / len(means))
@@ -214,7 +214,7 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
 
     assert words, "Not enough data"
 
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
 
     ax.boxplot(wpms, labels=words)
     ax.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
@@ -248,7 +248,7 @@ def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     show_diagram()
 
 
-def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
+def plot_mistypes_distribution(mistyped):
     """Plots a pie chart representing the shares of numbers of mistakes in
     mistyped words.
     """
@@ -269,7 +269,7 @@ def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
 
             mistakes[distance] += 1
 
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     labels, sizes = zip(*sorted(mistakes.items()))
     explode = [0] + [0.2] * (len(mistakes) - 1)
     ax.pie(sizes, labels=labels, autopct="%1.1f%%", explode=explode)
@@ -321,7 +321,7 @@ def parse_args():
         help="file to store word speeds in\n" + default,
     )
 
-    return dict(parser.parse_args()._get_kwargs(), help=parser.print_help)
+    return dict(parser.parse_args()._get_kwargs())
 
 
 if __name__ == "__main__":
