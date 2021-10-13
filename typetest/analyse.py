@@ -83,7 +83,7 @@ def plot_wpm(output):
 
     if len(df) < 2:
         print("More data is needed, before analysing is possible. " +
-            "A minimum of 2 tests is required.")
+              "A minimum of 2 tests is required.")
         return
 
     df.timestamp = pd.to_datetime(df.timestamp)
