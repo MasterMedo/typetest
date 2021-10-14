@@ -141,37 +141,37 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     filter_func: function taking a `char` returning `True` if char should be
     plotted, `False` otherwise. By default plots all characters.
     """
-    q = deque(char_speeds, maxlen=size)
-    df = pd.read_csv(
-        StringIO("".join(q)),
+    queue = deque(char_speeds, maxlen=size)
+    csv_data_frame = pd.read_csv(
+        StringIO("".join(queue)),
         header=None,
         names=["char", "duration", "wpm", "timestamp"],
     )
 
-    gdf = filter(lambda t: filter_func(t[1]["char"].iloc[0]), df.groupby(["char"]))
+    gdf = filter(lambda t: filter_func(t[1]["char"].iloc[0]), csv_data_frame.groupby(["char"]))
     wpms = []
     chars = []
     means = []
-    for char, df in gdf:
+    for char, csv_data_frame in gdf:
         if filter_func(char):
-            q1 = df["wpm"].quantile(0.1)  # noqa
-            q3 = df["wpm"].quantile(0.9)  # noqa
-            wpm = df.query("@q1 <= wpm <= @q3")["wpm"]
+            q1 = csv_data_frame["wpm"].quantile(0.1)  # noqa
+            q3 = csv_data_frame["wpm"].quantile(0.9)  # noqa
+            wpm = csv_data_frame.query("@q1 <= wpm <= @q3")["wpm"]
             chars.append(char)
             wpms.append(wpm)
             means.append(wpm.mean())
 
     assert chars, "Not enough data"
-    _, ax = plt.subplots()
+    _, axes = plt.subplots()
 
-    ax.boxplot(wpms, labels=chars)
+    axes.boxplot(wpms, labels=chars)
     mean = round(sum(means) / len(means))
-    ax.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
+    axes.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
 
-    ax.set_title(f"typing speed per character of last {size} characters")
-    ax.set_xlabel("")
-    ax.set_ylabel("typing speed [wpm]")
-    ax.legend()
+    axes.set_title(f"typing speed per character of last {size} characters")
+    axes.set_xlabel("")
+    axes.set_ylabel("typing speed [wpm]")
+    axes.legend()
 
     ticks = plt.yticks()[0]
     plt.yticks(np.arange(0, ticks[-1], 10))
