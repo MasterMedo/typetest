@@ -231,17 +231,17 @@ def plot_n_best_word_speeds(word_speeds, number, filter_func=lambda w: True):
 
 def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     """Plots a distribution over average speeds of unique words."""
-    df = pd.read_csv(
+    csv_data_frame = pd.read_csv(
         word_speeds, header=None, names=["word", "duration", "wpm", "timestamp"]
     )
 
-    gdf = list(filter(lambda t: filter_func(t[0]), df.groupby(["word"])))
-    wpms = [df["wpm"].median() for word, df in gdf]
+    gdf = list(filter(lambda t: filter_func(t[0]), csv_data_frame.groupby(["word"])))
+    wpms = [df["wpm"].median() for _, df in gdf]
 
-    ax = sns.histplot(wpms, kde=True, stat="probability")
-    ax.set_title("percentage of words typed at a certain speed")
-    ax.set_xlabel("typing speed in wpm")
-    ax.set_ylabel("percentage of words")
+    axes = sns.histplot(wpms, kde=True, stat="probability")
+    axes.set_title("percentage of words typed at a certain speed")
+    axes.set_xlabel("typing speed in wpm")
+    axes.set_ylabel("percentage of words")
     show_diagram()
 
 
