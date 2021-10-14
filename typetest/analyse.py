@@ -75,63 +75,60 @@ def plot_wpm(output):
     """Reads `output` and plots typing speeds uniformly apart.
     Adds a trendline.
     """
-    df = pd.read_csv(
+    csv_data_frame = pd.read_csv(
         output,
         header=None,
         names=["timestamp", "wpm", "accuracy", "actual_duration", "duration", "hash"],
     )
 
-    if len(df) < 2:
+    if len(csv_data_frame) < 2:
         print("More data is needed, before analysing is possible. " +
               "A minimum of 2 tests is required.")
         return
 
-    df.timestamp = pd.to_datetime(df.timestamp)
+    csv_data_frame.timestamp = pd.to_datetime(csv_data_frame.timestamp)
     # df = df.set_index(df.timestamp)
 
     min_wpm = None
-    gdf = defaultdict(lambda: [[], pd.DataFrame()])
-    for index, row in df.iterrows():
-        h = row["hash"]
-        indexes, hdf = gdf[h]
+    grouped_data_frames = defaultdict(lambda: [[], pd.DataFrame()])
+    for index, row in csv_data_frame.iterrows():
+        indexes, hash_data_frame = grouped_data_frames[row["hash"]]
         indexes.append(index)
-        hdf = hdf.append(row)
-        gdf[h] = indexes, hdf
+        hash_data_frame = hash_data_frame.append(row)
+        grouped_data_frames[row["hash"]] = indexes, hash_data_frame
         if min_wpm is None or row["wpm"] < min_wpm:
             min_wpm = row["wpm"]
 
     # grouped = sorted(gdf.items(), key=lambda x: x[1][1]['wpm'].mean(),
     #                  reverse=True)
-    grouped = gdf.items()
+    grouped = grouped_data_frames.items()
 
-    _, ax = plt.subplots()
+    _, axes = plt.subplots()
     colors = cycle(sns.color_palette())
-    for h, (indexes, hdf) in grouped:
-        if h in known_hashes:
-            h = known_hashes[h]
-        x = indexes
-        y = hdf.wpm
+    for row_hash, (indexes, hash_data_frame) in grouped:
+        if row_hash in known_hashes:
+            row_hash = known_hashes[row_hash]
         color = next(colors)
-        ax.plot(x, y, color=color, lw=3, label=h)
+        axes.plot(indexes, hash_data_frame.wpm, color=color, lw=3, label=row_hash)
         # ax.fill_between(x, y, min_wpm, facecolor=color, label=h)
-        trendline = np.poly1d(np.polyfit(x, y, 1))(x)
-        ax.plot(x, trendline, "-", lw=4, color="white")
-        ax.plot(x, trendline, "--", lw=2, color=color, label="trendline")
+        trendline = np.poly1d(np.polyfit(indexes, hash_data_frame.wpm, 1))(indexes)
+        axes.plot(indexes, trendline, "-", lw=4, color="white")
+        axes.plot(indexes, trendline, "--", lw=2, color=color, label="trendline")
 
-    ax.plot(df.accuracy, color="white", lw=4, alpha=0.5)
-    ax.plot(df.accuracy, color=next(colors), lw=1.5, label="accuracy [%]", alpha=0.5)
+    axes.plot(csv_data_frame.accuracy, color="white", lw=4, alpha=0.5)
+    axes.plot(csv_data_frame.accuracy, color=next(colors), lw=1.5, label="accuracy [%]", alpha=0.5)
 
-    ax.set_title("typing speed per typing test")
-    ax.set_xlabel("")
-    ax.set_ylabel("typing speed [wpm]")
-    ax.legend()
+    axes.set_title("typing speed per typing test")
+    axes.set_xlabel("")
+    axes.set_ylabel("typing speed [wpm]")
+    axes.legend()
 
     # ticks = plt.yticks()[0]
     # plt.yticks(np.arange(0, ticks[-1], 10))
-    plt.xticks(df.index, df.timestamp.dt.date, rotation=90)
+    plt.xticks(csv_data_frame.index, csv_data_frame.timestamp.dt.date, rotation=90)
     # label only every 50th tick
-    for i, label in enumerate(ax.xaxis.get_ticklabels()):
-        if i % math.ceil(len(df) / 50):
+    for i, label in enumerate(axes.xaxis.get_ticklabels()):
+        if i % math.ceil(len(csv_data_frame) / 50):
             label.set_visible(False)
 
     show_diagram()
