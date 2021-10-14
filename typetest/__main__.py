@@ -5,7 +5,6 @@ import sys
 import random
 import hashlib
 import platform
-
 from time import time, strftime, gmtime
 from datetime import datetime
 from argparse import ArgumentParser, RawTextHelpFormatter, FileType
