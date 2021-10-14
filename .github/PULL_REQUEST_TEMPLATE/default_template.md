@@ -1,7 +1,5 @@
-# What does your contribution aim to achieve
-What does your contribution aim to aciheve
+[A brief description of what your PR intends to achieve.]
 
-list of tasks:
-- [x] first task
-- [ ] second task
-- [ ] third task
+Please complete these tasks before opening your PR:
+- [ ] I have read and agree to the [code of conduct](../../CODE_OF_CONDUCT.md)
+- [ ] My PR has been linted with flake8.
