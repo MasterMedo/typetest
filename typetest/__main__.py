@@ -57,8 +57,12 @@ def main(
     if input.isatty():  # no test words provided, fallback to a default test
         basedir = os.path.dirname(__file__)
         input = open(basedir + "/tests/common_300", "r")
-        duration = 60
-        shuffle = True
+        if duration is None:
+            duration = 60
+            shuffle = True
+
+    if duration is None:
+        duration = float("inf")
 
     test = input.read()
     words = test.split()
@@ -289,8 +293,9 @@ def parse_args():
         "-d",
         "--duration",
         type=float,
-        default=float("inf"),
-        help="duration in seconds " + default,
+        default=None,
+        help="duration in seconds "
+        + "(default: <infinity> when a custom test is given, 60 seconds otherwise)",
     )
     parser.add_argument(
         "--hash",
