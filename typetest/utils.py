@@ -1,4 +1,5 @@
-def damerau_levenshtein_distance(word1: str, word2: str) -> int:
+"""Various utility functions."""
+
     """Calculates the distance between two words."""
     inf = len(word1) + len(word2)
     table = [[inf for _ in range(len(word1) + 2)] for _ in range(len(word2) + 2)]
