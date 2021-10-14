@@ -179,48 +179,48 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     show_diagram()
 
 
-def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
+def plot_n_best_word_speeds(word_speeds, number, filter_func=lambda w: True):
     """Loads all words from `word_speeds` and groups them by word."""
-    half = n // 2
-    df = pd.read_csv(
+    half = number // 2
+    csv_data_frame = pd.read_csv(
         word_speeds, header=None, names=["word", "duration", "wpm", "timestamp"]
     )
 
-    gdf = list(filter(lambda t: filter_func(t[0]), df.groupby(["word"])))
+    gdf = list(filter(lambda t: filter_func(t[0]), csv_data_frame.groupby(["word"])))
 
-    with open("least_typed_words", "w") as f:
+    with open("least_typed_words", "w") as open_file:
         words_by_freq = list(zip(*sorted(gdf, key=lambda t: len(t[1]))))[0]
-        f.write(" ".join(words_by_freq))
+        open_file.write(" ".join(words_by_freq))
 
     gdf = sorted(gdf, key=lambda x: x[1]["wpm"].median())
 
-    with open("worst_words", "w") as f:
+    with open("worst_words", "w") as open_file:
         words_by_median = list(zip(*gdf))[0]
-        f.write(" ".join(words_by_median))
+        open_file.write(" ".join(words_by_median))
 
     first_half = deque(maxlen=half)
     second_half = deque(maxlen=half)
-    for word, df in gdf:
+    for word, csv_data_frame in gdf:
         if len(first_half) < first_half.maxlen:
-            first_half.append((word, df["wpm"], df["wpm"].mean()))
+            first_half.append((word, csv_data_frame["wpm"], csv_data_frame["wpm"].mean()))
         else:
-            second_half.append((word, df["wpm"], df["wpm"].mean()))
+            second_half.append((word, csv_data_frame["wpm"], csv_data_frame["wpm"].mean()))
 
     words, wpms, means = zip(*list(first_half) + list(second_half))
     mean = round(sum(means) / len(means))
 
     assert words, "Not enough data"
 
-    _, ax = plt.subplots()
+    _, axes = plt.subplots()
 
-    ax.boxplot(wpms, labels=words)
-    ax.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
+    axes.boxplot(wpms, labels=words)
+    axes.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
 
-    ax.set_title(f"worst and best {half} words")
-    ax.set_xlabel("")
-    ax.set_yscale("linear")
-    ax.set_ylabel("typing speed [wpm]")
-    ax.legend()
+    axes.set_title(f"worst and best {half} words")
+    axes.set_xlabel("")
+    axes.set_yscale("linear")
+    axes.set_ylabel("typing speed [wpm]")
+    axes.legend()
 
     ticks = plt.yticks()[0]
     plt.yticks(np.arange(ticks[0], ticks[-1], 10))
