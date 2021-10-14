@@ -19,6 +19,8 @@ matplotlib = "^3.4.2"
 seaborn = "^0.11.1"
 
 [tool.poetry.dev-dependencies]
+flake8-import-order = "^0.18.1"
+flake8 = "^4.0.1"
 
 [tool.poetry.scripts]
 typetest = 'typetest.__main__:run'
