@@ -249,10 +249,10 @@ def plot_mistypes_distribution(mistyped):
     """Plots a pie chart representing the shares of numbers of mistakes in
     mistyped words.
     """
-    df = pd.read_csv(mistyped, header=None, names=["word", "mistype", "timestamp"])
+    csv_data_frames = pd.read_csv(mistyped, header=None, names=["word", "mistype", "timestamp"])
 
     mistakes = defaultdict(int)
-    words, mistypes = df["word"], df["mistype"]
+    words, mistypes = csv_data_frames["word"], csv_data_frames["mistype"]
     for word, mistype in zip(words, mistypes):
         if abs(len(word) - len(mistype)) < 10:
             distance = damerau_levenshtein_distance(word, mistype)
@@ -266,12 +266,12 @@ def plot_mistypes_distribution(mistyped):
 
             mistakes[distance] += 1
 
-    _, ax = plt.subplots()
+    _, axes = plt.subplots()
     labels, sizes = zip(*sorted(mistakes.items()))
     explode = [0] + [0.2] * (len(mistakes) - 1)
-    ax.pie(sizes, labels=labels, autopct="%1.1f%%", explode=explode)
+    axes.pie(sizes, labels=labels, autopct="%1.1f%%", explode=explode)
     # ax = sns.histplot(mistakes, stat='probability')
-    ax.set_title("number of mistakes made when typing a word")
+    axes.set_title("number of mistakes made when typing a word")
     show_diagram()
 
 
