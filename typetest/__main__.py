@@ -92,6 +92,7 @@ def main(
     colors = [color_normal] * len(words)
 
     char_times = []
+    restart_count = 0
 
     with term.raw(), term.cbreak(), term.fullscreen(), term.hidden_cursor():
         while word_i < len(words) and (not start or time() - start < duration):
@@ -128,6 +129,7 @@ def main(
 
             elif char in ("\x12", "\x13", "\t"):  # ctrl-r or ctrl-s or tab
                 # restart test
+                restart_count += 1
                 correct_chars = total_chars = -1
                 wpm = 0
                 time_passed = actual_duration = start = 0
@@ -184,6 +186,9 @@ def main(
     print(f"accuracy: {accuracy}%")
     print(f"speed:    {wpm}wpm")
     print(f"duration: {actual_duration:.2f}s")
+    print(f"restarts: {restart_count}")
+    print(f"words typed: {word_i}")
+    print(f"characters typed: {total_chars}")
 
     test_results_file = open(output_directory + "/results.csv", "a")
     mistyped_words_file = open(output_directory + "/mistyped_words.csv", "a")
@@ -191,7 +196,7 @@ def main(
     word_speeds_file = open(output_directory + "/word_speeds.csv", "a")
 
     test_results_writer = csv.writer(test_results_file, lineterminator="\n")
-    row = [timestamp, wpm, accuracy, actual_duration, duration, hash]
+    row = [timestamp, wpm, accuracy, actual_duration, duration, hash, restart_count, word_i, total_chars]
     test_results_writer.writerow(row)
 
     chars, times = zip(*char_times)
