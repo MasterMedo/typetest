@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-from io import StringIO
-from collections import deque, defaultdict
-from argparse import ArgumentParser, RawTextHelpFormatter, FileType
-from functools import partial
-from itertools import cycle
-from matplotlib import rcParams
 
 import os
 import re
 import sys
 import math
 import warnings
+from io import StringIO
+from collections import deque, defaultdict
+from argparse import ArgumentParser, RawTextHelpFormatter, FileType
+from functools import partial
+from itertools import cycle
+
+from matplotlib import rcParams
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -30,8 +31,9 @@ doc = f"""example:
 """
 
 known_hashes = {
-    "da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3": "300 most common english words",
-    "275eb003c4fba77d7e61893c3d9fa869822e06c8": "1000 most common english words (no double letters)",
+    "da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3": "300 most common english " + "words",
+    "275eb003c4fba77d7e61893c3d9fa869822e06c8": "1000 most common english "
+    + "words (no double letters)",
 }
 
 
@@ -78,8 +80,10 @@ def plot_wpm(output):
     )
 
     if len(df) < 2:
-        print("More data is needed, before analysing is possible. " +
-            "A minimum of 2 tests is required.")
+        print(
+            "More data is needed, before analysing is possible. "
+            + "A minimum of 2 tests is required."
+        )
         return
 
     df.timestamp = pd.to_datetime(df.timestamp)
