@@ -152,7 +152,7 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     )
 
     gdf = filter(lambda t: filter_func(t[1]["char"].iloc[0]), df.groupby(["char"]))
-    words_per_minutes = []
+    typing_speeds_in_wpm = []
     characters = []
     means = []
     for char, df in gdf:
@@ -161,13 +161,13 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
             q3 = df["wpm"].quantile(0.9)  # noqa
             word_per_minute = df.query("@q1 <= wpm <= @q3")["wpm"]
             characters.append(char)
-            words_per_minutes.append(word_per_minute)
+            typing_speeds_in_wpm.append(word_per_minute)
             means.append(word_per_minute.mean())
 
     assert characters, "Not enough data"
     fig, ax = plt.subplots()
 
-    ax.boxplot(words_per_minutes, labels=characters)
+    ax.boxplot(typing_speeds_in_wpm, labels=characters)
     mean = round(sum(means) / len(means))
     ax.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
 
@@ -209,14 +209,14 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
         else:
             second_half.append((word, df["wpm"], df["wpm"].mean()))
 
-    words, words_per_minutes, means = zip(*list(first_half) + list(second_half))
+    words, typing_speeds_in_wpm, means = zip(*list(first_half) + list(second_half))
     mean = round(sum(means) / len(means))
 
     assert words, "Not enough data"
 
     fig, ax = plt.subplots()
 
-    ax.boxplot(words_per_minutes, labels=words)
+    ax.boxplot(typing_speeds_in_wpm, labels=words)
     ax.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
 
     ax.set_title(f"worst and best {half_n} words")
@@ -239,9 +239,9 @@ def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     )
 
     gdf = list(filter(lambda t: filter_func(t[0]), df.groupby(["word"])))
-    words_per_minutes = [df["wpm"].median() for word, df in gdf]
+    typing_speeds_in_wpm = [df["wpm"].median() for word, df in gdf]
 
-    ax = sns.histplot(words_per_minutes, kde=True, stat="probability")
+    ax = sns.histplot(typing_speeds_in_wpm, kde=True, stat="probability")
     ax.set_title("percentage of words typed at a certain speed")
     ax.set_xlabel("typing speed in wpm")
     ax.set_ylabel("percentage of words")
