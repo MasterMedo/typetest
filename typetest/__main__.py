@@ -293,7 +293,8 @@ def parse_args():
     base_directory = os.path.dirname(__file__)
     parser.add_argument(
         "-d",
-        "--duration",
+        "-duration",
+        "--typing_duration",
         type=float,
         default=None,
         help="duration in seconds "
@@ -307,7 +308,8 @@ def parse_args():
     )
     parser.add_argument(
         "-i",
-        "--input",
+        "-input",
+        "--typed_word_input",
         type=FileType("r"),
         default=sys.stdin,
         help="file to read words from (default: sys.stdin)",
@@ -320,7 +322,7 @@ def parse_args():
         help="file to store results in\n" + default,
     )
     parser.add_argument(
-        "-s", "--shuffle", action="store_true", help="shuffle words " + default
+        "-s", "-shuffle", "--shuffle_flag", action="store_true", help="shuffle words " + default
     )
     parser.add_argument(
         "-r",
