@@ -36,15 +36,15 @@ def run():
 
 
 def main(
-    duration,
-    input,
+    typing_duration,
+    typed_word_input,
     rows,
-    shuffle,
+    shuffle_flag,
     help,
     output_directory,
     hash,
 ):
-    """Reads test words from `input` delimited by whitespace characters.
+    """Reads test words from `typed_word_input` delimited by whitespace characters.
     Listens to standard input forming a typed word every time a
     whitespace is pressed. Compares typed words with test words. Updates the
     screen calling `draw` every time a key is pressed or every 0.1 seconds,
@@ -53,24 +53,24 @@ def main(
     The test ends when `duration` time has passed or all words have been typed.
     Upon exiting, test results are printed and stored in `test_results_file`.
     """
-    if input.isatty():  # no test words provided, fallback to a default test
-        basedir = os.path.dirname(__file__)
-        input = open(basedir + "/tests/common_300", "r")
-        if duration is None:
-            duration = 60
-            shuffle = True
+    if typed_word_input.isatty():  # no test words provided, fallback to a default test
+        base_directory = os.path.dirname(__file__)
+        typed_word_input = open(base_directory + "/tests/common_300", "r")
+        if typing_duration is None:
+            typing_duration = 60
+            shuffle_flag = True
 
-    if duration is None:
-        duration = float("inf")
+    if typing_duration is None:
+        typing_duration = float("inf")
 
-    test = input.read()
-    words = test.split()
+    test = typed_word_input.read()
+    words_list = test.split()
 
     if hash is None:
         hash = hashlib.sha1(test.encode("utf-8")).hexdigest()
 
-    if shuffle:
-        random.shuffle(words)
+    if shuffle_flag:
+        random.shuffle(words_list)
 
     if not sys.__stdin__.isatty():  # force stdin from user
         if platform.system() == "Windows":
@@ -78,210 +78,210 @@ def main(
         else:
             sys.__stdin__ = open("/dev/tty", "r")
 
-    term = Terminal()
+    terminal = Terminal()
 
-    color_normal = term.normal
-    color_correct = term.color_rgb(0, 230, 0)
-    color_wrong = term.color_rgb(230, 0, 0)
+    normal_word_colour = terminal.normal
+    correct_word_colour = terminal.color_rgb(0, 230, 0)
+    wrong_word_colour = terminal.color_rgb(230, 0, 0)
 
-    correct_chars = total_chars = -1
-    wpm = 0  # words per minute
-    time_passed = actual_duration = start = 0
-    word_i = 0
-    text = ""  # text the user writes
-    colors = [color_normal] * len(words)
+    characters_correct = total_chars = -1
+    words_per_minute = 0
+    passed_duration = actual_duration = start = 0
+    test_word_index = 0
+    user_text = ""
+    colors = [normal_word_colour] * len(words_list)
 
-    char_times = []
+    character_times = []
 
-    with term.raw(), term.cbreak(), term.fullscreen(), term.hidden_cursor():
-        while word_i < len(words) and (not start or time() - start < duration):
-            word = words[word_i]
+    with terminal.raw(), terminal.cbreak(), terminal.fullscreen(), terminal.hidden_cursor():
+        while test_word_index < len(words_list) and (not start or time() - start < typing_duration):
+            test_word = words_list[test_word_index]
 
-            if word == text:
-                color = color_correct
-            elif word.startswith(text):
-                color = color_normal
+            if test_word == user_text:
+                color = correct_word_colour
+            elif test_word.startswith(user_text):
+                color = normal_word_colour
             else:
-                color = color_wrong
+                color = wrong_word_colour
 
-            colors[word_i] = color + term.reverse
+            colors[test_word_index] = color + terminal.reverse
 
-            draw(term, rows, words, colors, word_i, text, wpm, time_passed)
+            draw(terminal, rows, words_list, colors, test_word_index, user_text, words_per_minute, passed_duration)
 
-            char = term.inkey(timeout=0.1, esc_delay=0)
+            character = terminal.inkey(timeout=0.1, esc_delay=0)
             char_time = time()
-            time_passed = char_time - start if start else 0
+            passed_duration = char_time - start if start else 0
 
-            if not char:
+            if not character:
                 continue
 
             if not start:
                 start = time()
 
-            if char == "\x03" or char == "\x1b":  # ctrl-c or ctrl-[ or esc
+            if character == "\x03" or character == "\x1b":  # ctrl-c or ctrl-[ or esc
                 # stop the test
                 break
 
-            elif char == "\x08" or char == "\x7f":  # ctrl-h or bksp
+            elif character == "\x08" or character == "\x7f":  # ctrl-h or bksp
                 # delete last character
-                text = text[:-1]
+                user_text = user_text[:-1]
 
-            elif char in ("\x12", "\x13", "\t"):  # ctrl-r or ctrl-s or tab
+            elif character in ("\x12", "\x13", "\t"):  # ctrl-r or ctrl-s or tab
                 # restart test
-                correct_chars = total_chars = -1
-                wpm = 0
-                time_passed = actual_duration = start = 0
-                word_i = 0
-                text = ""
-                colors = [color_normal] * len(words)
-                char_times = []
-                if char == "\x13":  # ctrl-s
-                    random.shuffle(words)
+                characters_correct = total_chars = -1
+                words_per_minute = 0
+                passed_duration = actual_duration = start = 0
+                test_word_index = 0
+                user_text = ""
+                colors = [normal_word_colour] * len(words_list)
+                character_times = []
+                if character == "\x13":  # ctrl-s
+                    random.shuffle(words_list)
 
-            elif char == "\x15" or char == "\x17":  # ctrl-u or ctrl-w
+            elif character == "\x15" or character == "\x17":  # ctrl-u or ctrl-w
                 # clear user input
-                text = ""
+                user_text = ""
 
-            elif char.isspace() and text:  # word is submitted
-                if word_i + 1 < len(words):  # if not last space
+            elif character.isspace() and user_text:  # word is submitted
+                if test_word_index + 1 < len(words_list):  # if not last space
                     # count the space character as correct
                     total_chars += 1
-                    correct_chars += 1
+                    characters_correct += 1
 
-                if text == word:
-                    correct_chars += len(word)
-                    colors[word_i] = color_correct
+                if user_text == test_word:
+                    characters_correct += len(test_word)
+                    colors[test_word_index] = correct_word_colour
                 else:
-                    colors[word_i] = color_wrong
+                    colors[test_word_index] = wrong_word_colour
 
-                actual_duration = time_passed
-                wpm = min(int(correct_chars * 12 / actual_duration), 999)
+                actual_duration = passed_duration
+                words_per_minute = min(int(characters_correct * 12 / actual_duration), 999)
 
-                text = ""
-                word_i += 1
-                char_times.append((char, char_time))
+                user_text = ""
+                test_word_index += 1
+                character_times.append((character, char_time))
 
-            elif not char.isspace():
+            elif not character.isspace():
                 # append the character to user input
                 total_chars += 1
-                text += char
-                if word_i + 1 >= len(words) and words[-1] == text:  # last word
+                user_text += character
+                if test_word_index + 1 >= len(words_list) and words_list[-1] == user_text:  # last word
                     # end test without needing to submit a space
-                    term.ungetch(" ")
-                char_times.append((char, char_time))
+                    terminal.ungetch(" ")
+                character_times.append((character, char_time))
 
     # remove excess user input
-    total_chars -= len(text)
+    total_chars -= len(user_text)
 
     if actual_duration <= 0 or total_chars <= 0:  # test is invalid
         return
 
     # calculate results and write them to output files
 
-    accuracy = 100 * correct_chars // total_chars
+    accuracy = 100 * characters_correct // total_chars
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     print(f"accuracy: {accuracy}%")
-    print(f"speed:    {wpm}wpm")
+    print(f"speed:    {words_per_minute}wpm")
     print(f"duration: {actual_duration:.2f}s")
 
     test_results_file = open(output_directory + "/results.csv", "a")
     mistyped_words_file = open(output_directory + "/mistyped_words.csv", "a")
-    char_speeds_file = open(output_directory + "/char_speeds.csv", "a")
+    character_speeds_file = open(output_directory + "/char_speeds.csv", "a")
     word_speeds_file = open(output_directory + "/word_speeds.csv", "a")
 
     test_results_writer = csv.writer(test_results_file, lineterminator="\n")
-    row = [timestamp, wpm, accuracy, actual_duration, duration, hash]
+    row = [timestamp, words_per_minute, accuracy, actual_duration, typing_duration, hash]
     test_results_writer.writerow(row)
 
-    chars, times = zip(*char_times)
-    char_durations = [t1 - t0 for t0, t1 in zip(times, times[1:])]
-    char_speeds_writer = csv.writer(char_speeds_file, lineterminator="\n")
-    for char, duration in zip(chars, char_durations):
-        char_speeds_writer.writerow([char, duration, 12 / duration, timestamp])
+    characters, character_times = zip(*character_times)
+    character_durations = [t1 - t0 for t0, t1 in zip(character_times, character_times[1:])]
+    character_speeds_writer = csv.writer(character_speeds_file, lineterminator="\n")
+    for character, typing_duration in zip(characters, character_durations):
+        character_speeds_writer.writerow([character, typing_duration, 12 / typing_duration, timestamp])
 
-    word = ""
-    word_i = 0
+    test_word = ""
+    test_word_index = 0
     word_duration = 0
     word_durations = []
     mistyped_writer = csv.writer(mistyped_words_file, lineterminator="\n")
     word_speeds_writer = csv.writer(word_speeds_file, lineterminator="\n")
-    for char, duration in zip(chars, char_durations):
-        if char.isspace():
-            if word == words[word_i]:
-                word_durations.append((word, word_duration))
+    for character, typing_duration in zip(characters, character_durations):
+        if character.isspace():
+            if test_word == words_list[test_word_index]:
+                word_durations.append((test_word, word_duration))
                 word_speeds_writer.writerow(
                     [
-                        word,
+                        test_word,
                         word_duration,
-                        len(word) * 12 / word_duration,
+                        len(test_word) * 12 / word_duration,
                         timestamp,
                     ]
                 )
             else:
-                mistyped_writer.writerow([words[word_i], word, timestamp])
+                mistyped_writer.writerow([words_list[test_word_index], test_word, timestamp])
 
-            word_i += 1
-            word = ""
+            test_word_index += 1
+            test_word = ""
             word_duration = 0
         else:
-            word += char
-            word_duration += duration
+            test_word += character
+            word_duration += typing_duration
 
 
-def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
+def draw(terminal, rows, words_list, colors, test_word_index, user_text, words_per_minute, passed_duration):
     """Text wraps the `words` list to the terminal width, and prints `rows`
     lines of wrapped words coloured with `colors` starting with the line
     containing the current word that is being typed.
     Then, if there is space, prints `prompt` + `text` + `stats`.
     """
 
-    def join(words, length):
-        eol = term.clear_eol if length + len(words) - 1 < term.width else ""
+    def join(words_list, length):
+        eol = terminal.clear_eol if length + len(words_list) - 1 < terminal.width else ""
         return " ".join(line_words) + eol
 
-    echo = partial(print, end="", flush=True, file=term.stream)
-    allowed_height = min(term.height, rows)
+    echo = partial(print, end="", flush=True, file=terminal.stream)
+    allowed_height = min(terminal.height, rows)
 
-    len_line = 0
+    line_length = 0
     line_words = []
     line_height = None
-    for i, (word, color) in enumerate(zip(words, colors)):
-        if len_line + len(word) + len(line_words) > term.width:
+    for i, (word, color) in enumerate(zip(words_list, colors)):
+        if line_length + len(word) + len(line_words) > terminal.width:
             if line_height is not None:
-                echo(term.move_yx(line_height, 0) + join(line_words, len_line))
+                echo(terminal.move_yx(line_height, 0) + join(line_words, line_length))
                 line_height += 1
                 if line_height >= allowed_height:
                     break
 
-            len_line = 0
+            line_length = 0
             line_words = []
 
-        if i == word_i:
+        if i == test_word_index:
             line_height = 0
 
-        len_line += len(word)
-        line_words.append(color + word + term.normal)
+        line_length += len(word)
+        line_words.append(color + word + terminal.normal)
 
     else:
-        echo(term.move_yx(line_height, 0) + join(line_words, len_line))
+        echo(terminal.move_yx(line_height, 0) + join(line_words, line_length))
         line_height += 1
 
     if allowed_height > 1:
         prompt = ">>>"
-        timestamp = strftime("%H:%M:%S", gmtime(time_passed))
-        stats = f"{wpm:3d} wpm | {timestamp}"
-        n = term.width - len(prompt) - len(stats)
-        echo(term.move_yx(line_height, 0) + f"{prompt}{text[:n]: <{n}}{stats}")
+        timestamp = strftime("%H:%M:%S", gmtime(passed_duration))
+        stats = f"{words_per_minute:3d} wpm | {timestamp}"
+        n = terminal.width - len(prompt) - len(stats)
+        echo(terminal.move_yx(line_height, 0) + f"{prompt}{user_text[:n]: <{n}}{stats}")
 
     for i in range(1, allowed_height - line_height + 1):
-        echo(term.move_yx(line_height + i, 0) + term.clear_eol)
+        echo(terminal.move_yx(line_height + i, 0) + terminal.clear_eol)
 
 
 def parse_args():
     """Parses `sys.argv` and returns a dictionary suitable for `main`."""
 
-    def dir_path(string):
+    def directory_path(string):
         if os.path.isdir(string):
             return string
         else:
@@ -290,7 +290,7 @@ def parse_args():
     parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
 
     default = "(default: %(default)s)"
-    basedir = os.path.dirname(__file__)
+    base_directory = os.path.dirname(__file__)
     parser.add_argument(
         "-d",
         "--duration",
@@ -315,8 +315,8 @@ def parse_args():
     parser.add_argument(
         "-o",
         "--output-directory",
-        type=dir_path,
-        default=basedir + "/results",
+        type=directory_path,
+        default=base_directory + "/results",
         help="file to store results in\n" + default,
     )
     parser.add_argument(

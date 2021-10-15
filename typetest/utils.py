@@ -9,26 +9,26 @@ def damerau_levenshtein_distance(word1: str, word2: str) -> int:
         table[i][1] = i - 1
 
     da = {}
-    for col, c1 in enumerate(word1, 2):
+    for column, c1 in enumerate(word1, 2):
         last_row = 0
         for row, c2 in enumerate(word2, 2):
-            last_col = da.get(c2, 0)
+            last_column = da.get(c2, 0)
 
-            addition = table[row - 1][col] + 1
-            deletion = table[row][col - 1] + 1
-            substitution = table[row - 1][col - 1] + (0 if c1 == c2 else 1)
+            addition = table[row - 1][column] + 1
+            deletion = table[row][column - 1] + 1
+            substitution = table[row - 1][column - 1] + (0 if c1 == c2 else 1)
 
             transposition = (
-                table[last_row - 1][last_col - 1]
-                + (col - last_col - 1)
+                table[last_row - 1][last_column - 1]
+                + (column - last_column - 1)
                 + (row - last_row - 1)
                 + 1
             )
 
-            table[row][col] = min(addition, deletion, substitution, transposition)
+            table[row][column] = min(addition, deletion, substitution, transposition)
 
             if c1 == c2:
                 last_row = row
-        da[c1] = col
+        da[c1] = column
 
     return table[len(word2) + 1][len(word1) + 1]
