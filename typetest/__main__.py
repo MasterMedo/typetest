@@ -31,7 +31,7 @@ shortcuts:
 
 
 def run():
-    """ Parse command arguments and run main """
+    """Parse command arguments and run main"""
     main(**parse_args())
 
 
@@ -181,18 +181,18 @@ def main(
     print(f"speed:    {wpm}wpm")
     print(f"duration: {actual_duration:.2f}s")
 
-    test_results_file = open(output_directory + '/results.csv', 'a')
-    mistyped_words_file = open(output_directory + '/mistyped_words.csv', 'a')
-    char_speeds_file = open(output_directory + '/char_speeds.csv', 'a')
-    word_speeds_file = open(output_directory + '/word_speeds.csv', 'a')
+    test_results_file = open(output_directory + "/results.csv", "a")
+    mistyped_words_file = open(output_directory + "/mistyped_words.csv", "a")
+    char_speeds_file = open(output_directory + "/char_speeds.csv", "a")
+    word_speeds_file = open(output_directory + "/word_speeds.csv", "a")
 
-    test_results_writer = csv.writer(test_results_file, lineterminator='\n')
+    test_results_writer = csv.writer(test_results_file, lineterminator="\n")
     row = [timestamp, wpm, accuracy, actual_duration, duration, hash]
     test_results_writer.writerow(row)
 
     chars, times = zip(*char_times)
     char_durations = [t1 - t0 for t0, t1 in zip(times, times[1:])]
-    char_speeds_writer = csv.writer(char_speeds_file, lineterminator='\n')
+    char_speeds_writer = csv.writer(char_speeds_file, lineterminator="\n")
     for char, duration in zip(chars, char_durations):
         char_speeds_writer.writerow([char, duration, 12 / duration, timestamp])
 
@@ -200,18 +200,20 @@ def main(
     word_i = 0
     word_duration = 0
     word_durations = []
-    mistyped_writer = csv.writer(mistyped_words_file, lineterminator='\n')
-    word_speeds_writer = csv.writer(word_speeds_file, lineterminator='\n')
+    mistyped_writer = csv.writer(mistyped_words_file, lineterminator="\n")
+    word_speeds_writer = csv.writer(word_speeds_file, lineterminator="\n")
     for char, duration in zip(chars, char_durations):
         if char.isspace():
             if word == words[word_i]:
                 word_durations.append((word, word_duration))
-                word_speeds_writer.writerow([
-                    word,
-                    word_duration,
-                    len(word) * 12 / word_duration,
-                    timestamp,
-                ])
+                word_speeds_writer.writerow(
+                    [
+                        word,
+                        word_duration,
+                        len(word) * 12 / word_duration,
+                        timestamp,
+                    ]
+                )
             else:
                 mistyped_writer.writerow([words[word_i], word, timestamp])
 
@@ -274,6 +276,7 @@ def draw(term, rows, words, colors, word_i, text, wpm, time_passed):
 
 def parse_args():
     """Parses `sys.argv` and returns a dictionary suitable for `main`."""
+
     def dir_path(string):
         if os.path.isdir(string):
             return string
