@@ -195,7 +195,7 @@ def main(
     word_speeds_file = open(output_directory + "/word_speeds.csv", "a")
 
     test_results_writer = csv.writer(test_results_file, lineterminator="\n")
-    row = [timestamp, wpm, accuracy, actual_duration, duration, hash, restart_count, word_i, total_chars]
+    row = [timestamp, wpm, accuracy, actual_duration, duration, hash]
     test_results_writer.writerow(row)
 
     chars, times = zip(*char_times)
