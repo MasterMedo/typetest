@@ -229,7 +229,7 @@ def main(
             word_duration += expected_typing_duration
 
 
-def draw(terminal, rows, words, colors, test_word_index, user_text, typing_speed_in_wpm, passed_duration):
+def draw(terminal, rows, words, colors, test_word_index, user_text, typing_speed_in_wpm, typing_duration):
     """Text wraps the `words` list to the terminal width, and prints `rows`
     lines of wrapped words coloured with `colors` starting with the line
     containing the current word that is being typed.
@@ -269,7 +269,7 @@ def draw(terminal, rows, words, colors, test_word_index, user_text, typing_speed
 
     if allowed_height > 1:
         prompt = ">>>"
-        timestamp = strftime("%H:%M:%S", gmtime(passed_duration))
+        timestamp = strftime("%H:%M:%S", gmtime(typing_duration))
         stats = f"{typing_speed_in_wpm:3d} wpm | {timestamp}"
         n = terminal.width - len(prompt) - len(stats)
         echo(terminal.move_yx(line_height, 0) + f"{prompt}{user_text[:n]: <{n}}{stats}")
