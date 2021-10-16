@@ -16,4 +16,4 @@ jobs:
       - name: Run black
         run: poetry run black .
       - name: Check output matches input
-        name: git diff --exit-code
+        run: git diff --exit-code
