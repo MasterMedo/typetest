@@ -13,3 +13,7 @@ jobs:
         run: poetry install
       - name: Run flake8
         run: poetry run flake8
+      - name: Run black
+        run: poetry run black .
+      - name: Check output matches input
+        name: git diff --exit-code
