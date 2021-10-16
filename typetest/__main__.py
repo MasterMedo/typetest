@@ -188,7 +188,8 @@ def main(
     print(f"duration: {actual_duration:.2f}s")
     print(f"restarts: {restart_count}")
     print(
-        f"keystrokes: {correct_chars} correct | {total_chars - correct_chars} incorrect"
+        f"keystrokes: {correct_chars} correct | {total_chars - correct_chars}"
+        + " incorrect"
     )
 
     test_results_file = open(output_directory + "/results.csv", "a")
@@ -303,7 +304,8 @@ def parse_args():
         type=float,
         default=None,
         help="duration in seconds "
-        + "(default: <infinity> when a custom test is given, 60 seconds otherwise)",
+        + "(default: <infinity> when a custom test is given, 60 seconds "
+        + "otherwise)",
     )
     parser.add_argument(
         "--hash",

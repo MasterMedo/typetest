@@ -31,7 +31,8 @@ doc = f"""example:
 """
 
 known_hashes = {
-    "da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3": "300 most common english " + "words",
+    "da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3": "300 most common english "
+    + "words",
     "275eb003c4fba77d7e61893c3d9fa869822e06c8": "1000 most common english "
     + "words (no double letters)",
 }
@@ -76,7 +77,14 @@ def plot_wpm(output):
     df = pd.read_csv(
         output,
         header=None,
-        names=["timestamp", "wpm", "accuracy", "actual_duration", "duration", "hash"],
+        names=[
+            "timestamp",
+            "wpm",
+            "accuracy",
+            "actual_duration",
+            "duration",
+            "hash",
+        ],
     )
 
     if len(df) < 2:
@@ -119,7 +127,13 @@ def plot_wpm(output):
         ax.plot(x, trendline, "--", lw=2, color=color, label="trendline")
 
     ax.plot(df.accuracy, color="white", lw=4, alpha=0.5)
-    ax.plot(df.accuracy, color=next(colors), lw=1.5, label="accuracy [%]", alpha=0.5)
+    ax.plot(
+        df.accuracy,
+        color=next(colors),
+        lw=1.5,
+        label="accuracy [%]",
+        alpha=0.5,
+    )
 
     ax.set_title("typing speed per typing test")
     ax.set_xlabel("")
@@ -151,7 +165,9 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
         names=["char", "duration", "wpm", "timestamp"],
     )
 
-    gdf = filter(lambda t: filter_func(t[1]["char"].iloc[0]), df.groupby(["char"]))
+    gdf = filter(
+        lambda t: filter_func(t[1]["char"].iloc[0]), df.groupby(["char"])
+    )
     wpms = []
     chars = []
     means = []
@@ -186,7 +202,9 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     """Loads all words from `word_speeds` and groups them by word."""
     half = n // 2
     df = pd.read_csv(
-        word_speeds, header=None, names=["word", "duration", "wpm", "timestamp"]
+        word_speeds,
+        header=None,
+        names=["word", "duration", "wpm", "timestamp"],
     )
 
     gdf = list(filter(lambda t: filter_func(t[0]), df.groupby(["word"])))
@@ -235,7 +253,9 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
 def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     """Plots a distribution over average speeds of unique words."""
     df = pd.read_csv(
-        word_speeds, header=None, names=["word", "duration", "wpm", "timestamp"]
+        word_speeds,
+        header=None,
+        names=["word", "duration", "wpm", "timestamp"],
     )
 
     gdf = list(filter(lambda t: filter_func(t[0]), df.groupby(["word"])))
@@ -252,7 +272,9 @@ def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
     """Plots a pie chart representing the shares of numbers of mistakes in
     mistyped words.
     """
-    df = pd.read_csv(mistyped, header=None, names=["word", "mistype", "timestamp"])
+    df = pd.read_csv(
+        mistyped, header=None, names=["word", "mistype", "timestamp"]
+    )
 
     mistakes = defaultdict(int)
     words, mistypes = df["word"], df["mistype"]
