@@ -187,7 +187,9 @@ def main(
     print(f"speed:    {wpm}wpm")
     print(f"duration: {actual_duration:.2f}s")
     print(f"restarts: {restart_count}")
-    print(f"keystrokes: {correct_chars} correct | {total_chars - correct_chars} incorrect")
+    print(
+        f"keystrokes: {correct_chars} correct | {total_chars - correct_chars} incorrect"
+    )
 
     test_results_file = open(output_directory + "/results.csv", "a")
     mistyped_words_file = open(output_directory + "/mistyped_words.csv", "a")
