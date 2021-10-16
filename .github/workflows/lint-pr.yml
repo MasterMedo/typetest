@@ -13,5 +13,3 @@ jobs:
         run: poetry install
       - name: Run flake8
         run: poetry run flake8
-      - name: Run black
-        run: poetry run black .
