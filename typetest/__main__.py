@@ -92,6 +92,7 @@ def main(
     colors = [color_normal] * len(words)
 
     char_times = []
+    restart_count = 0
 
     with terminal.raw(), terminal.cbreak(), terminal.fullscreen(), terminal.hidden_cursor():
         while word_index < len(words) and (not start or time() - start < expected_typing_duration):
@@ -128,6 +129,7 @@ def main(
 
             elif char in ("\x12", "\x13", "\t"):  # ctrl-r or ctrl-s or tab
                 # restart test
+                restart_count += 1
                 correct_chars = total_chars = -1
                 typing_speed_in_wpm = 0
                 typing_duration = actual_duration = start = 0
@@ -184,6 +186,11 @@ def main(
     print(f"accuracy: {accuracy}%")
     print(f"speed:    {typing_speed_in_wpm}wpm")
     print(f"duration: {actual_duration:.2f}s")
+    print(f"restarts: {restart_count}")
+    print(
+        f"keystrokes: {correct_chars} correct | {total_chars - correct_chars}"
+        + " incorrect"
+    )
 
     test_results_file = open(output_directory + "/results.csv", "a")
     mistyped_words_file = open(output_directory + "/mistyped_words.csv", "a")
@@ -298,7 +305,8 @@ def parse_args():
         type=float,
         default=None,
         help="duration in seconds "
-        + "(default: <infinity> when a custom test is given, 60 seconds otherwise)",
+        + "(default: <infinity> when a custom test is given, 60 seconds "
+        + "otherwise)",
     )
     parser.add_argument(
         "--hash",
