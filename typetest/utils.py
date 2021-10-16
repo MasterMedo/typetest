@@ -21,8 +21,9 @@ def damerau_levenshtein_distance(word_1: str, word_2: str) -> int:
 
             addition = table[row - 1][col] + 1
             deletion = table[row][col - 1] + 1
-            substitution = table[row - 1][col - 1] + (0 if char_1 == char_2
-                                                      else 1)
+            substitution = table[row - 1][col - 1] + (
+                0 if char_1 == char_2 else 1
+            )
 
             transposition = (
                 table[last_row - 1][last_encountered_col - 1]
