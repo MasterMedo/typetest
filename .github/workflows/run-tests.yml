@@ -2,7 +2,7 @@ name:  "Unit tests"
 on: push
 
 jobs:
-  lint:
+  unittest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
