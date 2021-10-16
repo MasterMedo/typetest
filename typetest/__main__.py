@@ -84,29 +84,29 @@ def main(
     color_correct = terminal.color_rgb(0, 230, 0)
     color_wrong = terminal.color_rgb(230, 0, 0)
 
-    chars_correct = total_chars = -1
+    correct_chars = total_chars = -1
     typing_speed_in_wpm = 0
     typing_duration = actual_duration = start = 0
-    test_word_index = 0
+    word_index = 0
     user_text = ""
     colors = [color_normal] * len(words)
 
     char_times = []
 
     with terminal.raw(), terminal.cbreak(), terminal.fullscreen(), terminal.hidden_cursor():
-        while test_word_index < len(words) and (not start or time() - start < expected_typing_duration):
-            test_word = words[test_word_index]
+        while word_index < len(words) and (not start or time() - start < expected_typing_duration):
+            word = words[word_index]
 
-            if test_word == user_text:
+            if word == user_text:
                 color = color_correct
-            elif test_word.startswith(user_text):
+            elif word.startswith(user_text):
                 color = color_normal
             else:
                 color = color_wrong
 
-            colors[test_word_index] = color + terminal.reverse
+            colors[word_index] = color + terminal.reverse
 
-            draw(terminal, rows, words, colors, test_word_index, user_text, typing_speed_in_wpm, typing_duration)
+            draw(terminal, rows, words, colors, word_index, user_text, typing_speed_in_wpm, typing_duration)
 
             char = terminal.inkey(timeout=0.1, esc_delay=0)
             char_time = time()
@@ -128,10 +128,10 @@ def main(
 
             elif char in ("\x12", "\x13", "\t"):  # ctrl-r or ctrl-s or tab
                 # restart test
-                chars_correct = total_chars = -1
+                correct_chars = total_chars = -1
                 typing_speed_in_wpm = 0
                 typing_duration = actual_duration = start = 0
-                test_word_index = 0
+                word_index = 0
                 user_text = ""
                 colors = [color_normal] * len(words)
                 char_times = []
@@ -143,29 +143,29 @@ def main(
                 user_text = ""
 
             elif char.isspace() and user_text:  # word is submitted
-                if test_word_index + 1 < len(words):  # if not last space
+                if word_index + 1 < len(words):  # if not last space
                     # count the space char as correct
                     total_chars += 1
-                    chars_correct += 1
+                    correct_chars += 1
 
-                if user_text == test_word:
-                    chars_correct += len(test_word)
-                    colors[test_word_index] = color_correct
+                if user_text == word:
+                    correct_chars += len(word)
+                    colors[word_index] = color_correct
                 else:
-                    colors[test_word_index] = color_wrong
+                    colors[word_index] = color_wrong
 
                 actual_duration = typing_duration
-                typing_speed_in_wpm = min(int(chars_correct * 12 / actual_duration), 999)
+                typing_speed_in_wpm = min(int(correct_chars * 12 / actual_duration), 999)
 
                 user_text = ""
-                test_word_index += 1
+                word_index += 1
                 char_times.append((char, char_time))
 
             elif not char.isspace():
                 # append the char to user input
                 total_chars += 1
                 user_text += char
-                if test_word_index + 1 >= len(words) and words[-1] == user_text:  # last word
+                if word_index + 1 >= len(words) and words[-1] == user_text:  # last word
                     # end test without needing to submit a space
                     terminal.ungetch(" ")
                 char_times.append((char, char_time))
@@ -178,7 +178,7 @@ def main(
 
     # calculate results and write them to output files
 
-    accuracy = 100 * chars_correct // total_chars
+    accuracy = 100 * correct_chars // total_chars
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     print(f"accuracy: {accuracy}%")
@@ -195,41 +195,41 @@ def main(
     test_results_writer.writerow(row)
 
     chars, char_times = zip(*char_times)
-    char_durations = [t1 - t0 for t0, t1 in zip(char_times, char_times[1:])]
+    duration = [t1 - t0 for t0, t1 in zip(char_times, char_times[1:])]
     char_speeds_writer = csv.writer(char_speeds_file, lineterminator="\n")
-    for char, expected_typing_duration in zip(chars, char_durations):
+    for char, expected_typing_duration in zip(chars, duration):
         char_speeds_writer.writerow([char, expected_typing_duration, 12 / expected_typing_duration, timestamp])
 
-    test_word = ""
-    test_word_index = 0
+    word = ""
+    word_index = 0
     word_duration = 0
     word_durations = []
     mistyped_writer = csv.writer(mistyped_words_file, lineterminator="\n")
     word_speeds_writer = csv.writer(word_speeds_file, lineterminator="\n")
-    for char, expected_typing_duration in zip(chars, char_durations):
+    for char, expected_typing_duration in zip(chars, duration):
         if char.isspace():
-            if test_word == words[test_word_index]:
-                word_durations.append((test_word, word_duration))
+            if word == words[word_index]:
+                word_durations.append((word, word_duration))
                 word_speeds_writer.writerow(
                     [
-                        test_word,
+                        word,
                         word_duration,
-                        len(test_word) * 12 / word_duration,
+                        len(word) * 12 / word_duration,
                         timestamp,
                     ]
                 )
             else:
-                mistyped_writer.writerow([words[test_word_index], test_word, timestamp])
+                mistyped_writer.writerow([words[word_index], word, timestamp])
 
-            test_word_index += 1
-            test_word = ""
+            word_index += 1
+            word = ""
             word_duration = 0
         else:
-            test_word += char
+            word += char
             word_duration += expected_typing_duration
 
 
-def draw(terminal, rows, words_list, colors, test_word_index, user_text, typing_speed_in_wpm, passed_duration):
+def draw(terminal, rows, words, colors, test_word_index, user_text, typing_speed_in_wpm, passed_duration):
     """Text wraps the `words` list to the terminal width, and prints `rows`
     lines of wrapped words coloured with `colors` starting with the line
     containing the current word that is being typed.
@@ -246,7 +246,7 @@ def draw(terminal, rows, words_list, colors, test_word_index, user_text, typing_
     line_length = 0
     line_words = []
     line_height = None
-    for i, (word, color) in enumerate(zip(words_list, colors)):
+    for i, (word, color) in enumerate(zip(words, colors)):
         if line_length + len(word) + len(line_words) > terminal.width:
             if line_height is not None:
                 echo(terminal.move_yx(line_height, 0) + join(line_words, line_length))

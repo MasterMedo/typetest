@@ -153,21 +153,21 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
 
     gdf = filter(lambda t: filter_func(t[1]["char"].iloc[0]), df.groupby(["char"]))
     typing_speeds_in_wpm = []
-    characters = []
+    chars = []
     means = []
     for char, df in gdf:
         if filter_func(char):
             q1 = df["wpm"].quantile(0.1)  # noqa
             q3 = df["wpm"].quantile(0.9)  # noqa
-            word_per_minute = df.query("@q1 <= wpm <= @q3")["wpm"]
-            characters.append(char)
-            typing_speeds_in_wpm.append(word_per_minute)
-            means.append(word_per_minute.mean())
+            typing_speed_in_wpm = df.query("@q1 <= wpm <= @q3")["wpm"]
+            chars.append(char)
+            typing_speeds_in_wpm.append(typing_speed_in_wpm)
+            means.append(typing_speed_in_wpm.mean())
 
-    assert characters, "Not enough data"
+    assert chars, "Not enough data"
     fig, ax = plt.subplots()
 
-    ax.boxplot(typing_speeds_in_wpm, labels=characters)
+    ax.boxplot(typing_speeds_in_wpm, labels=chars)
     mean = round(sum(means) / len(means))
     ax.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
 
@@ -184,7 +184,7 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
 
 def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     """Loads all words from `word_speeds` and groups them by word."""
-    half_n = n // 2
+    
     df = pd.read_csv(
         word_speeds, header=None, names=["word", "duration", "wpm", "timestamp"]
     )
@@ -201,8 +201,8 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
         words_by_median = list(zip(*gdf))[0]
         f.write(" ".join(words_by_median))
 
-    first_half = deque(maxlen=half_n)
-    second_half = deque(maxlen=half_n)
+    first_half = deque(maxlen=n // 2)
+    second_half = deque(maxlen=n // 2)
     for word, df in gdf:
         if len(first_half) < first_half.maxlen:
             first_half.append((word, df["wpm"], df["wpm"].mean()))
@@ -219,7 +219,7 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     ax.boxplot(typing_speeds_in_wpm, labels=words)
     ax.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
 
-    ax.set_title(f"worst and best {half_n} words")
+    ax.set_title(f"worst and best {n // 2} words")
     ax.set_xlabel("")
     ax.set_yscale("linear")
     ax.set_ylabel("typing speed [wpm]")
