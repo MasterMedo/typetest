@@ -3,3 +3,4 @@
 Please complete these tasks before opening your PR:
 - [ ] My PR has been linted with flake8, i.e. `poetry run flake8`
 - [ ] My PR has been formatted with black, i.e. `poetry run black .`
+- [ ] My PR passes the tests, i.e. `poetry run python -m unittest`
