@@ -124,7 +124,7 @@ def main(
                 break
 
             elif char == "\x08" or char == "\x7f":  # ctrl-h or bksp
-                # delete last char
+                # delete last character
                 user_text = user_text[:-1]
 
             elif char in ("\x12", "\x13", "\t"):  # ctrl-r or ctrl-s or tab
