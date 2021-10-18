@@ -146,7 +146,7 @@ def main(
 
             elif char.isspace() and user_text:  # word is submitted
                 if word_index + 1 < len(words):  # if not last space
-                    # count the space char as correct
+                    # count the space character as correct
                     total_chars += 1
                     correct_chars += 1
 
