@@ -36,7 +36,7 @@ def run():
 
 
 def main(
-    expected_typing_duration,
+    duration,
     input,
     rows,
     shuffle_flag,
@@ -56,12 +56,12 @@ def main(
     if input.isatty():  # no test words provided, fallback to a default test
         base_directory = os.path.dirname(__file__)
         input = open(base_directory + "/tests/common_300", "r")
-        if expected_typing_duration is None:
-            expected_typing_duration = 60
+        if duration is None:
+            duration = 60
             shuffle_flag = True
 
-    if expected_typing_duration is None:
-        expected_typing_duration = float("inf")
+    if duration is None:
+        duration = float("inf")
 
     test = input.read()
     words = test.split()
@@ -95,7 +95,7 @@ def main(
     restart_count = 0
 
     with terminal.raw(), terminal.cbreak(), terminal.fullscreen(), terminal.hidden_cursor():
-        while word_index < len(words) and (not start or time() - start < expected_typing_duration):
+        while word_index < len(words) and (not start or time() - start < duration):
             word = words[word_index]
 
             if word == user_text:
@@ -198,14 +198,14 @@ def main(
     word_speeds_file = open(output_directory + "/word_speeds.csv", "a")
 
     test_results_writer = csv.writer(test_results_file, lineterminator="\n")
-    row = [timestamp, typing_speed_in_wpm, accuracy, actual_duration, expected_typing_duration, hash]
+    row = [timestamp, typing_speed_in_wpm, accuracy, actual_duration, duration, hash]
     test_results_writer.writerow(row)
 
-    chars, char_times = zip(*char_times)
-    duration = [t1 - t0 for t0, t1 in zip(char_times, char_times[1:])]
+    chars, times = zip(*char_times)
+    char_durations  = [t1 - t0 for t0, t1 in zip(times, times[1:])]
     char_speeds_writer = csv.writer(char_speeds_file, lineterminator="\n")
-    for char, expected_typing_duration in zip(chars, duration):
-        char_speeds_writer.writerow([char, expected_typing_duration, 12 / expected_typing_duration, timestamp])
+    for char, duration in zip(chars, char_durations):
+        char_speeds_writer.writerow([char, duration, 12 / duration, timestamp])
 
     word = ""
     word_index = 0
@@ -213,7 +213,7 @@ def main(
     word_durations = []
     mistyped_writer = csv.writer(mistyped_words_file, lineterminator="\n")
     word_speeds_writer = csv.writer(word_speeds_file, lineterminator="\n")
-    for char, expected_typing_duration in zip(chars, duration):
+    for char, duration in zip(chars, char_durations):
         if char.isspace():
             if word == words[word_index]:
                 word_durations.append((word, word_duration))
@@ -233,18 +233,18 @@ def main(
             word_duration = 0
         else:
             word += char
-            word_duration += expected_typing_duration
+            word_duration += duration
 
 
-def draw(terminal, rows, words, colors, test_word_index, user_text, typing_speed_in_wpm, typing_duration):
+def draw(terminal, rows, words, colors, word_index, user_text, typing_speed_in_wpm, typing_duration):
     """Text wraps the `words` list to the terminal width, and prints `rows`
     lines of wrapped words coloured with `colors` starting with the line
     containing the current word that is being typed.
     Then, if there is space, prints `prompt` + `text` + `stats`.
     """
 
-    def join(words_list, length):
-        eol = terminal.clear_eol if length + len(words_list) - 1 < terminal.width else ""
+    def join(words, length):
+        eol = terminal.clear_eol if length + len(words) - 1 < terminal.width else ""
         return " ".join(line_words) + eol
 
     echo = partial(print, end="", flush=True, file=terminal.stream)
@@ -264,7 +264,7 @@ def draw(terminal, rows, words, colors, test_word_index, user_text, typing_speed
             line_length = 0
             line_words = []
 
-        if i == test_word_index:
+        if i == word_index:
             line_height = 0
 
         line_length += len(word)
@@ -300,8 +300,7 @@ def parse_args():
     base_directory = os.path.dirname(__file__)
     parser.add_argument(
         "-d",
-        "-duration",
-        "--typing_duration",
+        "--duration",
         type=float,
         default=None,
         help="duration in seconds "
