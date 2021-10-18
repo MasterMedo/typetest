@@ -164,7 +164,7 @@ def main(
                 char_times.append((char, char_time))
 
             elif not char.isspace():
-                # append the char to user input
+                # append the character to user input
                 total_chars += 1
                 user_text += char
                 if word_index + 1 >= len(words) and words[-1] == user_text:  # last word
