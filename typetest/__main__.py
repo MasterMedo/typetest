@@ -124,7 +124,7 @@ def main(
                 break
 
             elif char == "\x08" or char == "\x7f":  # ctrl-h or bksp
-                # delete last char
+                # delete last character
                 user_text = user_text[:-1]
 
             elif char in ("\x12", "\x13", "\t"):  # ctrl-r or ctrl-s or tab
@@ -146,7 +146,7 @@ def main(
 
             elif char.isspace() and user_text:  # word is submitted
                 if word_index + 1 < len(words):  # if not last space
-                    # count the space char as correct
+                    # count the space character as correct
                     total_chars += 1
                     correct_chars += 1
 
@@ -164,7 +164,7 @@ def main(
                 char_times.append((char, char_time))
 
             elif not char.isspace():
-                # append the char to user input
+                # append the character to user input
                 total_chars += 1
                 user_text += char
                 if word_index + 1 >= len(words) and words[-1] == user_text:  # last word
