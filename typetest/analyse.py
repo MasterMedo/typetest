@@ -168,7 +168,7 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     gdf = filter(
         lambda t: filter_func(t[1]["char"].iloc[0]), df.groupby(["char"])
     )
-    
+
     typing_speeds_in_wpm = []
     chars = []
     means = []
@@ -201,7 +201,7 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
 
 def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     """Loads all words from `word_speeds` and groups them by word."""
-    
+
     df = pd.read_csv(
         word_speeds,
         header=None,
@@ -228,7 +228,9 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
         else:
             second_half.append((word, df["wpm"], df["wpm"].mean()))
 
-    words, typing_speeds_in_wpm, means = zip(*list(first_half) + list(second_half))
+    words, typing_speeds_in_wpm, means = zip(
+        *list(first_half) + list(second_half)
+    )
     mean = round(sum(means) / len(means))
 
     assert words, "Not enough data"

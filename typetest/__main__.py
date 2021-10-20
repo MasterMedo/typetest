@@ -95,7 +95,9 @@ def main(
     restart_count = 0
 
     with terminal.raw(), terminal.cbreak(), terminal.fullscreen(), terminal.hidden_cursor():
-        while word_index < len(words) and (not start or time() - start < duration):
+        while word_index < len(words) and (
+            not start or time() - start < duration
+        ):
             word = words[word_index]
 
             if word == user_text:
@@ -107,7 +109,16 @@ def main(
 
             colors[word_index] = color + terminal.reverse
 
-            draw(terminal, rows, words, colors, word_index, user_text, typing_speed_in_wpm, typing_duration)
+            draw(
+                terminal,
+                rows,
+                words,
+                colors,
+                word_index,
+                user_text,
+                typing_speed_in_wpm,
+                typing_duration,
+            )
 
             char = terminal.inkey(timeout=0.1, esc_delay=0)
             char_time = time()
@@ -157,7 +168,9 @@ def main(
                     colors[word_index] = color_wrong
 
                 actual_duration = typing_duration
-                typing_speed_in_wpm = min(int(correct_chars * 12 / actual_duration), 999)
+                typing_speed_in_wpm = min(
+                    int(correct_chars * 12 / actual_duration), 999
+                )
 
                 user_text = ""
                 word_index += 1
@@ -167,7 +180,9 @@ def main(
                 # append the character to user input
                 total_chars += 1
                 user_text += char
-                if word_index + 1 >= len(words) and words[-1] == user_text:  # last word
+                if (
+                    word_index + 1 >= len(words) and words[-1] == user_text
+                ):  # last word
                     # end test without needing to submit a space
                     terminal.ungetch(" ")
                 char_times.append((char, char_time))
@@ -198,11 +213,18 @@ def main(
     word_speeds_file = open(output_directory + "/word_speeds.csv", "a")
 
     test_results_writer = csv.writer(test_results_file, lineterminator="\n")
-    row = [timestamp, typing_speed_in_wpm, accuracy, actual_duration, duration, hash]
+    row = [
+        timestamp,
+        typing_speed_in_wpm,
+        accuracy,
+        actual_duration,
+        duration,
+        hash,
+    ]
     test_results_writer.writerow(row)
 
     chars, times = zip(*char_times)
-    char_durations  = [t1 - t0 for t0, t1 in zip(times, times[1:])]
+    char_durations = [t1 - t0 for t0, t1 in zip(times, times[1:])]
     char_speeds_writer = csv.writer(char_speeds_file, lineterminator="\n")
     for char, duration in zip(chars, char_durations):
         char_speeds_writer.writerow([char, duration, 12 / duration, timestamp])
@@ -236,7 +258,16 @@ def main(
             word_duration += duration
 
 
-def draw(terminal, rows, words, colors, word_index, user_text, typing_speed_in_wpm, typing_duration):
+def draw(
+    terminal,
+    rows,
+    words,
+    colors,
+    word_index,
+    user_text,
+    typing_speed_in_wpm,
+    typing_duration,
+):
     """Text wraps the `words` list to the terminal width, and prints `rows`
     lines of wrapped words coloured with `colors` starting with the line
     containing the current word that is being typed.
@@ -244,7 +275,11 @@ def draw(terminal, rows, words, colors, word_index, user_text, typing_speed_in_w
     """
 
     def join(words, length):
-        eol = terminal.clear_eol if length + len(words) - 1 < terminal.width else ""
+        eol = (
+            terminal.clear_eol
+            if length + len(words) - 1 < terminal.width
+            else ""
+        )
         return " ".join(line_words) + eol
 
     echo = partial(print, end="", flush=True, file=terminal.stream)
@@ -256,7 +291,10 @@ def draw(terminal, rows, words, colors, word_index, user_text, typing_speed_in_w
     for i, (word, color) in enumerate(zip(words, colors)):
         if line_length + len(word) + len(line_words) > terminal.width:
             if line_height is not None:
-                echo(terminal.move_yx(line_height, 0) + join(line_words, line_length))
+                echo(
+                    terminal.move_yx(line_height, 0)
+                    + join(line_words, line_length)
+                )
                 line_height += 1
                 if line_height >= allowed_height:
                     break
@@ -279,7 +317,10 @@ def draw(terminal, rows, words, colors, word_index, user_text, typing_speed_in_w
         timestamp = strftime("%H:%M:%S", gmtime(typing_duration))
         stats = f"{typing_speed_in_wpm:3d} wpm | {timestamp}"
         n = terminal.width - len(prompt) - len(stats)
-        echo(terminal.move_yx(line_height, 0) + f"{prompt}{user_text[:n]: <{n}}{stats}")
+        echo(
+            terminal.move_yx(line_height, 0)
+            + f"{prompt}{user_text[:n]: <{n}}{stats}"
+        )
 
     for i in range(1, allowed_height - line_height + 1):
         echo(terminal.move_yx(line_height + i, 0) + terminal.clear_eol)
@@ -328,7 +369,11 @@ def parse_args():
         help="file to store results in\n" + default,
     )
     parser.add_argument(
-        "-s", "-shuffle", "--shuffle_flag", action="store_true", help="shuffle words " + default
+        "-s",
+        "-shuffle",
+        "--shuffle_flag",
+        action="store_true",
+        help="shuffle words " + default,
     )
     parser.add_argument(
         "-r",
