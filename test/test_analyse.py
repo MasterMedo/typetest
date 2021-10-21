@@ -63,6 +63,17 @@ class TestAnalyse(unittest.TestCase):
         pd.read_csv.assert_called_once()
         plt.show.assert_not_called()
 
+    def test_plot_char_speeds_not_enough_data(self):
+        pd.read_csv = MagicMock(
+            return_value=pd.DataFrame(
+                columns=["char", "duration", "wpm", "timestamp"]
+            )
+        )
+        plt.show = MagicMock()
+        self.assertRaises(AssertionError, plot_char_speeds, "")
+        pd.read_csv.assert_called_once()
+        plt.show.assert_not_called()
+
     def test_plot_word_wpm_distribution(self):
         pd.read_csv = MagicMock(
             return_value=pd.DataFrame(
