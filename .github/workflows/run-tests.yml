@@ -14,4 +14,4 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run tests
-        run: poetry run python -m unittest
+        run: poetry run test
