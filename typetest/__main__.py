@@ -36,8 +36,7 @@ def run():
 
 
 def main(
-    duration,
-    input,
+    duration, input,
     rows,
     shuffle_flag,
     help,
