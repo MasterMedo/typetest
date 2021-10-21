@@ -94,7 +94,7 @@ def main(
     char_times = []
     restart_count = 0
 
-    with terminal.raw(), terminal.cbreak(), terminal.fullscreen(), terminal.hidden_cursor():
+    with terminal.raw(), terminal.cbreak(), terminal.fullscreen(), terminal.hidden_cursor():  # noqa E501
         while word_index < len(words) and (
             not start or time() - start < duration
         ):
