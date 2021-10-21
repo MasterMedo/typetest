@@ -168,22 +168,23 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     gdf = filter(
         lambda t: filter_func(t[1]["char"].iloc[0]), df.groupby(["char"])
     )
-    wpms = []
+
+    typing_speeds_in_wpm = []
     chars = []
     means = []
     for char, df in gdf:
         if filter_func(char):
             q1 = df["wpm"].quantile(0.1)  # noqa
             q3 = df["wpm"].quantile(0.9)  # noqa
-            wpm = df.query("@q1 <= wpm <= @q3")["wpm"]
+            typing_speed_in_wpm = df.query("@q1 <= wpm <= @q3")["wpm"]
             chars.append(char)
-            wpms.append(wpm)
-            means.append(wpm.mean())
+            typing_speeds_in_wpm.append(typing_speed_in_wpm)
+            means.append(typing_speed_in_wpm.mean())
 
     assert chars, "Not enough data"
     fig, ax = plt.subplots()
 
-    ax.boxplot(wpms, labels=chars)
+    ax.boxplot(typing_speeds_in_wpm, labels=chars)
     mean = round(sum(means) / len(means))
     ax.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
 
@@ -200,7 +201,7 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
 
 def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     """Loads all words from `word_speeds` and groups them by word."""
-    half = n // 2
+
     df = pd.read_csv(
         word_speeds,
         header=None,
@@ -219,25 +220,27 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
         words_by_median = list(zip(*gdf))[0]
         f.write(" ".join(words_by_median))
 
-    first_half = deque(maxlen=half)
-    second_half = deque(maxlen=half)
+    first_half = deque(maxlen=n // 2)
+    second_half = deque(maxlen=n // 2)
     for word, df in gdf:
         if len(first_half) < first_half.maxlen:
             first_half.append((word, df["wpm"], df["wpm"].mean()))
         else:
             second_half.append((word, df["wpm"], df["wpm"].mean()))
 
-    words, wpms, means = zip(*list(first_half) + list(second_half))
+    words, typing_speeds_in_wpm, means = zip(
+        *list(first_half) + list(second_half)
+    )
     mean = round(sum(means) / len(means))
 
     assert words, "Not enough data"
 
     fig, ax = plt.subplots()
 
-    ax.boxplot(wpms, labels=words)
+    ax.boxplot(typing_speeds_in_wpm, labels=words)
     ax.axhline(y=mean, color="r", linestyle="-", label=f"mean {mean} wpm")
 
-    ax.set_title(f"worst and best {half} words")
+    ax.set_title(f"worst and best {n // 2} words")
     ax.set_xlabel("")
     ax.set_yscale("linear")
     ax.set_ylabel("typing speed [wpm]")
@@ -259,9 +262,9 @@ def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     )
 
     gdf = list(filter(lambda t: filter_func(t[0]), df.groupby(["word"])))
-    wpms = [df["wpm"].median() for word, df in gdf]
+    typing_speeds_in_wpm = [df["wpm"].median() for word, df in gdf]
 
-    ax = sns.histplot(wpms, kde=True, stat="probability")
+    ax = sns.histplot(typing_speeds_in_wpm, kde=True, stat="probability")
     ax.set_title("percentage of words typed at a certain speed")
     ax.set_xlabel("typing speed in wpm")
     ax.set_ylabel("percentage of words")
@@ -305,8 +308,8 @@ def parse_args():
     parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
 
     default = "(default: %(default)s)"
-    basedir = os.path.dirname(__file__)
-    resultsdir = "results"
+    base_directory = os.path.dirname(__file__)
+    results_directory = "results"
     parser.add_argument(
         "graphs",
         type=str,
@@ -318,28 +321,28 @@ def parse_args():
         "-o",
         "--output",
         type=FileType("r"),
-        default=f"{basedir}/{resultsdir}/results.csv",
+        default=f"{base_directory}/{results_directory}/results.csv",
         help="file to store results in\n" + default,
     )
     parser.add_argument(
         "-m",
         "--mistyped",
         type=FileType("r"),
-        default=f"{basedir}/{resultsdir}/mistyped_words.csv",
+        default=f"{base_directory}/{results_directory}/mistyped_words.csv",
         help="file to store mistyped words in\n" + default,
     )
     parser.add_argument(
         "-c",
         "--char_speeds",
         type=FileType("r"),
-        default=f"{basedir}/{resultsdir}/char_speeds.csv",
+        default=f"{base_directory}/{results_directory}/char_speeds.csv",
         help="file to store character speeds in\n" + default,
     )
     parser.add_argument(
         "-w",
         "--word_speeds",
         type=FileType("r"),
-        default=f"{basedir}/{resultsdir}/word_speeds.csv",
+        default=f"{base_directory}/{results_directory}/word_speeds.csv",
         help="file to store word speeds in\n" + default,
     )
 
