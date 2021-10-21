@@ -26,6 +26,7 @@ black = "^21.9b0"
 [tool.poetry.scripts]
 typetest = 'typetest.__main__:run'
 typetest-analyse = 'typetest.analyse:run'
+test = 'test.__main__:run'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
