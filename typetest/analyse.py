@@ -74,6 +74,19 @@ def plot_wpm(output):
     """Reads `output` and plots typing speeds uniformly apart.
     Adds a trendline.
     """
+    df = wpm_data(output)
+    if (df is None):
+        print(
+            "More data is needed, before analysing is possible. "
+            + "A minimum of 2 tests is required."
+        )
+        return
+    grouped = wpm_logic(df)
+    wpm_display(df, grouped)
+
+
+def wpm_data(output):
+    """Read and verify the data for wpm."""
     df = pd.read_csv(
         output,
         header=None,
@@ -88,15 +101,14 @@ def plot_wpm(output):
     )
 
     if len(df) < 2:
-        print(
-            "More data is needed, before analysing is possible. "
-            + "A minimum of 2 tests is required."
-        )
-        return
+        return None
 
     df.timestamp = pd.to_datetime(df.timestamp)
-    # df = df.set_index(df.timestamp)
+    return df
 
+
+def wpm_logic(df):
+    """Transform the data for wpm."""
     min_wpm = None
     gdf = defaultdict(lambda: [[], pd.DataFrame()])
     for index, row in df.iterrows():
@@ -110,8 +122,11 @@ def plot_wpm(output):
 
     # grouped = sorted(gdf.items(), key=lambda x: x[1][1]['wpm'].mean(),
     #                  reverse=True)
-    grouped = gdf.items()
+    return gdf.items()
 
+
+def wpm_display(df, grouped):
+    """Create the plot for wpm."""
     fig, ax = plt.subplots()
     colors = cycle(sns.color_palette())
     for h, (indexes, hdf) in grouped:
