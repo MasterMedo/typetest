@@ -82,9 +82,7 @@ class TestAnalyse(unittest.TestCase):
         pd.read_csv = MagicMock(
             return_value=pd.DataFrame(
                 columns=["char", "duration", "wpm", "timestamp"],
-                data=[
-                    ["a", 1, 1000, "2021-10-21T21:21+13:00"]
-                ]
+                data=[["a", 1, 1000, "2021-10-21T21:21+13:00"]],
             )
         )
         plt.show = MagicMock()
