@@ -306,8 +306,6 @@ def parse_args():
     parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
 
     default = "(default: %(default)s)"
-    basedir = os.path.dirname(__file__)
-    resultsdir = "results"
     parser.add_argument(
         "graphs",
         type=str,

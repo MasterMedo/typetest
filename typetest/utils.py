@@ -1,6 +1,5 @@
 """Various utility functions."""
 from functools import wraps
-from argparse import ArgumentError
 from os.path import dirname, isfile
 
 
@@ -50,7 +49,6 @@ def check_files(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
 
-        default = "(default: %(default)s)"
         basedir = dirname(__file__)
         resultsdir = "results"
 
@@ -59,12 +57,15 @@ def check_files(func):
         # print(parser)
         files_missing = []
 
-        graphs = { # Type of graph: (arg_name, default_path)
+        graphs = {  # Type of graph: (arg_name, default_path)
             "wpm": ("output", f"{basedir}/{resultsdir}/results.csv"),
             "char": ("char_speeds", f"{basedir}/{resultsdir}/char_speeds.csv"),
             "word": ("word_speeds", f"{basedir}/{resultsdir}/word_speeds.csv"),
             "dist": ("word_speeds", f"{basedir}/{resultsdir}/word_speeds.csv"),
-            "mistypes": ("mistyped", f"{basedir}/{resultsdir}/mistyped_words.csv"),
+            "mistypes": (
+                "mistyped",
+                f"{basedir}/{resultsdir}/mistyped_words.csv",
+            ),
         }
 
         for graph in graphs:
@@ -77,9 +78,11 @@ def check_files(func):
                     files_missing.append(graphs[graph][1])
 
         if files_missing:
-            print(f"Results file(s) {str(files_missing)[1:-1]} not " +
-                  "found. Please do more typing tests with 'typetest' " +
-                  "before analysing the results")
+            print(
+                f"Results file(s) {str(files_missing)[1:-1]} not "
+                + "found. Please do more typing tests with 'typetest' "
+                + "before analysing the results"
+            )
             exit(1)
 
         return parser
