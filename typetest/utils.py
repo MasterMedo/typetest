@@ -64,7 +64,7 @@ def check_files(func):
             "char": ("char_speeds", f"{basedir}/{resultsdir}/char_speeds.csv"),
             "word": ("word_speeds", f"{basedir}/{resultsdir}/word_speeds.csv"),
             "dist": ("word_speeds", f"{basedir}/{resultsdir}/word_speeds.csv"),
-            "mistypes": ("mystyped", f"{basedir}/{resultsdir}/mistyped_words.csv"),
+            "mistypes": ("mistyped", f"{basedir}/{resultsdir}/mistyped_words.csv"),
         }
 
         for graph in graphs:
@@ -72,7 +72,7 @@ def check_files(func):
                 if parser[graphs[graph][0]]:
                     continue
                 if isfile(graphs[graph][1]):
-                    parser[graphs[graph][0]] = open(graphs[graph[1]])
+                    parser[graphs[graph][0]] = open(graphs[graph][1])
                 else:
                     files_missing.append(graphs[graph][1])
 
