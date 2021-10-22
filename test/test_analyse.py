@@ -8,6 +8,7 @@ from typetest.analyse import (
     plot_word_wpm_distribution,
     plot_wpm,
     plot_char_speeds,
+    plot_n_best_word_speeds,
 )
 
 
@@ -87,6 +88,24 @@ class TestAnalyse(unittest.TestCase):
         )
         plt.show = MagicMock()
         plot_char_speeds("")
+        pd.read_csv.assert_called_once()
+        plt.show.assert_called_once()
+
+    def test_plot_n_best_word_speeds(self):
+        pd.read_csv = MagicMock(
+            return_value=pd.DataFrame(
+                columns=["word", "duration", "wpm", "timestamp"],
+                data=[
+                    ["turtle", 4, 1001, "2021-10-21T21:21+13:00"],
+                    ["pigeon", 5, 999, "2021-10-21T21:21+13:00"],
+                    ["albatross", 6, 1000, "2021-10-21T21:21+13:00"],
+                    ["giraffe", 6, 1000, "2021-10-21T21:21+13:00"],
+                    ["elephant", 6, 1000, "2021-10-21T21:21+13:00"],
+                ],
+            )
+        )
+        plt.show = MagicMock()
+        plot_n_best_word_speeds("", 2)
         pd.read_csv.assert_called_once()
         plt.show.assert_called_once()
 
