@@ -17,7 +17,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from typetest.utils import damerau_levenshtein_distance
+from typetest.utils import damerau_levenshtein_distance, check_files
 
 warnings.simplefilter("ignore", np.RankWarning)
 warnings.simplefilter("error", UserWarning)
@@ -300,6 +300,7 @@ def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
     show_diagram()
 
 
+@check_files
 def parse_args():
     """Parses `sys.argv` and returns a dictionary suitable for `main`."""
     parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
@@ -318,28 +319,24 @@ def parse_args():
         "-o",
         "--output",
         type=FileType("r"),
-        default=f"{basedir}/{resultsdir}/results.csv",
         help="file to store results in\n" + default,
     )
     parser.add_argument(
         "-m",
         "--mistyped",
         type=FileType("r"),
-        default=f"{basedir}/{resultsdir}/mistyped_words.csv",
         help="file to store mistyped words in\n" + default,
     )
     parser.add_argument(
         "-c",
         "--char_speeds",
         type=FileType("r"),
-        default=f"{basedir}/{resultsdir}/char_speeds.csv",
         help="file to store character speeds in\n" + default,
     )
     parser.add_argument(
         "-w",
         "--word_speeds",
         type=FileType("r"),
-        default=f"{basedir}/{resultsdir}/word_speeds.csv",
         help="file to store word speeds in\n" + default,
     )
 
