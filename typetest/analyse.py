@@ -75,7 +75,7 @@ def plot_wpm(output):
     Adds a trendline.
     """
     df = wpm_data(output)
-    if (df is None):
+    if df is None:
         print(
             "More data is needed, before analysing is possible. "
             + "A minimum of 2 tests is required."
