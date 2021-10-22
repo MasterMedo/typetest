@@ -9,6 +9,7 @@ from typetest.analyse import (
     plot_wpm,
     plot_char_speeds,
     plot_n_best_word_speeds,
+    plot_mistypes_distribution,
 )
 
 
@@ -117,5 +118,23 @@ class TestAnalyse(unittest.TestCase):
         )
         plt.show = MagicMock()
         plot_word_wpm_distribution("")
+        pd.read_csv.assert_called_once()
+        plt.show.assert_called_once()
+
+    def test_plot_mistypes_distribution(self):
+        pd.read_csv = MagicMock(
+            return_value=pd.DataFrame(
+                columns=["word", "mistype", "timestamp"],
+                data=[
+                    ["turtle", "trutle", "2021-10-21T21:21+13:00"],
+                    ["pigeon", "pgeone", "2021-10-21T21:21+13:00"],
+                    ["albatross", "abbatros", "2021-10-21T21:21+13:00"],
+                    ["giraffe", "gragfe", "2021-10-21T21:21+13:00"],
+                    ["elephant", "elelgpaglea", "2021-10-21T21:21+13:00"],
+                ],
+            )
+        )
+        plt.show = MagicMock()
+        plot_mistypes_distribution("")
         pd.read_csv.assert_called_once()
         plt.show.assert_called_once()
