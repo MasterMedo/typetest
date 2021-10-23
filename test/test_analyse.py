@@ -10,6 +10,7 @@ from typetest.analyse import (
     plot_char_speeds,
     plot_n_best_word_speeds,
     plot_mistypes_distribution,
+    wpm_data,
 )
 
 
@@ -79,6 +80,25 @@ class TestAnalyse(unittest.TestCase):
         self.assertRaises(AssertionError, plot_char_speeds, "")
         pd.read_csv.assert_called_once()
         plt.show.assert_not_called()
+
+    def test_wpm_data(self):
+        pd.read_csv = MagicMock(
+            return_value=pd.DataFrame(
+                columns=[
+                    "timestamp",
+                    "wpm",
+                    "accuracy",
+                    "actual_duration",
+                    "duration",
+                    "hash",
+                ],
+                data=[],
+            )
+        )
+        plt.show = MagicMock()
+        data = wpm_data("")
+        pd.read_csv.assert_called_once()
+        self.assertIsNone(data)
 
     def test_plot_char_speeds(self):
         pd.read_csv = MagicMock(
