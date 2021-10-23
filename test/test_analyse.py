@@ -1,3 +1,4 @@
+from re import I
 import unittest
 from unittest.mock import MagicMock
 
@@ -11,6 +12,7 @@ from typetest.analyse import (
     plot_n_best_word_speeds,
     plot_mistypes_distribution,
     wpm_data,
+    wpm_logic,
 )
 
 
@@ -68,6 +70,57 @@ class TestAnalyse(unittest.TestCase):
                 ],
                 data=df_data,
             )
+        )
+
+    def test_wpm_logic_no_data(self):
+        df = pd.DataFrame(
+            columns=[
+                "timestamp",
+                "wpm",
+                "accuracy",
+                "actual_duration",
+                "duration",
+                "hash",
+            ],
+            data=[],
+        )
+        result = wpm_logic(df)
+        self.assertIsNotNone(result)
+
+    def test_wpm_logic(self):
+        df = pd.DataFrame(
+            columns=[
+                "timestamp",
+                "wpm",
+                "accuracy",
+                "actual_duration",
+                "duration",
+                "hash",
+            ],
+            data=[
+                [
+                    "2021-10-21t21:21+13:00",
+                    1000,
+                    100,
+                    5,
+                    5,
+                    "ABCDA4846A3C2A8469DD77C921AB0B0BCD506B6E9F3",
+                ],
+                [
+                    "2021-10-21t21:21+13:00",
+                    1000,
+                    100,
+                    5,
+                    5,
+                    "ABCDA4846A3C2A8469DD77C921AB0B0BCD506B6E9F3",
+                ],
+            ],
+        )
+        result = wpm_logic(df)
+        self.assertIsNotNone(result)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(
+            len(result["ABCDA4846A3C2A8469DD77C921AB0B0BCD506B6E9F3"]), 2
         )
 
     def test_plot_char_speeds_not_enough_data(self):
