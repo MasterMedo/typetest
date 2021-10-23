@@ -60,6 +60,8 @@ def main(graphs, output, mistyped, char_speeds, word_speeds, help):
     is_word = partial(re.match, r"^[a-z]+$")
     if "wpm" in graphs:
         plot_wpm(output)
+    if "duration" in graphs:
+        plot_wpm_by_test_duration(output)
     if "char" in graphs:
         plot_char_speeds(char_speeds, filter_func=str.islower)
     if "word" in graphs:
@@ -300,6 +302,84 @@ def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
     ax.pie(sizes, labels=labels, autopct="%1.1f%%", explode=explode)
     # ax = sns.histplot(mistakes, stat='probability')
     ax.set_title("number of mistakes made when typing a word")
+    show_diagram()
+
+
+def plot_wpm_by_test_duration(output):
+    """Reads `output` and plots typing speeds (wpm)
+    categorized by buckets of test duration.
+
+    Bucket labels and their time intervals:
+    short: below 20 seconds
+    medium: 20 to 60 seconds
+    long: 60 seconds to 10 minutes
+    extra long: >10 minutes
+    """
+    df = pd.read_csv(
+        output,
+        header=None,
+        names=["timestamp", "wpm", "accuracy",
+               "actual_duration", "duration", "hash"]
+    )
+
+    if len(df) < 2:
+        print(
+            "More data is needed, before analysing is possible. ",
+            "A minimum of 2 tests is required."
+        )
+        return
+
+    df.timestamp = pd.to_datetime(df.timestamp)
+
+    min_wpm = None
+    gdf = defaultdict(lambda: [[], pd.DataFrame()])
+    for index, row in df.iterrows():
+        ad = row["actual_duration"]
+        key = None
+        if ad < 20:
+            key = "short (< 20s)"
+        elif ad >= 20 and ad < 60:
+            key = "medium (> 20s and < 60s)"
+        elif ad >= 60 and ad < 600:
+            key = "long (> 60s and < 600s)"
+        else:
+            key = "extra long (> 600s)"
+        indexes, hdf = gdf[key]
+        indexes.append(index)
+        hdf = hdf.append(row)
+        gdf[key] = indexes, hdf
+        if min_wpm is None or row["wpm"] < min_wpm:
+            min_wpm = row["wpm"]
+
+    grouped = gdf.items()
+
+    fig, ax = plt.subplots()
+    colors = cycle(sns.color_palette())
+    for key, (indexes, hdf) in grouped:
+        x = indexes
+        y = hdf.wpm
+        color = next(colors)
+        ax.plot(x, y, color=color, lw=3, label=key)
+        trendline = np.poly1d(np.polyfit(x, y, 1))(x)
+        ax.plot(x, trendline, "-", lw=4, color="white")
+        ax.plot(x, trendline, "--", lw=2, label="trendline", color=color)
+
+    # plot accuracy
+    ax.plot(df.accuracy, color="white", lw=4, alpha=0.5)
+    ax.plot(df.accuracy, color=next(colors), lw=1.5,
+            label="accuracy [%]", alpha=0.5)
+
+    ax.set_title("typing speed categorized by test duration")
+    ax.set_xlabel("")
+    ax.set_ylabel("typing speed [wpm]")
+    ax.legend()
+
+    # add ticks
+    plt.xticks(df.index, df.timestamp.dt.date, rotation=90)
+    for i, label in enumerate(ax.xaxis.get_ticklabels()):
+        if i % math.ceil(len(df) / 50):
+            label.set_visible(False)
+
     show_diagram()
 
 
