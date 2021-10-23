@@ -16,35 +16,25 @@ from typetest.analyse import (
 
 class TestAnalyse(unittest.TestCase):
     def test_plot_wpm(self):
-        pd.read_csv = MagicMock(
-            return_value=pd.DataFrame(
-                columns=[
-                    "timestamp",
-                    "wpm",
-                    "accuracy",
-                    "actual_duration",
-                    "duration",
-                    "hash",
+        pd.read_csv = self._wpm_df_mock_helper(
+            [
+                [
+                    "2021-10-21t21:21+13:00",
+                    1000,
+                    100,
+                    5,
+                    5,
+                    "ABCDA4846A3C2A8469DD77C921AB0B0BCD506B6E9F3",
                 ],
-                data=[
-                    [
-                        "2021-10-21T21:21+13:00",
-                        1000,
-                        100,
-                        5,
-                        5,
-                        "abcda4846a3c2a8469dd77c921ab0b0bcd506b6e9f3",
-                    ],
-                    [
-                        "2021-10-21T21:21+13:00",
-                        1000,
-                        100,
-                        5,
-                        5,
-                        "abcda4846a3c2a8469dd77c921ab0b0bcd506b6e9f3",
-                    ],
+                [
+                    "2021-10-21t21:21+13:00",
+                    1000,
+                    100,
+                    5,
+                    5,
+                    "ABCDA4846A3C2A8469DD77C921AB0B0BCD506B6E9F3",
                 ],
-            )
+            ],
         )
         plt.show = MagicMock()
         plot_wpm("")
@@ -52,7 +42,21 @@ class TestAnalyse(unittest.TestCase):
         plt.show.assert_called_once()
 
     def test_plot_wpm_returns_when_not_enough_data(self):
-        pd.read_csv = MagicMock(
+        pd.read_csv = self._wpm_df_mock_helper()
+        plt.show = MagicMock()
+        plot_wpm("")
+        pd.read_csv.assert_called_once()
+        plt.show.assert_not_called()
+
+    def test_wpm_data(self):
+        pd.read_csv = self._wpm_df_mock_helper()
+        plt.show = MagicMock()
+        data = wpm_data("")
+        pd.read_csv.assert_called_once()
+        self.assertIsNone(data)
+
+    def _wpm_df_mock_helper(self, df_data=[]):
+        return MagicMock(
             return_value=pd.DataFrame(
                 columns=[
                     "timestamp",
@@ -62,13 +66,9 @@ class TestAnalyse(unittest.TestCase):
                     "duration",
                     "hash",
                 ],
-                data=[],
+                data=df_data,
             )
         )
-        plt.show = MagicMock()
-        plot_wpm("")
-        pd.read_csv.assert_called_once()
-        plt.show.assert_not_called()
 
     def test_plot_char_speeds_not_enough_data(self):
         pd.read_csv = MagicMock(
@@ -80,25 +80,6 @@ class TestAnalyse(unittest.TestCase):
         self.assertRaises(AssertionError, plot_char_speeds, "")
         pd.read_csv.assert_called_once()
         plt.show.assert_not_called()
-
-    def test_wpm_data(self):
-        pd.read_csv = MagicMock(
-            return_value=pd.DataFrame(
-                columns=[
-                    "timestamp",
-                    "wpm",
-                    "accuracy",
-                    "actual_duration",
-                    "duration",
-                    "hash",
-                ],
-                data=[],
-            )
-        )
-        plt.show = MagicMock()
-        data = wpm_data("")
-        pd.read_csv.assert_called_once()
-        self.assertIsNone(data)
 
     def test_plot_char_speeds(self):
         pd.read_csv = MagicMock(
