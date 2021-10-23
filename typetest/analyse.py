@@ -122,14 +122,14 @@ def wpm_logic(df):
 
     # grouped = sorted(gdf.items(), key=lambda x: x[1][1]['wpm'].mean(),
     #                  reverse=True)
-    return gdf.items()
+    return gdf
 
 
 def wpm_display(df, grouped):
     """Create the plot for wpm."""
     fig, ax = plt.subplots()
     colors = cycle(sns.color_palette())
-    for h, (indexes, hdf) in grouped:
+    for h, (indexes, hdf) in grouped.items():
         if h in known_hashes:
             h = known_hashes[h]
         x = indexes
