@@ -91,8 +91,8 @@ def plot_wpm(output):
 
     if len(df) < 2:
         print(
-            "More data is needed, before analysing is possible. ",
-            "A minimum of 2 tests is required.",
+            "More data is needed, before analysing is possible. "
+            + "A minimum of 2 tests is required."
         )
         return
 
@@ -330,8 +330,8 @@ def plot_wpm_by_test_duration(output):
 
     if len(df) < 2:
         print(
-            "More data is needed, before analysing is possible. ",
-            "A minimum of 2 tests is required.",
+            "More data is needed, before analysing is possible. "
+            + "A minimum of 2 tests is required."
         )
         return
 
@@ -356,6 +356,14 @@ def plot_wpm_by_test_duration(output):
         gdf[key] = indexes, hdf
         if min_wpm is None or row["wpm"] < min_wpm:
             min_wpm = row["wpm"]
+
+    for _, (indexes, hdf) in gdf.items():
+        if len(indexes) < 2:
+            print(
+                "More data is needed, before analysing is possible. "
+                + "A minimum of 2 tests is required."
+            )
+            return
 
     grouped = gdf.items()
 
