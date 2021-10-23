@@ -48,7 +48,7 @@ class TestAnalyse(unittest.TestCase):
         plot_wpm("")
         pd.read_csv.assert_called_once()
         plt.show.assert_not_called()
-        
+
     def test_wpm_data(self):
         pd.read_csv = self._wpm_df_mock_helper()
         plt.show = MagicMock()
