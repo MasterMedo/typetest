@@ -31,10 +31,10 @@ doc = f"""example:
 """
 
 known_hashes = {
-    "da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3":
-    "300 most common english " + "words",
-    "275eb003c4fba77d7e61893c3d9fa869822e06c8":
-    "1000 most common english " + "words (no double letters)",
+    "da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3": "300 most common english "
+    + "words",
+    "275eb003c4fba77d7e61893c3d9fa869822e06c8": "1000 most common english "
+    + "words (no double letters)",
 }
 
 
@@ -92,7 +92,7 @@ def plot_wpm(output):
     if len(df) < 2:
         print(
             "More data is needed, before analysing is possible. ",
-            "A minimum of 2 tests is required."
+            "A minimum of 2 tests is required.",
         )
         return
 
@@ -318,14 +318,20 @@ def plot_wpm_by_test_duration(output):
     df = pd.read_csv(
         output,
         header=None,
-        names=["timestamp", "wpm", "accuracy",
-               "actual_duration", "duration", "hash"]
+        names=[
+            "timestamp",
+            "wpm",
+            "accuracy",
+            "actual_duration",
+            "duration",
+            "hash",
+        ],
     )
 
     if len(df) < 2:
         print(
             "More data is needed, before analysing is possible. ",
-            "A minimum of 2 tests is required."
+            "A minimum of 2 tests is required.",
         )
         return
 
@@ -366,8 +372,13 @@ def plot_wpm_by_test_duration(output):
 
     # plot accuracy
     ax.plot(df.accuracy, color="white", lw=4, alpha=0.5)
-    ax.plot(df.accuracy, color=next(colors), lw=1.5,
-            label="accuracy [%]", alpha=0.5)
+    ax.plot(
+        df.accuracy,
+        color=next(colors),
+        lw=1.5,
+        label="accuracy [%]",
+        alpha=0.5,
+    )
 
     ax.set_title("typing speed categorized by test duration")
     ax.set_xlabel("")
