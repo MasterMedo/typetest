@@ -70,6 +70,7 @@ def main(graphs, output, mistyped, char_speeds, word_speeds, help):
         plot_mistypes_distribution(mistyped, filter_func=is_word)
 
 
+@check_files
 def plot_wpm(output):
     """Reads `output` and plots typing speeds uniformly apart.
     Adds a trendline.
@@ -151,6 +152,7 @@ def plot_wpm(output):
     show_diagram()
 
 
+@check_files
 def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     """Reads last `size` lines of `char_speeds` and groups them by characters.
     Removes lowest and highest 10% and boxplots the data.
@@ -199,6 +201,7 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     show_diagram()
 
 
+@check_files
 def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     """Loads all words from `word_speeds` and groups them by word."""
 
@@ -253,6 +256,7 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     show_diagram()
 
 
+@check_files
 def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     """Plots a distribution over average speeds of unique words."""
     df = pd.read_csv(
@@ -271,6 +275,7 @@ def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     show_diagram()
 
 
+@check_files
 def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
     """Plots a pie chart representing the shares of numbers of mistakes in
     mistyped words.
@@ -303,12 +308,13 @@ def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
     show_diagram()
 
 
-@check_files
 def parse_args():
     """Parses `sys.argv` and returns a dictionary suitable for `main`."""
     parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
 
     default = "(default: %(default)s)"
+    base_directory = os.path.dirname(__file__)
+    results_directory = "results"
     parser.add_argument(
         "graphs",
         type=str,
@@ -319,25 +325,29 @@ def parse_args():
     parser.add_argument(
         "-o",
         "--output",
-        type=FileType("r"),
+        type=str,
+        default=f"{base_directory}/{results_directory}/results.csv",
         help="file to store results in\n" + default,
     )
     parser.add_argument(
         "-m",
         "--mistyped",
-        type=FileType("r"),
+        type=str,
+        default=f"{base_directory}/{results_directory}/mistyped_words.csv",
         help="file to store mistyped words in\n" + default,
     )
     parser.add_argument(
         "-c",
         "--char_speeds",
-        type=FileType("r"),
+        type=str,
+        default=f"{base_directory}/{results_directory}/char_speeds.csv",
         help="file to store character speeds in\n" + default,
     )
     parser.add_argument(
         "-w",
         "--word_speeds",
-        type=FileType("r"),
+        type=str,
+        default=f"{base_directory}/{results_directory}/word_speeds.csv",
         help="file to store word speeds in\n" + default,
     )
 

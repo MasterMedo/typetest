@@ -1,6 +1,7 @@
 """Various utility functions."""
 from functools import wraps
 from os.path import dirname, isfile
+from sys import exit
 
 
 def damerau_levenshtein_distance(word_1: str, word_2: str) -> int:
@@ -46,45 +47,16 @@ def damerau_levenshtein_distance(word_1: str, word_2: str) -> int:
 
 
 def check_files(func):
+    """Wrapper for checking if the files for analyzing exist"""    
     @wraps(func)
     def wrapper(*args, **kwargs):
+        file_to_open = args[0]
 
-        basedir = dirname(__file__)
-        resultsdir = "results"
-
-        parser = func()
-
-        # print(parser)
-        files_missing = []
-
-        graphs = {  # Type of graph: (arg_name, default_path)
-            "wpm": ("output", f"{basedir}/{resultsdir}/results.csv"),
-            "char": ("char_speeds", f"{basedir}/{resultsdir}/char_speeds.csv"),
-            "word": ("word_speeds", f"{basedir}/{resultsdir}/word_speeds.csv"),
-            "dist": ("word_speeds", f"{basedir}/{resultsdir}/word_speeds.csv"),
-            "mistypes": (
-                "mistyped",
-                f"{basedir}/{resultsdir}/mistyped_words.csv",
-            ),
-        }
-
-        for graph in graphs:
-            if graph == parser["graphs"][0]:
-                if parser[graphs[graph][0]]:
-                    continue
-                if isfile(graphs[graph][1]):
-                    parser[graphs[graph][0]] = open(graphs[graph][1])
-                else:
-                    files_missing.append(graphs[graph][1])
-
-        if files_missing:
-            print(
-                f"Results file(s) {str(files_missing)[1:-1]} not "
-                + "found. Please do more typing tests with 'typetest' "
-                + "before analysing the results"
-            )
-            exit(1)
-
-        return parser
+        if not isfile(file_to_open):
+            exit(f"The file {file_to_open} does not exist. Please run " +
+                       "'typetest' to generate more data, or provide a " +
+                       "path to look for the file")
+        
+        func(*args, **kwargs)
 
     return wrapper
