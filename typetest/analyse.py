@@ -330,16 +330,15 @@ def plot_wpm_by_test_duration(output):
 
     df.timestamp = pd.to_datetime(df.timestamp)
 
-    min_wpm = None
     gdf = defaultdict(lambda: [[], pd.DataFrame()])
     for index, row in df.iterrows():
-        ad = row["actual_duration"]
+        actual_duration = row["actual_duration"]
         key = None
-        if ad < 20:
+        if actual_duration < 20:
             key = "short (< 20s)"
-        elif ad >= 20 and ad < 60:
+        elif actual_duration >= 20 and actual_duration < 60:
             key = "medium (> 20s and < 60s)"
-        elif ad >= 60 and ad < 600:
+        elif actual_duration >= 60 and actual_duration < 600:
             key = "long (> 60s and < 600s)"
         else:
             key = "extra long (> 600s)"
@@ -347,18 +346,13 @@ def plot_wpm_by_test_duration(output):
         indexes.append(index)
         hdf = hdf.append(row)
         gdf[key] = indexes, hdf
-        if min_wpm is None or row["wpm"] < min_wpm:
-            min_wpm = row["wpm"]
-
-    for _, (indexes, hdf) in gdf.items():
-        if len(indexes) < 2:
-            print(
-                "More data is needed, before analysing is possible. "
-                + "A minimum of 2 tests is required."
-            )
-            return
 
     grouped = gdf.items()
+    if any(len(group[1][0]) < 2 for group in grouped):
+        exit(
+            "More data is needed, before analysing is possible. "
+            + "A minimum of 2 tests for each duration is required."
+        )
 
     fig, ax = plt.subplots()
     colors = cycle(sns.color_palette())
