@@ -47,16 +47,21 @@ def damerau_levenshtein_distance(word_1: str, word_2: str) -> int:
 
 
 def check_files(func):
-    """Wrapper for checking if the files for analyzing exist"""    
+    """Wrapper function that checks if the first argument of the
+    decorated function is a filename of a file that exists.
+    """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         file_to_open = args[0]
 
         if not isfile(file_to_open):
-            exit(f"The file {file_to_open} does not exist. Please run " +
-                       "'typetest' to generate more data, or provide a " +
-                       "path to look for the file")
-        
+            exit(
+                f"The file {file_to_open} does not exist. Please run"
+                + "`typetest` to generate more test results, or provide"
+                + "a custom path to results file/directory"
+            )
+
         func(*args, **kwargs)
 
     return wrapper

@@ -88,13 +88,6 @@ def plot_wpm(output):
         ],
     )
 
-    if len(df) < 2:
-        print(
-            "More data is needed, before analysing is possible. "
-            + "A minimum of 2 tests is required."
-        )
-        return
-
     df.timestamp = pd.to_datetime(df.timestamp)
     # df = df.set_index(df.timestamp)
 
@@ -112,6 +105,12 @@ def plot_wpm(output):
     # grouped = sorted(gdf.items(), key=lambda x: x[1][1]['wpm'].mean(),
     #                  reverse=True)
     grouped = gdf.items()
+
+    if any(len(group[1][0]) < 2 for group in grouped):
+        exit(
+            "More data is needed, before analysing is possible. "
+            + "A minimum of 2 tests is required."
+        )
 
     fig, ax = plt.subplots()
     colors = cycle(sns.color_palette())
@@ -160,7 +159,9 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     filter_func: function taking a `char` returning `True` if char should be
     plotted, `False` otherwise. By default plots all characters.
     """
-    q = deque(char_speeds, maxlen=size)
+    with open(char_speeds) as f:
+        q = deque(f, maxlen=size)
+
     df = pd.read_csv(
         StringIO("".join(q)),
         header=None,
@@ -181,7 +182,8 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
             typing_speed_in_wpm = df.query("@q1 <= wpm <= @q3")["wpm"]
             chars.append(char)
             typing_speeds_in_wpm.append(typing_speed_in_wpm)
-            means.append(typing_speed_in_wpm.mean())
+            mean = typing_speed_in_wpm.mean()
+            means.append(mean if mean > 0 else 0)
 
     assert chars, "Not enough data"
     fig, ax = plt.subplots()
@@ -298,6 +300,12 @@ def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
                 continue
 
             mistakes[distance] += 1
+
+    if not mistakes:
+        exit(
+            "No incorrectly written words found. Do more typing tests"
+            + "with `typetest` to increase the chances of making a mistake."
+        )
 
     fig, ax = plt.subplots()
     labels, sizes = zip(*sorted(mistakes.items()))
