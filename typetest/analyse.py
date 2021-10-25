@@ -17,7 +17,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from typetest.utils import damerau_levenshtein_distance
+from typetest.utils import damerau_levenshtein_distance, check_files
 
 warnings.simplefilter("ignore", np.RankWarning)
 warnings.simplefilter("error", UserWarning)
@@ -72,6 +72,7 @@ def main(graphs, output, mistyped, char_speeds, word_speeds, help):
         plot_mistypes_distribution(mistyped, filter_func=is_word)
 
 
+@check_files
 def plot_wpm(output):
     """Reads `output` and plots typing speeds uniformly apart.
     Adds a trendline.
@@ -88,13 +89,6 @@ def plot_wpm(output):
             "hash",
         ],
     )
-
-    if len(df) < 2:
-        print(
-            "More data is needed, before analysing is possible. "
-            + "A minimum of 2 tests is required."
-        )
-        return
 
     df.timestamp = pd.to_datetime(df.timestamp)
     # df = df.set_index(df.timestamp)
@@ -113,6 +107,12 @@ def plot_wpm(output):
     # grouped = sorted(gdf.items(), key=lambda x: x[1][1]['wpm'].mean(),
     #                  reverse=True)
     grouped = gdf.items()
+
+    if any(len(group[1][0]) < 2 for group in grouped):
+        exit(
+            "More data is needed, before analysing is possible. "
+            + "A minimum of 2 tests is required."
+        )
 
     fig, ax = plt.subplots()
     colors = cycle(sns.color_palette())
@@ -153,6 +153,7 @@ def plot_wpm(output):
     show_diagram()
 
 
+@check_files
 def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     """Reads last `size` lines of `char_speeds` and groups them by characters.
     Removes lowest and highest 10% and boxplots the data.
@@ -160,7 +161,9 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     filter_func: function taking a `char` returning `True` if char should be
     plotted, `False` otherwise. By default plots all characters.
     """
-    q = deque(char_speeds, maxlen=size)
+    with open(char_speeds) as f:
+        q = deque(f, maxlen=size)
+
     df = pd.read_csv(
         StringIO("".join(q)),
         header=None,
@@ -181,7 +184,8 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
             typing_speed_in_wpm = df.query("@q1 <= wpm <= @q3")["wpm"]
             chars.append(char)
             typing_speeds_in_wpm.append(typing_speed_in_wpm)
-            means.append(typing_speed_in_wpm.mean())
+            mean = typing_speed_in_wpm.mean()
+            means.append(mean if mean > 0 else 0)
 
     assert chars, "Not enough data"
     fig, ax = plt.subplots()
@@ -201,6 +205,7 @@ def plot_char_speeds(char_speeds, size=10000, filter_func=lambda c: True):
     show_diagram()
 
 
+@check_files
 def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     """Loads all words from `word_speeds` and groups them by word."""
 
@@ -255,6 +260,7 @@ def plot_n_best_word_speeds(word_speeds, n, filter_func=lambda w: True):
     show_diagram()
 
 
+@check_files
 def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     """Plots a distribution over average speeds of unique words."""
     df = pd.read_csv(
@@ -273,6 +279,7 @@ def plot_word_wpm_distribution(word_speeds, filter_func=lambda c: True):
     show_diagram()
 
 
+@check_files
 def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
     """Plots a pie chart representing the shares of numbers of mistakes in
     mistyped words.
@@ -295,6 +302,12 @@ def plot_mistypes_distribution(mistyped, filter_func=lambda c: True):
                 continue
 
             mistakes[distance] += 1
+
+    if not mistakes:
+        exit(
+            "No incorrectly written words found. Do more typing tests"
+            + "with `typetest` to increase the chances of making a mistake."
+        )
 
     fig, ax = plt.subplots()
     labels, sizes = zip(*sorted(mistakes.items()))
@@ -406,28 +419,28 @@ def parse_args():
     parser.add_argument(
         "-o",
         "--output",
-        type=FileType("r"),
+        type=str,
         default=f"{base_directory}/{results_directory}/results.csv",
         help="file to store results in\n" + default,
     )
     parser.add_argument(
         "-m",
         "--mistyped",
-        type=FileType("r"),
+        type=str,
         default=f"{base_directory}/{results_directory}/mistyped_words.csv",
         help="file to store mistyped words in\n" + default,
     )
     parser.add_argument(
         "-c",
         "--char_speeds",
-        type=FileType("r"),
+        type=str,
         default=f"{base_directory}/{results_directory}/char_speeds.csv",
         help="file to store character speeds in\n" + default,
     )
     parser.add_argument(
         "-w",
         "--word_speeds",
-        type=FileType("r"),
+        type=str,
         default=f"{base_directory}/{results_directory}/word_speeds.csv",
         help="file to store word speeds in\n" + default,
     )

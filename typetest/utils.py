@@ -1,4 +1,7 @@
 """Various utility functions."""
+from functools import wraps
+from os.path import dirname, isfile
+from sys import exit
 
 
 def damerau_levenshtein_distance(word_1: str, word_2: str) -> int:
@@ -41,3 +44,24 @@ def damerau_levenshtein_distance(word_1: str, word_2: str) -> int:
         last_encountered_cols[char_1] = col
 
     return table[len(word_2) + 1][len(word_1) + 1]
+
+
+def check_files(func):
+    """Wrapper function that checks if the first argument of the
+    decorated function is a filename of a file that exists.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        file_to_open = args[0]
+
+        if not isfile(file_to_open):
+            exit(
+                f"The file {file_to_open} does not exist. Please run"
+                + "`typetest` to generate more test results, or provide"
+                + "a custom path to results file/directory"
+            )
+
+        func(*args, **kwargs)
+
+    return wrapper
