@@ -1,5 +1,8 @@
 __pycache__/
-*.csv
 .vim/
 dist/
 env/
+.vscode/
+
+*.csv
+*.cfg
