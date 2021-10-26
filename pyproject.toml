@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "typetest"
-version = "0.1.7"
+version = "0.1.8"
 description = "Test your typing speed without leaving the terminal."
 authors = ["MasterMedo <mislav.vuletic@gmail.com>"]
 maintainers = ["MasterMedo <mislav.vuletic@gmail.com>"]
@@ -25,7 +25,7 @@ black = "^21.9b0"
 
 [tool.poetry.scripts]
 typetest = 'typetest.__main__:run'
-typetest-analyse = 'typetest.analyse:run'
+typetest-analyse = 'typetest.analyse.__main__:run'
 test = 'test.__main__:run'
 
 [build-system]
