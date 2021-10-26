@@ -5,12 +5,15 @@ import sys
 import random
 import hashlib
 import platform
+
 from time import time, strftime, gmtime
 from datetime import datetime
 from argparse import ArgumentParser, RawTextHelpFormatter, FileType
 from functools import partial
 
 from blessed import Terminal
+
+from typetest.utils import create_least_typed_words_and_worst_words_test_files
 
 
 filename = os.path.basename(sys.argv[0])
@@ -256,6 +259,12 @@ def main(
         else:
             word += char
             word_duration += duration
+
+    create_least_typed_words_and_worst_words_test_files(
+        output_directory + "/word_speeds.csv",
+        output_directory + "/../tests/least_typed_words",
+        output_directory + "/../tests/worst_words",
+    )
 
 
 def draw(

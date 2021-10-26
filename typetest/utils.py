@@ -1,5 +1,9 @@
 """Various utility functions."""
+import pandas as pd
+
 from functools import wraps
+from random import sample
+from collections import Counter
 from os.path import dirname, isfile
 
 
@@ -64,3 +68,26 @@ def validate_input_file_path(func):
         func(*args, **kwargs)
 
     return wrapper
+
+
+@validate_input_file_path
+def create_least_typed_words_and_worst_words_test_files(
+    input_file, least_typed_words_output_file, worst_words_output_file
+):
+    data_frame = pd.read_csv(
+        input_file,
+        header=None,
+        names=["word", "duration", "wpm", "timestamp"],
+    )
+
+    counter = Counter(sample(list(data_frame["word"]), k=len(data_frame)))
+    with open(least_typed_words_output_file, "w") as f:
+        f.write(" ".join(reversed(list(zip(*counter.most_common()))[0])))
+
+    grouped_data_frames = sorted(
+        data_frame.groupby("word"), key=lambda x: x[1]["wpm"].median()
+    )
+
+    with open(worst_words_output_file, "w") as f:
+        words_by_median = list(zip(*grouped_data_frames))[0]
+        f.write(" ".join(words_by_median))

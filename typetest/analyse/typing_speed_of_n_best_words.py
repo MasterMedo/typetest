@@ -20,20 +20,9 @@ def plot(input_file, n, filter_func=lambda w: True):
     grouped_data_frames = list(
         filter(lambda t: filter_func(t[0]), data_frame.groupby("word"))
     )
-
-    with open("least_typed_words", "w") as f:
-        words_by_freq = list(
-            zip(*sorted(grouped_data_frames, key=lambda t: len(t[1])))
-        )[0]
-        f.write(" ".join(words_by_freq))
-
     grouped_data_frames = sorted(
         grouped_data_frames, key=lambda x: x[1]["wpm"].median()
     )
-
-    with open("worst_words", "w") as f:
-        words_by_median = list(zip(*grouped_data_frames))[0]
-        f.write(" ".join(words_by_median))
 
     first_half = deque(maxlen=n // 2)
     second_half = deque(maxlen=n // 2)
