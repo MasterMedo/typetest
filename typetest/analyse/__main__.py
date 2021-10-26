@@ -8,6 +8,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from pathlib import Path
 from argparse import ArgumentParser, RawTextHelpFormatter, FileType
 from functools import partial
 from matplotlib import rcParams
@@ -74,7 +75,7 @@ def parse_args():
     parser = ArgumentParser(epilog=doc, formatter_class=RawTextHelpFormatter)
 
     default = "(default: %(default)s)"
-    base_directory = os.path.dirname(__file__) + "/../"
+    base_directory = Path(__file__).parent.parent
     results_directory = "results"
     parser.add_argument(
         "graphs",
