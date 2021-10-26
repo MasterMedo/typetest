@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 
 from collections import deque
 
-from typetest.utils import check_file
+from typetest.utils import validate_input_file_path
 
 
-@check_file
+@validate_input_file_path
 def plot(input_file, n, filter_func=lambda w: True):
     """Loads all words from `input_file` and groups them by word."""
 

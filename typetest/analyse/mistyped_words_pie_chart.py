@@ -1,10 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from typetest.utils import check_file, damerau_levenshtein_distance
+from typetest.utils import validate_input_file_path, damerau_levenshtein_distance
 
 
-@check_file
+@validate_input_file_path
 def plot(input_file, filter_func=lambda c: True):
     """Plots a pie chart representing the shares of numbers of mistakes in
     mistyped words.

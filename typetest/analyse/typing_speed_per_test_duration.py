@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from itertools import cycle
 from collections import defaultdict
 
-from typetest.utils import check_file
+from typetest.utils import validate_input_file_path
 
 
-@check_file
+@validate_input_file_path
 def plot(output):
     """Reads `output` and plots typing speeds (wpm)
     categorized by buckets of test duration.

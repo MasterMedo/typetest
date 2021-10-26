@@ -45,7 +45,7 @@ def damerau_levenshtein_distance(word_1: str, word_2: str) -> int:
     return table[len(word_2) + 1][len(word_1) + 1]
 
 
-def check_file(func):
+def validate_input_file_path(func):
     """Wrapper function that checks if the first argument of the
     decorated function is a filename of a file that exists.
     """
