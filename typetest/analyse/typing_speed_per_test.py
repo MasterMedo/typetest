@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from itertools import cycle
 from matplotlib.ticker import MaxNLocator, FuncFormatter
 
-from typetest.utils import check_files
+from typetest.utils import check_file
 
 
-@check_files
+@check_file
 def plot(input_file_path):
     """Reads file at `input_file_path` and plots typing speeds for each
     test taken. Adds a trendline (linear approximation of the curve).

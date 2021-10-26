@@ -1,7 +1,6 @@
 """Various utility functions."""
 from functools import wraps
 from os.path import dirname, isfile
-from sys import exit
 
 
 def damerau_levenshtein_distance(word_1: str, word_2: str) -> int:
@@ -46,7 +45,7 @@ def damerau_levenshtein_distance(word_1: str, word_2: str) -> int:
     return table[len(word_2) + 1][len(word_1) + 1]
 
 
-def check_files(func):
+def check_file(func):
     """Wrapper function that checks if the first argument of the
     decorated function is a filename of a file that exists.
     """

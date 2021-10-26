@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 from io import StringIO
 from collections import deque
 
-from typetest.utils import check_files
+from typetest.utils import check_file
 
 
-@check_files
+@check_file
 def plot(input_file, size=10000, filter_func=lambda c: True):
     """Reads last `size` lines of `input_file` and groups them by characters.
     Removes lowest and highest 10% and boxplots the data.

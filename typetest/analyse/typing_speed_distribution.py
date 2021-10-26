@@ -2,10 +2,10 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from typetest.utils import check_files
+from typetest.utils import check_file
 
 
-@check_files
+@check_file
 def plot(input_file, filter_func=lambda c: True):
     """Plots a distribution over average speeds of unique words."""
     data_frame = pd.read_csv(
