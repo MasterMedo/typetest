@@ -1,7 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from typetest.utils import validate_input_file_path, damerau_levenshtein_distance
+from typetest.utils import (
+    validate_input_file_path,
+    damerau_levenshtein_distance,
+)
 
 
 @validate_input_file_path
