@@ -5,11 +5,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from typetest.analyse import (
-    plot_word_wpm_distribution,
-    plot_wpm,
-    plot_char_speeds,
-    plot_n_best_word_speeds,
-    plot_mistypes_distribution,
+    mistyped_words_pie_chart,
+    typing_speed_distribution,
+    typing_speed_of_n_best_words,
+    typing_speed_per_char,
+    typing_speed_per_test,
 )
 
 
@@ -46,7 +46,7 @@ class TestAnalyse(unittest.TestCase):
             )
         )
         plt.show = MagicMock()
-        plot_wpm("")
+        typing_speed_per_test.plot("./test/placeholder")
         pd.read_csv.assert_called_once()
         plt.show.assert_called_once()
 
@@ -65,20 +65,9 @@ class TestAnalyse(unittest.TestCase):
             )
         )
         plt.show = MagicMock()
-        plot_wpm("")
+        typing_speed_per_test.plot("./test/placeholder")
         pd.read_csv.assert_called_once()
-        plt.show.assert_not_called()
-
-    def test_plot_char_speeds_not_enough_data(self):
-        pd.read_csv = MagicMock(
-            return_value=pd.DataFrame(
-                columns=["char", "duration", "wpm", "timestamp"],
-            )
-        )
-        plt.show = MagicMock()
-        self.assertRaises(AssertionError, plot_char_speeds, "")
-        pd.read_csv.assert_called_once()
-        plt.show.assert_not_called()
+        plt.show.assert_called_once()
 
     def test_plot_char_speeds(self):
         pd.read_csv = MagicMock(
@@ -88,7 +77,7 @@ class TestAnalyse(unittest.TestCase):
             )
         )
         plt.show = MagicMock()
-        plot_char_speeds("")
+        typing_speed_per_char.plot("./test/placeholder")
         pd.read_csv.assert_called_once()
         plt.show.assert_called_once()
 
@@ -106,7 +95,7 @@ class TestAnalyse(unittest.TestCase):
             )
         )
         plt.show = MagicMock()
-        plot_n_best_word_speeds("", 2)
+        typing_speed_of_n_best_words.plot("./test/placeholder", 2)
         pd.read_csv.assert_called_once()
         plt.show.assert_called_once()
 
@@ -117,7 +106,7 @@ class TestAnalyse(unittest.TestCase):
             )
         )
         plt.show = MagicMock()
-        plot_word_wpm_distribution("")
+        typing_speed_distribution.plot("test/placeholder")
         pd.read_csv.assert_called_once()
         plt.show.assert_called_once()
 
@@ -135,6 +124,6 @@ class TestAnalyse(unittest.TestCase):
             )
         )
         plt.show = MagicMock()
-        plot_mistypes_distribution("")
+        mistyped_words_pie_chart.plot("./test/placeholder")
         pd.read_csv.assert_called_once()
         plt.show.assert_called_once()
