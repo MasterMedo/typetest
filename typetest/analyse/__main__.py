@@ -81,8 +81,9 @@ def parse_args():
         "graphs",
         type=str,
         nargs="*",
-        default=["wpm", "dist", "word", "char", "mistypes"],
-        help="graphs to plot: wpm char word dist mistypes\n" + default,
+        default=["wpm", "dist", "word", "char", "mistypes", "duration"],
+        help="graphs to plot: wpm char word dist mistypes duration\n"
+        + default,
     )
     parser.add_argument(
         "-o",
