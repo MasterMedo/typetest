@@ -261,6 +261,11 @@ def main(
             word += char
             word_duration += duration
 
+    test_results_file.close()
+    mistyped_words_file.close()
+    char_speeds_file.close()
+    word_speeds_file.close()
+
     create_least_typed_words_and_worst_words_test_files(
         Path(output_directory) / "word_speeds.csv",
         Path(output_directory) / "../tests/least_typed_words",

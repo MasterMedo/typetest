@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "typetest"
-version = "0.1.8"
+version = "0.1.9"
 description = "Test your typing speed without leaving the terminal."
 authors = ["MasterMedo <mislav.vuletic@gmail.com>"]
 maintainers = ["MasterMedo <mislav.vuletic@gmail.com>"]

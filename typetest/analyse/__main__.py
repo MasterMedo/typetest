@@ -33,13 +33,6 @@ doc = f"""example:
   {filename} char word
 """
 
-known_hashes = {
-    "da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3": "300 most common english "
-    + "words",
-    "275eb003c4fba77d7e61893c3d9fa869822e06c8": "1000 most common english "
-    + "words (no double letters)",
-}
-
 
 def run():
     """Parse command line arguments and run main"""
