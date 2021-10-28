@@ -9,6 +9,13 @@ from matplotlib.ticker import MaxNLocator, FuncFormatter
 
 from typetest.utils import validate_input_file_path
 
+known_hashes = {
+    "da4846a3c2a8469dd77c921ab0b0bcd506b6e9f3": "300 most common english "
+    + "words",
+    "275eb003c4fba77d7e61893c3d9fa869822e06c8": "1000 most common english "
+    + "words (no double letters)",
+}
+
 
 @validate_input_file_path
 def plot(input_file_path):
@@ -52,7 +59,15 @@ def plot(input_file_path):
         x = grouped_data_frame.index.values.tolist()
         y = grouped_data_frame.wpm
         color = next(colors)
-        ax.plot(x, y, color=color, lw=3, label=test_hash)
+        ax.plot(
+            x,
+            y,
+            color=color,
+            lw=3,
+            label=known_hashes.get(
+                test_hash, "unknown test (add hash to config)"
+            ),
+        )
         if len(grouped_data_frame) > 1:
             trendline = np.poly1d(np.polyfit(x, y, 1))(x)
             # trendline outline
